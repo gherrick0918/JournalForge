@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using CommunityToolkit.Maui;
+using JournalForge.Models;
 
 namespace JournalForge;
 
@@ -17,8 +18,27 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
 
-		// Register services
-		builder.Services.AddSingleton<Services.IAIService, Services.AIService>();
+		// Configure app settings for OpenAI
+		// TO USE OPENAI: Set your API key in the AppSettings below
+		var appSettings = new AppSettings
+		{
+			// Replace with your OpenAI API key from https://platform.openai.com/api-keys
+			OpenAIApiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? string.Empty,
+			OpenAIModel = "gpt-4o-mini" // Cost-effective model; change to "gpt-4o" for better quality
+		};
+		builder.Services.AddSingleton(appSettings);
+
+		// Register AI service - uses OpenAI if API key is configured, otherwise falls back to mock
+		builder.Services.AddSingleton<Services.IAIService>(sp =>
+		{
+			var settings = sp.GetRequiredService<AppSettings>();
+			if (!string.IsNullOrWhiteSpace(settings.OpenAIApiKey))
+			{
+				return new Services.OpenAIService(settings);
+			}
+			return new Services.AIService();
+		});
+
 		builder.Services.AddSingleton<Services.ITimeCapsuleService, Services.TimeCapsuleService>();
 		builder.Services.AddSingleton<Services.IJournalEntryService, Services.JournalEntryService>();
 

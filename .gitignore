@@ -52,3 +52,10 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# Security - API Keys and Secrets
+**/appsettings.local.json
+**/appsettings.*.local.json
+**/.env
+**/.env.local
+secrets.json
