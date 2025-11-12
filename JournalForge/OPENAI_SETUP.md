@@ -1,52 +1,53 @@
 # OpenAI Integration Setup Guide
 
-JournalForge now supports real AI-powered features using OpenAI's API! This guide will help you configure your API key.
+JournalForge now supports real AI-powered features using OpenAI's API! This guide will help you configure your API key securely.
 
-## Quick Start
+## Quick Start (Recommended for Android)
 
-### Option 1: Environment Variable (Recommended)
+### Secure Local Configuration File
+
+This method works for **all platforms including Android** and keeps your API key secure and private.
 
 1. **Get your API key** from [OpenAI Platform](https://platform.openai.com/api-keys)
 
-2. **Set the environment variable** before running the app:
-
-   **Windows (Command Prompt):**
-   ```cmd
-   set OPENAI_API_KEY=sk-your-api-key-here
-   ```
-
-   **Windows (PowerShell):**
-   ```powershell
-   $env:OPENAI_API_KEY="sk-your-api-key-here"
-   ```
-
-   **macOS/Linux:**
+2. **Copy the example config file:**
    ```bash
-   export OPENAI_API_KEY=sk-your-api-key-here
+   cp appsettings.local.json.example appsettings.local.json
    ```
+   
+   Or manually create a file named `appsettings.local.json` in the `JournalForge` folder.
 
-3. **Run the app** - it will automatically use OpenAI for AI features!
-
-### Option 2: Code Configuration
-
-1. **Get your API key** from [OpenAI Platform](https://platform.openai.com/api-keys)
-
-2. **Edit `MauiProgram.cs`** and replace the empty string with your API key:
-
-   ```csharp
-   var appSettings = new AppSettings
+3. **Edit `appsettings.local.json`** and add your API key:
+   ```json
    {
-       // Replace this line with your actual API key
-       OpenAIApiKey = "sk-your-api-key-here",
-       OpenAIModel = "gpt-4o-mini"
-   };
+     "OpenAI": {
+       "ApiKey": "sk-your-actual-api-key-here",
+       "Model": "gpt-4o-mini"
+     }
+   }
    ```
 
-3. **Save and rebuild** the app
+4. **Build and run** - the app automatically loads your settings!
 
-⚠️ **Security Warning:** If you use Option 2, **DO NOT commit your API key** to version control!
+✅ **Why this works for Android:**
+- The config file is packaged into your APK during build
+- It's **never committed to git** (automatically ignored)
+- Each developer/device has their own private config
+- Works exactly the same on iOS, Android, and desktop
 
-## How It Works
+⚠️ **Important:** The `appsettings.local.json` file is automatically excluded from git. Never rename it or remove it from `.gitignore`!
+
+## How the Configuration Works
+
+The app checks for configuration files in this order:
+
+1. **`appsettings.local.json`** (your private config with API key) - **Preferred!**
+2. **`appsettings.json`** (checked into git, no API key) - Fallback
+3. **No config found** - Uses mock AI (keyword-based responses)
+
+When you create `appsettings.local.json`, it takes priority and is automatically packaged with your Android APK. Your API key stays private and never gets committed to git.
+
+## Features
 
 - **With API Key**: The app uses OpenAI's GPT models for truly dynamic, context-aware responses
 - **Without API Key**: The app falls back to the built-in mock AI service (keyword-based responses)

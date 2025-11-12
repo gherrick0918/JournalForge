@@ -179,8 +179,9 @@ The current implementation includes UI for voice recording but uses placeholder 
 
 ### AI Service
 ✅ **OpenAI Integration Complete!** The app now supports real AI with OpenAI's API:
-- Set your API key via environment variable: `OPENAI_API_KEY`
-- Or configure directly in `MauiProgram.cs`
+- **Secure local config**: Create `appsettings.local.json` with your API key
+- **Works on Android**: Config file is packaged into APK at build time
+- **Git-safe**: Local config is automatically excluded from version control
 - Automatically falls back to mock responses if API key is not set
 - Uses `gpt-4o-mini` by default for cost-effectiveness
 - See [OPENAI_SETUP.md](JournalForge/OPENAI_SETUP.md) for detailed setup instructions

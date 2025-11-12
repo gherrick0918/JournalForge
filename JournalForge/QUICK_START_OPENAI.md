@@ -3,29 +3,33 @@
 ## Step 1: Get Your API Key
 Visit https://platform.openai.com/api-keys and create a new API key.
 
-## Step 2: Set Environment Variable
+## Step 2: Create Local Config File
 
-**Windows (PowerShell):**
-```powershell
-$env:OPENAI_API_KEY="sk-your-api-key-here"
+In the `JournalForge` project folder, create a file named `appsettings.local.json`:
+
+```json
+{
+  "OpenAI": {
+    "ApiKey": "sk-your-actual-api-key-here",
+    "Model": "gpt-4o-mini"
+  }
+}
 ```
 
-**Windows (Command Prompt):**
-```cmd
-set OPENAI_API_KEY=sk-your-api-key-here
-```
-
-**macOS/Linux:**
+Or copy the example file:
 ```bash
-export OPENAI_API_KEY=sk-your-api-key-here
+cp appsettings.local.json.example appsettings.local.json
+# Then edit appsettings.local.json with your API key
 ```
 
-## Step 3: Run the App
+## Step 3: Build and Run
 ```bash
 dotnet build -f net9.0-android
 ```
 
-That's it! The app will automatically detect your API key and use OpenAI for all AI features.
+That's it! The app will automatically load your settings and use OpenAI for all AI features.
+
+✅ **Works on Android!** The config file is packaged into your APK and stays private (automatically excluded from git).
 
 ## Verify It's Working
 1. Go to "New Entry"
@@ -33,13 +37,15 @@ That's it! The app will automatically detect your API key and use OpenAI for all
 3. Click "🤔 Probe Deeper"
 4. You should see a highly contextual question about your specific content
 
-## Alternative: Direct Configuration
-If you prefer not to use environment variables, edit `JournalForge/MauiProgram.cs` line 26:
-```csharp
-OpenAIApiKey = "sk-your-api-key-here",
-```
+## Why This Method?
 
-**⚠️ Security Warning**: Don't commit this file to git if you hardcode the key!
+**Perfect for Android packaging:**
+- Config file is included in your APK at build time
+- Each developer has their own private config file
+- **Never committed to git** - your API key stays secure
+- No need for environment variables that don't work in mobile apps
+
+The `appsettings.local.json` file is automatically ignored by git, so you can't accidentally commit your API key!
 
 ## Need Help?
 See [OPENAI_SETUP.md](OPENAI_SETUP.md) for:
