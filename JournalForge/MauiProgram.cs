@@ -21,7 +21,7 @@ public static class MauiProgram
 		// Configure app settings for OpenAI
 		// TO USE OPENAI: Create appsettings.local.json with your API key
 		// See OPENAI_SETUP.md for instructions
-		var appSettings = Services.ConfigurationService.LoadSettingsAsync().GetAwaiter().GetResult();
+		var appSettings = Services.ConfigurationService.LoadSettings();
 		builder.Services.AddSingleton(appSettings);
 
 		// Register AI service - uses OpenAI if API key is configured, otherwise falls back to mock

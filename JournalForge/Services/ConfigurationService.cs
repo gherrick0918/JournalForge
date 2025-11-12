@@ -10,6 +10,41 @@ namespace JournalForge.Services;
 public class ConfigurationService
 {
     /// <summary>
+    /// Loads app settings synchronously from appsettings.local.json (priority) or appsettings.json (fallback).
+    /// This method is safe to call during app startup without blocking the UI thread.
+    /// The local file should contain your actual API key and is excluded from git.
+    /// </summary>
+    public static AppSettings LoadSettings()
+    {
+        var settings = new AppSettings();
+        
+        try
+        {
+            // Try to load from appsettings.local.json first (user's private config)
+            var localConfig = TryLoadConfigFile("appsettings.local.json");
+            if (localConfig != null)
+            {
+                return ParseSettings(localConfig);
+            }
+            
+            // Fallback to appsettings.json (checked into git, no API key)
+            var defaultConfig = TryLoadConfigFile("appsettings.json");
+            if (defaultConfig != null)
+            {
+                return ParseSettings(defaultConfig);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't crash - app works without OpenAI
+            System.Diagnostics.Debug.WriteLine($"Error loading settings: {ex.Message}");
+        }
+        
+        // Return empty settings if no config file found (fallback to mock AI)
+        return settings;
+    }
+    
+    /// <summary>
     /// Loads app settings from appsettings.local.json (priority) or appsettings.json (fallback).
     /// The local file should contain your actual API key and is excluded from git.
     /// </summary>
@@ -41,6 +76,23 @@ public class ConfigurationService
         
         // Return empty settings if no config file found (fallback to mock AI)
         return settings;
+    }
+    
+    private static string? TryLoadConfigFile(string filename)
+    {
+        try
+        {
+            // Try to read from app's Resources/Raw folder (where MAUI assets are stored)
+            // Use synchronous file access to avoid deadlocks during app startup
+            using var stream = FileSystem.OpenAppPackageFileAsync(filename).GetAwaiter().GetResult();
+            using var reader = new StreamReader(stream);
+            return reader.ReadToEnd();
+        }
+        catch
+        {
+            // File not found or couldn't be read - this is normal
+            return null;
+        }
     }
     
     private static async Task<string?> TryLoadConfigFileAsync(string filename)
