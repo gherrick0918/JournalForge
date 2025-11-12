@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:JournalForge.ViewModels"
+             x:Class="JournalForge.Pages.JournalEntryPage"
+             x:DataType="viewmodels:JournalEntryViewModel"
+             Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+
+            <!-- Header -->
+            <Label Text="✍️ Chronicle Your Journey ✍️" 
+                   Style="{StaticResource RPGHeaderLarge}"
+                   Margin="0,10"/>
+
+            <!-- Entry Title -->
+            <Frame Style="{StaticResource RPGCard}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="📝 Entry Title" 
+                           Style="{StaticResource RPGHeaderSmall}"/>
+                    <Entry Text="{Binding EntryTitle}"
+                           Style="{StaticResource RPGEntry}"
+                           Placeholder="Give your entry a title..."/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Voice Recording Section -->
+            <Frame Style="{StaticResource RPGCard}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="🎤 Voice Dictation" 
+                           Style="{StaticResource RPGHeaderSmall}"/>
+                    <HorizontalStackLayout Spacing="15" HorizontalOptions="Center">
+                        <Button Text="🎙️ Start Recording"
+                                Style="{StaticResource RPGButtonSecondary}"
+                                Command="{Binding StartRecordingCommand}"
+                                IsVisible="{Binding IsRecording, Converter={StaticResource InverseBoolConverter}}"/>
+                        <Button Text="⏹️ Stop Recording"
+                                Style="{StaticResource RPGButtonPrimary}"
+                                Command="{Binding StopRecordingCommand}"
+                                IsVisible="{Binding IsRecording}"/>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Main Entry Content -->
+            <Frame Style="{StaticResource RPGCard}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="📖 Your Story" 
+                           Style="{StaticResource RPGHeaderSmall}"/>
+                    <Editor Text="{Binding EntryContent}"
+                            Style="{StaticResource RPGEditor}"
+                            Placeholder="Begin writing your story... The AI will help guide you deeper."
+                            HeightRequest="300"
+                            AutoSize="TextChanges"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- AI Conversation Panel -->
+            <Frame Style="{StaticResource RPGCard}"
+                   BackgroundColor="{StaticResource RPGBlue}"
+                   IsVisible="{Binding AIQuestion, Converter={StaticResource StringNotEmptyConverter}}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="🤖 AI Companion" 
+                           Style="{StaticResource RPGHeaderSmall}"
+                           TextColor="{StaticResource RPGTextLight}"/>
+                    <Label Text="{Binding AIQuestion}" 
+                           Style="{StaticResource RPGBodyText}"
+                           TextColor="{StaticResource RPGTextLight}"
+                           FontSize="14"
+                           LineBreakMode="WordWrap"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- AI Action Buttons -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Text="🤔 Probe Deeper"
+                        Style="{StaticResource RPGButtonSecondary}"
+                        Command="{Binding GetAIQuestionCommand}"
+                        Grid.Column="0"/>
+                <Button Text="✨ Suggest Ending"
+                        Style="{StaticResource RPGButtonSecondary}"
+                        Command="{Binding SuggestEndingCommand}"
+                        Grid.Column="1"/>
+            </Grid>
+
+            <!-- Conversation History -->
+            <Frame Style="{StaticResource RPGCard}"
+                   IsVisible="{Binding Conversation.Count, Converter={StaticResource CountToVisibilityConverter}}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="💬 Conversation History" 
+                           Style="{StaticResource RPGHeaderSmall}"/>
+                    <CollectionView ItemsSource="{Binding Conversation}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Label Text="{Binding}" 
+                                       Style="{StaticResource RPGBodyText}"
+                                       Margin="0,5"
+                                       FontSize="12"/>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Save Button -->
+            <Button Text="💾 Save Entry"
+                    Style="{StaticResource RPGButtonPrimary}"
+                    Command="{Binding SaveCommand}"
+                    FontSize="18"
+                    Padding="20"
+                    Margin="0,20"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

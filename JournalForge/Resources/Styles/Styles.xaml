@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xaml-comp compile="true" ?>
+<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- RPG-themed Styles -->
+
+    <!-- Base Page Style -->
+    <Style TargetType="ContentPage" ApplyToDerivedTypes="True">
+        <Setter Property="BackgroundColor" Value="{StaticResource RPGBackground}" />
+    </Style>
+
+    <!-- RPG Button Styles -->
+    <Style x:Key="RPGButtonPrimary" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource RPGGold}" />
+        <Setter Property="TextColor" Value="{StaticResource RPGDarkBrown}" />
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="BorderColor" Value="{StaticResource RPGDarkGold}" />
+        <Setter Property="BorderWidth" Value="2" />
+        <Setter Property="CornerRadius" Value="5" />
+        <Setter Property="Padding" Value="15,10" />
+        <Setter Property="Margin" Value="5" />
+    </Style>
+
+    <Style x:Key="RPGButtonSecondary" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource RPGStone}" />
+        <Setter Property="TextColor" Value="{StaticResource RPGTextLight}" />
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="BorderColor" Value="{StaticResource RPGDarkStone}" />
+        <Setter Property="BorderWidth" Value="2" />
+        <Setter Property="CornerRadius" Value="5" />
+        <Setter Property="Padding" Value="15,10" />
+        <Setter Property="Margin" Value="5" />
+    </Style>
+
+    <Style x:Key="RPGIconButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource RPGBrown}" />
+        <Setter Property="TextColor" Value="{StaticResource RPGTextLight}" />
+        <Setter Property="FontSize" Value="24" />
+        <Setter Property="CornerRadius" Value="30" />
+        <Setter Property="WidthRequest" Value="60" />
+        <Setter Property="HeightRequest" Value="60" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+
+    <!-- RPG Label Styles -->
+    <Style x:Key="RPGHeaderLarge" TargetType="Label">
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontSize" Value="24" />
+        <Setter Property="TextColor" Value="{StaticResource RPGDarkBrown}" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="Margin" Value="0,10" />
+    </Style>
+
+    <Style x:Key="RPGHeaderMedium" TargetType="Label">
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="TextColor" Value="{StaticResource RPGBrown}" />
+        <Setter Property="Margin" Value="0,5" />
+    </Style>
+
+    <Style x:Key="RPGHeaderSmall" TargetType="Label">
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="TextColor" Value="{StaticResource RPGBrown}" />
+        <Setter Property="Margin" Value="0,3" />
+    </Style>
+
+    <Style x:Key="RPGBodyText" TargetType="Label">
+        <Setter Property="FontFamily" Value="OpenSansRegular" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="TextColor" Value="{StaticResource RPGTextPrimary}" />
+        <Setter Property="LineBreakMode" Value="WordWrap" />
+    </Style>
+
+    <!-- RPG Card/Frame Style -->
+    <Style x:Key="RPGCard" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="{StaticResource RPGCardBackground}" />
+        <Setter Property="BorderColor" Value="{StaticResource RPGDarkBrown}" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="15" />
+        <Setter Property="Margin" Value="10" />
+        <Setter Property="HasShadow" Value="True" />
+    </Style>
+
+    <!-- RPG Entry/Editor Style -->
+    <Style x:Key="RPGEditor" TargetType="Editor">
+        <Setter Property="BackgroundColor" Value="{StaticResource RPGParchment}" />
+        <Setter Property="TextColor" Value="{StaticResource RPGTextPrimary}" />
+        <Setter Property="FontFamily" Value="OpenSansRegular" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="PlaceholderColor" Value="{StaticResource RPGTextSecondary}" />
+    </Style>
+
+    <Style x:Key="RPGEntry" TargetType="Entry">
+        <Setter Property="BackgroundColor" Value="{StaticResource RPGParchment}" />
+        <Setter Property="TextColor" Value="{StaticResource RPGTextPrimary}" />
+        <Setter Property="FontFamily" Value="OpenSansRegular" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="PlaceholderColor" Value="{StaticResource RPGTextSecondary}" />
+    </Style>
+
+    <!-- Default Styles -->
+    <Style TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource RPGGold}" />
+        <Setter Property="TextColor" Value="{StaticResource RPGDarkBrown}" />
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="CornerRadius" Value="5" />
+        <Setter Property="Padding" Value="14,10" />
+    </Style>
+
+    <Style TargetType="Label">
+        <Setter Property="TextColor" Value="{StaticResource RPGTextPrimary}" />
+        <Setter Property="FontFamily" Value="OpenSansRegular" />
+        <Setter Property="FontSize" Value="14" />
+    </Style>
+
+    <Style TargetType="Entry">
+        <Setter Property="TextColor" Value="{StaticResource RPGTextPrimary}" />
+        <Setter Property="FontFamily" Value="OpenSansRegular" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="PlaceholderColor" Value="{StaticResource RPGTextSecondary}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource RPGParchment}" />
+    </Style>
+
+    <Style TargetType="Editor">
+        <Setter Property="TextColor" Value="{StaticResource RPGTextPrimary}" />
+        <Setter Property="FontFamily" Value="OpenSansRegular" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="PlaceholderColor" Value="{StaticResource RPGTextSecondary}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource RPGParchment}" />
+    </Style>
+
+</ResourceDictionary>

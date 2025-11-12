@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:JournalForge.ViewModels"
+             x:Class="JournalForge.Pages.MainPage"
+             x:DataType="viewmodels:MainViewModel"
+             Title="{Binding Title}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+            
+            <!-- Header -->
+            <Label Text="⚔️ Welcome, Chronicler ⚔️" 
+                   Style="{StaticResource RPGHeaderLarge}"
+                   Margin="0,20,0,10"/>
+
+            <!-- Daily Prompt Card -->
+            <Frame Style="{StaticResource RPGCard}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="📜 Today's Quest Prompt" 
+                           Style="{StaticResource RPGHeaderMedium}"
+                           TextColor="{StaticResource RPGGold}"/>
+                    <Label Text="{Binding DailyPrompt}" 
+                           Style="{StaticResource RPGBodyText}"
+                           FontSize="16"
+                           LineBreakMode="WordWrap"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Action Buttons -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,10">
+                <Button Text="✍️ New Entry"
+                        Style="{StaticResource RPGButtonPrimary}"
+                        Command="{Binding NewEntryCommand}"
+                        Grid.Column="0"/>
+                <Button Text="⏰ Time Capsule"
+                        Style="{StaticResource RPGButtonSecondary}"
+                        Command="{Binding ViewTimeCapsuleCommand}"
+                        Grid.Column="1"/>
+            </Grid>
+
+            <!-- Daily Insights -->
+            <Frame Style="{StaticResource RPGCard}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="🔮 Daily Insights" 
+                           Style="{StaticResource RPGHeaderMedium}"
+                           TextColor="{StaticResource RPGBlue}"/>
+                    <CollectionView ItemsSource="{Binding DailyInsights}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Label Text="{Binding}" 
+                                       Style="{StaticResource RPGBodyText}"
+                                       Margin="0,5"/>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Recent Entries -->
+            <Frame Style="{StaticResource RPGCard}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="📖 Recent Chronicles" 
+                           Style="{StaticResource RPGHeaderMedium}"
+                           TextColor="{StaticResource RPGGreen}"/>
+                    <CollectionView ItemsSource="{Binding RecentEntries}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame BackgroundColor="{StaticResource RPGParchment}"
+                                       BorderColor="{StaticResource RPGBrown}"
+                                       CornerRadius="5"
+                                       Padding="10"
+                                       Margin="0,5">
+                                    <VerticalStackLayout Spacing="5">
+                                        <Label Text="{Binding Title}" 
+                                               FontFamily="OpenSansSemibold"
+                                               FontSize="14"
+                                               TextColor="{StaticResource RPGDarkBrown}"/>
+                                        <Label Text="{Binding CreatedDate, StringFormat='{0:MMMM dd, yyyy}'}" 
+                                               FontSize="12"
+                                               TextColor="{StaticResource RPGTextSecondary}"/>
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Refresh Button -->
+            <Button Text="🔄 Refresh"
+                    Style="{StaticResource RPGButtonSecondary}"
+                    Command="{Binding RefreshCommand}"
+                    Margin="0,10"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
