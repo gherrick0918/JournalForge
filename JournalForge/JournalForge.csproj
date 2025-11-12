@@ -63,4 +63,20 @@
 		<PackageReference Include="CommunityToolkit.Maui" Version="9.0.3" />
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0-android'">
+		<Compile Include="Platforms\Android\**\*.cs" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0-ios'">
+		<Compile Include="Platforms\iOS\**\*.cs" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0-maccatalyst'">
+		<Compile Include="Platforms\MacCatalyst\**\*.cs" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0-windows10.0.19041.0'">
+		<Compile Include="Platforms\Windows\**\*.cs" />
+	</ItemGroup>
+
 </Project>
