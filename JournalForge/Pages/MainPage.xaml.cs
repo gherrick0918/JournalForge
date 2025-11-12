@@ -14,6 +14,13 @@ public partial class MainPage : ContentPage
 		_viewModel = viewModel;
 	}
 
+	protected override void OnAppearing()
+	{
+		base.OnAppearing();
+		// Refresh data when returning to the page
+		_viewModel.RefreshCommand.Execute(null);
+	}
+
 	private async void OnEntrySelected(object sender, SelectionChangedEventArgs e)
 	{
 		if (e.CurrentSelection.FirstOrDefault() is JournalEntry selectedEntry)
