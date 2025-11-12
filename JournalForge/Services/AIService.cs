@@ -50,8 +50,59 @@ public class AIService : IAIService
 
     public Task<string> GenerateProbingQuestionAsync(string entryContent)
     {
-        // Simple implementation - in a real app, this would use AI to analyze content
-        var question = _probingQuestions[_random.Next(_probingQuestions.Count)];
+        // Enhanced implementation - analyzes content for context-aware questions
+        // In a real app, this would use AI to deeply analyze content
+        
+        var content = entryContent.ToLower();
+        string question;
+        
+        // Context-aware question selection based on keywords
+        if (content.Contains("feel") || content.Contains("felt") || content.Contains("emotion"))
+        {
+            question = "How did that make you feel in the moment?";
+        }
+        else if (content.Contains("learned") || content.Contains("discovered") || content.Contains("realized"))
+        {
+            question = "What lesson is hidden within this experience?";
+        }
+        else if (content.Contains("today") || content.Contains("day"))
+        {
+            question = "How does this connect to your larger journey?";
+        }
+        else if (content.Contains("friend") || content.Contains("family") || content.Contains("person") || content.Contains("someone"))
+        {
+            question = "How did this interaction change your perspective?";
+        }
+        else if (content.Contains("work") || content.Contains("job") || content.Contains("career"))
+        {
+            question = "How does this relate to your values and goals?";
+        }
+        else if (content.Contains("challenge") || content.Contains("difficult") || content.Contains("hard") || content.Contains("struggle"))
+        {
+            question = "What strength did you discover in yourself?";
+        }
+        else if (content.Contains("happy") || content.Contains("joy") || content.Contains("excited") || content.Contains("wonderful"))
+        {
+            question = "What made this moment particularly special for you?";
+        }
+        else if (content.Contains("sad") || content.Contains("upset") || content.Contains("angry") || content.Contains("frustrated"))
+        {
+            question = "What do you need right now to process these feelings?";
+        }
+        else if (content.Contains("future") || content.Contains("tomorrow") || content.Contains("next"))
+        {
+            question = "How will this shape your path forward?";
+        }
+        else if (content.Contains("past") || content.Contains("before") || content.Contains("ago"))
+        {
+            question = "What would you tell your past self about this?";
+        }
+        else
+        {
+            // Default to a varied question
+            question = _probingQuestions[_random.Next(_probingQuestions.Count)];
+        }
+        
         return Task.FromResult(question);
     }
 

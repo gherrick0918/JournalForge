@@ -13,6 +13,7 @@ public class JournalEntryViewModel : BaseViewModel
     private string _aiQuestion = string.Empty;
     private ObservableCollection<string> _conversation = new();
     private bool _isRecording;
+    private string _recordingStatus = string.Empty;
 
     public JournalEntryViewModel(
         IAIService aiService,
@@ -67,6 +68,12 @@ public class JournalEntryViewModel : BaseViewModel
     {
         get => _isRecording;
         set => SetProperty(ref _isRecording, value);
+    }
+
+    public string RecordingStatus
+    {
+        get => _recordingStatus;
+        set => SetProperty(ref _recordingStatus, value);
     }
 
     public ICommand SaveCommand { get; }
@@ -162,14 +169,36 @@ public class JournalEntryViewModel : BaseViewModel
     private void StartRecording()
     {
         IsRecording = true;
+        RecordingStatus = "Listening for your voice...";
         // In a real implementation, this would start voice recording
-        // For now, it's a placeholder
+        // For now, it's a placeholder that simulates recording behavior
+        
+        // Simulate recording after a delay to show feedback
+        Task.Run(async () =>
+        {
+            await Task.Delay(2000);
+            if (IsRecording)
+            {
+                RecordingStatus = "Processing speech... (Feature coming soon)";
+            }
+        });
     }
 
     private void StopRecording()
     {
         IsRecording = false;
-        // In a real implementation, this would stop voice recording
-        // and convert speech to text
+        RecordingStatus = "Recording stopped. Speech-to-text feature coming soon.";
+        
+        // Clear status after a delay
+        Task.Run(async () =>
+        {
+            await Task.Delay(3000);
+            RecordingStatus = string.Empty;
+        });
+        
+        // In a real implementation, this would:
+        // 1. Stop the audio recording
+        // 2. Send audio to speech-to-text service
+        // 3. Append the transcribed text to EntryContent
     }
 }

@@ -63,7 +63,14 @@
                     <Label Text="📖 Recent Chronicles" 
                            Style="{StaticResource RPGHeaderMedium}"
                            TextColor="{StaticResource RPGGreen}"/>
-                    <CollectionView ItemsSource="{Binding RecentEntries}">
+                    <Label Text="(Tap any entry to view)" 
+                           FontSize="12"
+                           TextColor="{StaticResource RPGTextSecondary}"
+                           HorizontalOptions="Center"
+                           Margin="0,0,0,5"/>
+                    <CollectionView ItemsSource="{Binding RecentEntries}"
+                                    SelectionMode="Single"
+                                    SelectionChanged="OnEntrySelected">
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
                                 <Frame BackgroundColor="{StaticResource RPGParchment}"
@@ -75,10 +82,16 @@
                                         <Label Text="{Binding Title}" 
                                                FontFamily="OpenSansSemibold"
                                                FontSize="14"
-                                               TextColor="{StaticResource RPGDarkBrown}"/>
+                                               TextColor="{StaticResource RPGDarkBrown}"
+                                               LineBreakMode="TailTruncation"/>
                                         <Label Text="{Binding CreatedDate, StringFormat='{0:MMMM dd, yyyy}'}" 
                                                FontSize="12"
                                                TextColor="{StaticResource RPGTextSecondary}"/>
+                                        <Label Text="{Binding Content}" 
+                                               FontSize="11"
+                                               TextColor="{StaticResource RPGTextSecondary}"
+                                               MaxLines="2"
+                                               LineBreakMode="TailTruncation"/>
                                     </VerticalStackLayout>
                                 </Frame>
                             </DataTemplate>
