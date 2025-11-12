@@ -71,6 +71,11 @@
 
 		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+		
+		<!-- Configuration files -->
+		<MauiAsset Include="appsettings.json" LogicalName="appsettings.json" />
+		<!-- appsettings.local.json will be included if it exists, but is .gitignored -->
+		<MauiAsset Include="appsettings.local.json" LogicalName="appsettings.local.json" Condition="Exists('appsettings.local.json')" />
 	</ItemGroup>
 
 	<ItemGroup>

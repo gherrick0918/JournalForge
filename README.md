@@ -19,11 +19,14 @@ JournalForge is a cross-platform (Android-focused) mobile application built with
 - Automatically track which capsules are ready to be opened
 - Reveal messages from your past self
 
-### 🤖 AI Features
+### 🤖 AI Features (OpenAI Powered!)
+- **Real OpenAI Integration**: Use your OpenAI API key for truly dynamic, context-aware AI responses
 - Daily writing prompts with RPG-themed language
-- Probing questions based on entry content
-- Suggested entry endings
-- Daily insights about journaling patterns
+- Context-aware probing questions based on your actual entry content
+- Personalized entry ending suggestions
+- Smart insights about journaling patterns and themes
+- **Fallback Mode**: Works without API key using built-in responses
+- 📘 See [OPENAI_SETUP.md](JournalForge/OPENAI_SETUP.md) for configuration instructions
 
 ### 🎨 RPG Visual Theme
 - Medieval/fantasy color scheme with gold, brown, and parchment tones
@@ -175,11 +178,18 @@ The current implementation includes UI for voice recording but uses placeholder 
 4. Link recordings to journal entries
 
 ### AI Service
-The AIService currently returns pre-defined responses. To implement real AI:
-1. Integrate with OpenAI API or similar
-2. Implement prompt engineering for journaling context
-3. Add conversation history management
-4. Consider local vs. cloud AI options
+✅ **OpenAI Integration Complete!** The app now supports real AI with OpenAI's API:
+- **Secure local config**: Create `appsettings.local.json` with your API key
+- **Works on Android**: Config file is packaged into APK at build time
+- **Git-safe**: Local config is automatically excluded from version control
+- Automatically falls back to mock responses if API key is not set
+- Uses `gpt-4o-mini` by default for cost-effectiveness
+- See [OPENAI_SETUP.md](JournalForge/OPENAI_SETUP.md) for detailed setup instructions
+
+Future enhancements:
+1. Add conversation history to API calls for context
+2. Support for other AI providers (Azure OpenAI, Anthropic, etc.)
+3. Local AI option for privacy-focused users
 
 ### Data Persistence
 Current services store data in memory. To persist:

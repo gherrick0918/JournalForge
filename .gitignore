@@ -52,3 +52,14 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# Security - API Keys and Secrets
+# IMPORTANT: Never commit appsettings.local.json - it contains your API keys!
+**/appsettings.local.json
+**/appsettings.*.local.json
+**/.env
+**/.env.local
+secrets.json
+# Also ignore any JSON file with "secret" or "key" in the name
+**/*secret*.json
+**/*key*.json

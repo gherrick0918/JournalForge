@@ -40,23 +40,22 @@
                                 Command="{Binding StopRecordingCommand}"
                                 IsVisible="{Binding IsRecording}"/>
                     </HorizontalStackLayout>
+                    <!-- Recording Status Indicator -->
+                    <Label Text="🔴 Recording in progress..." 
+                           Style="{StaticResource RPGBodyText}"
+                           FontSize="14"
+                           TextColor="Red"
+                           HorizontalOptions="Center"
+                           IsVisible="{Binding IsRecording}"/>
+                    <Label Text="{Binding RecordingStatus}" 
+                           Style="{StaticResource RPGBodyText}"
+                           FontSize="12"
+                           HorizontalOptions="Center"
+                           IsVisible="{Binding RecordingStatus, Converter={StaticResource StringNotEmptyConverter}}"/>
                 </VerticalStackLayout>
             </Frame>
 
-            <!-- Main Entry Content -->
-            <Frame Style="{StaticResource RPGCard}">
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="📖 Your Story" 
-                           Style="{StaticResource RPGHeaderSmall}"/>
-                    <Editor Text="{Binding EntryContent}"
-                            Style="{StaticResource RPGEditor}"
-                            Placeholder="Begin writing your story... The AI will help guide you deeper."
-                            HeightRequest="300"
-                            AutoSize="TextChanges"/>
-                </VerticalStackLayout>
-            </Frame>
-
-            <!-- AI Conversation Panel -->
+            <!-- AI Conversation Panel (moved above entry content) -->
             <Frame Style="{StaticResource RPGCard}"
                    BackgroundColor="{StaticResource RPGBlue}"
                    IsVisible="{Binding AIQuestion, Converter={StaticResource StringNotEmptyConverter}}">
@@ -72,7 +71,7 @@
                 </VerticalStackLayout>
             </Frame>
 
-            <!-- AI Action Buttons -->
+            <!-- AI Action Buttons (moved above entry content) -->
             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                 <Button Text="🤔 Probe Deeper"
                         Style="{StaticResource RPGButtonSecondary}"
@@ -83,6 +82,19 @@
                         Command="{Binding SuggestEndingCommand}"
                         Grid.Column="1"/>
             </Grid>
+
+            <!-- Main Entry Content -->
+            <Frame Style="{StaticResource RPGCard}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="📖 Your Story" 
+                           Style="{StaticResource RPGHeaderSmall}"/>
+                    <Editor Text="{Binding EntryContent}"
+                            Style="{StaticResource RPGEditor}"
+                            Placeholder="Begin writing your story... The AI will help guide you deeper."
+                            HeightRequest="300"
+                            AutoSize="TextChanges"/>
+                </VerticalStackLayout>
+            </Frame>
 
             <!-- Conversation History -->
             <Frame Style="{StaticResource RPGCard}"
