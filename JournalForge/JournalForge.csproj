@@ -42,6 +42,9 @@
 	<PropertyGroup Condition="'$(TargetFramework)' == 'net9.0-android'">
 		<!-- Ensure the resource directory exists before Android tasks try to access it -->
 		<AndroidResgenFile>$(IntermediateOutputPath)Resource.designer.cs</AndroidResgenFile>
+		<!-- Fix serialization assembly loading issues by disabling the linker for serialization assemblies -->
+		<AndroidLinkMode>SdkOnly</AndroidLinkMode>
+		<AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
 	</PropertyGroup>
 
 	<!-- Target to create Android resource directories before build tasks need them -->
