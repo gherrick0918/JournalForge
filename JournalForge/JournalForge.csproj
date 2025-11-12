@@ -38,6 +38,23 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
 	</PropertyGroup>
 
+	<!-- Android-specific configuration to handle build directory issues -->
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net9.0-android'">
+		<!-- Ensure the resource directory exists before Android tasks try to access it -->
+		<AndroidResgenFile>$(IntermediateOutputPath)Resource.designer.cs</AndroidResgenFile>
+	</PropertyGroup>
+
+	<!-- Target to create Android resource directories before build tasks need them -->
+	<Target Name="CreateAndroidResourceDirectories" BeforeTargets="GenerateRtxt;_GeneratePackageManagerJava">
+		<MakeDir Directories="$(IntermediateOutputPath)res" Condition="'$(TargetFramework)' == 'net9.0-android'" />
+		<MakeDir Directories="$(IntermediateOutputPath)lp" Condition="'$(TargetFramework)' == 'net9.0-android'" />
+	</Target>
+
+	<!-- Target to handle directory cleanup issues by retrying on failure -->
+	<Target Name="CleanAndroidDirectories" BeforeTargets="Clean" Condition="'$(TargetFramework)' == 'net9.0-android'">
+		<RemoveDir Directories="$(IntermediateOutputPath)" ContinueOnError="true" />
+	</Target>
+
 	<ItemGroup>
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
