@@ -1,0 +1,2 @@
+This is a placeholder for OpenSans-Semibold.ttf
+In production, download the actual font from Google Fonts

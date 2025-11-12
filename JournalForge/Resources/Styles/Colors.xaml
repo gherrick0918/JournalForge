@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xaml-comp compile="true" ?>
+<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- RPG Theme Colors - Old School Fantasy -->
+    
+    <!-- Primary Colors -->
+    <Color x:Key="RPGGold">#D4AF37</Color>
+    <Color x:Key="RPGDarkGold">#8B7000</Color>
+    <Color x:Key="RPGLightGold">#FFD700</Color>
+    
+    <!-- Brown/Wood Tones -->
+    <Color x:Key="RPGDarkBrown">#3E2723</Color>
+    <Color x:Key="RPGBrown">#5D4037</Color>
+    <Color x:Key="RPGLightBrown">#8D6E63</Color>
+    <Color x:Key="RPGParchment">#F4E4C1</Color>
+    
+    <!-- Stone/Gray Tones -->
+    <Color x:Key="RPGStone">#78909C</Color>
+    <Color x:Key="RPGDarkStone">#455A64</Color>
+    <Color x:Key="RPGLightStone">#B0BEC5</Color>
+    
+    <!-- Accent Colors -->
+    <Color x:Key="RPGRed">#8B0000</Color>
+    <Color x:Key="RPGBlue">#1E3A5F</Color>
+    <Color x:Key="RPGGreen">#2E7D32</Color>
+    <Color x:Key="RPGPurple">#4A148C</Color>
+    
+    <!-- Text Colors -->
+    <Color x:Key="RPGTextPrimary">#2C1810</Color>
+    <Color x:Key="RPGTextSecondary">#5D4037</Color>
+    <Color x:Key="RPGTextLight">#F4E4C1</Color>
+    
+    <!-- Background Colors -->
+    <Color x:Key="RPGBackground">#E8DCC4</Color>
+    <Color x:Key="RPGCardBackground">#F5F0E8</Color>
+    
+    <!-- Standard MAUI Color mappings -->
+    <Color x:Key="Primary">#D4AF37</Color>
+    <Color x:Key="Secondary">#8D6E63</Color>
+    <Color x:Key="Tertiary">#78909C</Color>
+    <Color x:Key="White">White</Color>
+    <Color x:Key="Black">Black</Color>
+    <Color x:Key="Gray100">#E1E1E1</Color>
+    <Color x:Key="Gray200">#C8C8C8</Color>
+    <Color x:Key="Gray300">#ACACAC</Color>
+    <Color x:Key="Gray400">#919191</Color>
+    <Color x:Key="Gray500">#6E6E6E</Color>
+    <Color x:Key="Gray600">#404040</Color>
+    <Color x:Key="Gray900">#212121</Color>
+    <Color x:Key="Gray950">#141414</Color>
+
+    <!-- Light Theme Colors -->
+    <Color x:Key="LightBackground">#E8DCC4</Color>
+    <Color x:Key="LightSurface">#F5F0E8</Color>
+    <Color x:Key="LightText">#2C1810</Color>
+
+</ResourceDictionary>
