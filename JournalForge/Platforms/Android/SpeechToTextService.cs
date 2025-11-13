@@ -60,11 +60,11 @@ public class SpeechToTextService : ISpeechToTextService
         intent.PutExtra(RecognizerIntent.ExtraLanguageModel, RecognizerIntent.LanguageModelFreeForm);
         intent.PutExtra(RecognizerIntent.ExtraLanguage, Java.Util.Locale.Default);
         intent.PutExtra(RecognizerIntent.ExtraPartialResults, true);
-        // Reduced silence times for faster response
-        intent.PutExtra(RecognizerIntent.ExtraSpeechInputCompleteSilenceLengthMillis, 1500);
-        intent.PutExtra(RecognizerIntent.ExtraSpeechInputPossiblyCompleteSilenceLengthMillis, 1500);
+        // Increased silence times to give users more time to speak
+        intent.PutExtra(RecognizerIntent.ExtraSpeechInputCompleteSilenceLengthMillis, 3000);
+        intent.PutExtra(RecognizerIntent.ExtraSpeechInputPossiblyCompleteSilenceLengthMillis, 2000);
         intent.PutExtra(RecognizerIntent.ExtraMaxResults, 1);
-        // Disable beep sounds that can be delayed
+        // Prefer online for better accuracy
         intent.PutExtra(RecognizerIntent.ExtraPreferOffline, false);
 
         _speechRecognizer.StartListening(intent);
@@ -100,15 +100,21 @@ public class SpeechToTextService : ISpeechToTextService
 
         public void OnError(SpeechRecognizerError error)
         {
+            // For NoMatch and SpeechTimeout, return empty string instead of error
+            // This allows the UI to show a friendlier message
+            if (error == SpeechRecognizerError.NoMatch || error == SpeechRecognizerError.SpeechTimeout)
+            {
+                _tcs.TrySetResult(string.Empty);
+                return;
+            }
+            
             var errorMessage = error switch
             {
-                SpeechRecognizerError.NoMatch => "No speech detected. Please try again.",
                 SpeechRecognizerError.NetworkTimeout => "Network timeout. Please check your connection.",
                 SpeechRecognizerError.Network => "Network error. Please check your connection.",
                 SpeechRecognizerError.Audio => "Audio recording error.",
                 SpeechRecognizerError.Server => "Server error. Please try again.",
                 SpeechRecognizerError.Client => "Client error.",
-                SpeechRecognizerError.SpeechTimeout => "No speech detected. Please try again.",
                 SpeechRecognizerError.RecognizerBusy => "Speech recognizer is busy.",
                 SpeechRecognizerError.InsufficientPermissions => "Microphone permission required.",
                 _ => "Speech recognition error."

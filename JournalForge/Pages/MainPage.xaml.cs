@@ -25,11 +25,11 @@ public partial class MainPage : ContentPage
 	{
 		if (e.CurrentSelection.FirstOrDefault() is JournalEntry selectedEntry)
 		{
-			// Navigate to the entry page with the entry ID
-			await Shell.Current.GoToAsync($"{nameof(Pages.JournalEntryPage)}?entryId={selectedEntry.Id}");
-			
-			// Clear the selection
+			// Clear the selection first to allow re-selecting the same item
 			((CollectionView)sender).SelectedItem = null;
+			
+			// Navigate to the entry page with the entry ID
+			await Shell.Current.GoToAsync($"JournalEntryPage?entryId={selectedEntry.Id}");
 		}
 	}
 }

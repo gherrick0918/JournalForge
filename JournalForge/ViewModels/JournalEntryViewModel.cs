@@ -446,14 +446,14 @@ public class JournalEntryViewModel : BaseViewModel
             var hasPermission = await _speechToTextService.RequestPermissionsAsync();
             if (!hasPermission)
             {
-                RecordingStatus = "Microphone permission is required for speech-to-text.";
+                RecordingStatus = "❌ Microphone permission is required for speech-to-text.";
                 await Task.Delay(3000);
                 RecordingStatus = string.Empty;
                 return;
             }
 
             IsRecording = true;
-            RecordingStatus = "Listening... Speak now";
+            RecordingStatus = "🎙️ Listening... Start speaking now";
             
             // Start listening
             var transcribedText = await _speechToTextService.ListenAsync();
@@ -469,30 +469,30 @@ public class JournalEntryViewModel : BaseViewModel
                 {
                     CurrentMessage += " " + transcribedText;
                 }
-                RecordingStatus = $"✅ Text added: \"{transcribedText.Substring(0, Math.Min(50, transcribedText.Length))}{(transcribedText.Length > 50 ? "..." : "")}\" - Tap send when ready!";
+                RecordingStatus = $"✅ Transcribed: \"{transcribedText.Substring(0, Math.Min(50, transcribedText.Length))}{(transcribedText.Length > 50 ? "..." : "")}\"";
             }
             else
             {
-                RecordingStatus = "❌ No speech detected. Please try again.";
+                RecordingStatus = "⚠️ No speech detected. Try speaking louder or closer to the microphone.";
             }
             
             IsRecording = false;
             
             // Clear status after a longer delay to give user time to see the message
-            await Task.Delay(5000);
+            await Task.Delay(4000);
             RecordingStatus = string.Empty;
         }
         catch (PlatformNotSupportedException)
         {
             IsRecording = false;
-            RecordingStatus = "Speech-to-text is not supported on this platform.";
+            RecordingStatus = "❌ Speech-to-text is not supported on this platform.";
             await Task.Delay(3000);
             RecordingStatus = string.Empty;
         }
         catch (Exception ex)
         {
             IsRecording = false;
-            RecordingStatus = $"Error: {ex.Message}";
+            RecordingStatus = $"❌ Error: {ex.Message}";
             await Task.Delay(3000);
             RecordingStatus = string.Empty;
         }
