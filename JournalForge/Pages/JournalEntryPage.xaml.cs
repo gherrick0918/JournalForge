@@ -25,5 +25,10 @@ public partial class JournalEntryPage : ContentPage
 		{
 			await _viewModel.LoadEntryAsync(EntryId);
 		}
+		else
+		{
+			// Reset for a new entry
+			_viewModel.ResetForNewEntry();
+		}
 	}
 }

@@ -53,6 +53,21 @@ public class JournalEntryViewModel : BaseViewModel
         }
     }
 
+    public void ResetForNewEntry()
+    {
+        // Reset to new entry state
+        _currentEntry = new JournalEntry();
+        Title = "New Journal Entry";
+        EntryTitle = string.Empty;
+        CurrentMessage = string.Empty;
+        IsRecording = false;
+        RecordingStatus = string.Empty;
+        
+        // Clear and re-add initial AI greeting
+        ConversationMessages.Clear();
+        AddAIMessage("Welcome, Chronicler! I'm here to help you explore your thoughts. What's on your mind today?");
+    }
+
     public string EntryTitle
     {
         get => _currentEntry.Title;
