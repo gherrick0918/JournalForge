@@ -23,7 +23,8 @@
             <!-- Entry Title -->
             <Entry Text="{Binding EntryTitle}"
                    Style="{StaticResource RPGEntry}"
-                   Placeholder="Entry title (optional - will be auto-generated)"/>
+                   Placeholder="Entry title (optional - will be auto-generated)"
+                   IsReadOnly="{Binding IsViewMode}"/>
         </VerticalStackLayout>
 
         <!-- Conversation Thread -->
@@ -82,7 +83,8 @@
         <!-- Voice Recording Section -->
         <Frame Grid.Row="2" 
                Style="{StaticResource RPGCard}"
-               Margin="20,10">
+               Margin="20,10"
+               IsVisible="{Binding IsViewMode, Converter={StaticResource InverseBoolConverter}}">
             <VerticalStackLayout Spacing="8">
                 <HorizontalStackLayout Spacing="15" HorizontalOptions="Center">
                     <Button Text="🎙️ Start Recording"
@@ -108,7 +110,8 @@
                BorderColor="{StaticResource RPGBrown}"
                CornerRadius="0"
                Padding="15,10"
-               HasShadow="True">
+               HasShadow="True"
+               IsVisible="{Binding IsViewMode, Converter={StaticResource InverseBoolConverter}}">
             <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
                 <!-- Message Entry -->
                 <Entry Grid.Column="0"
