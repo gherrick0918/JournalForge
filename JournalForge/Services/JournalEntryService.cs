@@ -1,4 +1,5 @@
 using JournalForge.Models;
+using System.Text.Json;
 
 namespace JournalForge.Services;
 
@@ -14,6 +15,17 @@ public interface IJournalEntryService
 public class JournalEntryService : IJournalEntryService
 {
     private readonly List<JournalEntry> _entries = new();
+    private readonly string _dataFilePath;
+    private readonly SemaphoreSlim _fileLock = new(1, 1);
+
+    public JournalEntryService()
+    {
+        var appDataPath = FileSystem.AppDataDirectory;
+        _dataFilePath = Path.Combine(appDataPath, "journal_entries.json");
+        
+        // Load existing entries on initialization
+        Task.Run(async () => await LoadEntriesAsync()).Wait();
+    }
 
     public Task<List<JournalEntry>> GetAllEntriesAsync()
     {
@@ -26,7 +38,7 @@ public class JournalEntryService : IJournalEntryService
         return Task.FromResult(entry);
     }
 
-    public Task<bool> SaveEntryAsync(JournalEntry entry)
+    public async Task<bool> SaveEntryAsync(JournalEntry entry)
     {
         var existing = _entries.FirstOrDefault(e => e.Id == entry.Id);
         if (existing != null)
@@ -35,18 +47,69 @@ public class JournalEntryService : IJournalEntryService
         }
         
         _entries.Add(entry);
-        return Task.FromResult(true);
+        await SaveEntriesToFileAsync();
+        return true;
     }
 
-    public Task<bool> DeleteEntryAsync(string id)
+    public async Task<bool> DeleteEntryAsync(string id)
     {
         var entry = _entries.FirstOrDefault(e => e.Id == id);
         if (entry != null)
         {
             _entries.Remove(entry);
-            return Task.FromResult(true);
+            await SaveEntriesToFileAsync();
+            return true;
         }
-        return Task.FromResult(false);
+        return false;
+    }
+
+    private async Task LoadEntriesAsync()
+    {
+        await _fileLock.WaitAsync();
+        try
+        {
+            if (File.Exists(_dataFilePath))
+            {
+                var json = await File.ReadAllTextAsync(_dataFilePath);
+                var entries = JsonSerializer.Deserialize<List<JournalEntry>>(json);
+                if (entries != null)
+                {
+                    _entries.Clear();
+                    _entries.AddRange(entries);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't throw - app should continue with empty list
+            System.Diagnostics.Debug.WriteLine($"Error loading entries: {ex.Message}");
+        }
+        finally
+        {
+            _fileLock.Release();
+        }
+    }
+
+    private async Task SaveEntriesToFileAsync()
+    {
+        await _fileLock.WaitAsync();
+        try
+        {
+            var json = JsonSerializer.Serialize(_entries, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+            await File.WriteAllTextAsync(_dataFilePath, json);
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't throw - this is a background operation
+            System.Diagnostics.Debug.WriteLine($"Error saving entries: {ex.Message}");
+        }
+        finally
+        {
+            _fileLock.Release();
+        }
     }
 
     public Task<List<JournalEntry>> GetRecentEntriesAsync(int count = 10)
