@@ -9,6 +9,7 @@ public class JournalEntryViewModel : BaseViewModel
 {
     private readonly IAIService _aiService;
     private readonly IJournalEntryService _journalService;
+    private readonly ISpeechToTextService _speechToTextService;
     private JournalEntry _currentEntry;
     private ObservableCollection<ConversationMessage> _conversationMessages = new();
     private string _currentMessage = string.Empty;
@@ -17,10 +18,12 @@ public class JournalEntryViewModel : BaseViewModel
 
     public JournalEntryViewModel(
         IAIService aiService,
-        IJournalEntryService journalService)
+        IJournalEntryService journalService,
+        ISpeechToTextService speechToTextService)
     {
         _aiService = aiService;
         _journalService = journalService;
+        _speechToTextService = speechToTextService;
         _currentEntry = new JournalEntry();
 
         Title = "New Journal Entry";
@@ -28,7 +31,7 @@ public class JournalEntryViewModel : BaseViewModel
         SaveCommand = new Command(async () => await SaveEntryAsync());
         SendMessageCommand = new Command(async () => await SendMessageAsync(), () => !string.IsNullOrWhiteSpace(CurrentMessage));
         RequestAIQuestionCommand = new Command(async () => await RequestAIQuestionAsync());
-        StartRecordingCommand = new Command(StartRecording);
+        StartRecordingCommand = new Command(async () => await StartRecordingAsync());
         StopRecordingCommand = new Command(StopRecording);
         
         // Add initial AI greeting
@@ -259,39 +262,77 @@ public class JournalEntryViewModel : BaseViewModel
         }
     }
 
-    private void StartRecording()
+    private async Task StartRecordingAsync()
     {
-        IsRecording = true;
-        RecordingStatus = "Listening for your voice...";
-        // In a real implementation, this would start voice recording
-        // For now, it's a placeholder that simulates recording behavior
-        
-        // Simulate recording after a delay to show feedback
-        Task.Run(async () =>
+        try
         {
-            await Task.Delay(2000);
-            if (IsRecording)
+            // Request permissions
+            var hasPermission = await _speechToTextService.RequestPermissionsAsync();
+            if (!hasPermission)
             {
-                RecordingStatus = "Processing speech... (Feature coming soon)";
+                RecordingStatus = "Microphone permission is required for speech-to-text.";
+                await Task.Delay(3000);
+                RecordingStatus = string.Empty;
+                return;
             }
-        });
+
+            IsRecording = true;
+            RecordingStatus = "Listening... Speak now";
+            
+            // Start listening
+            var transcribedText = await _speechToTextService.ListenAsync();
+            
+            // Add transcribed text to current message
+            if (!string.IsNullOrWhiteSpace(transcribedText))
+            {
+                if (string.IsNullOrWhiteSpace(CurrentMessage))
+                {
+                    CurrentMessage = transcribedText;
+                }
+                else
+                {
+                    CurrentMessage += " " + transcribedText;
+                }
+                RecordingStatus = "Speech recognized successfully!";
+            }
+            else
+            {
+                RecordingStatus = "No speech detected. Please try again.";
+            }
+            
+            IsRecording = false;
+            
+            // Clear status after a delay
+            await Task.Delay(2000);
+            RecordingStatus = string.Empty;
+        }
+        catch (PlatformNotSupportedException)
+        {
+            IsRecording = false;
+            RecordingStatus = "Speech-to-text is not supported on this platform.";
+            await Task.Delay(3000);
+            RecordingStatus = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            IsRecording = false;
+            RecordingStatus = $"Error: {ex.Message}";
+            await Task.Delay(3000);
+            RecordingStatus = string.Empty;
+        }
     }
 
     private void StopRecording()
     {
+        _speechToTextService.StopListening();
         IsRecording = false;
-        RecordingStatus = "Recording stopped. Speech-to-text feature coming soon.";
+        RecordingStatus = "Recording stopped.";
         
         // Clear status after a delay
         Task.Run(async () =>
         {
-            await Task.Delay(3000);
+            await Task.Delay(2000);
             RecordingStatus = string.Empty;
         });
-        
-        // In a real implementation, this would:
-        // 1. Stop the audio recording
-        // 2. Send audio to speech-to-text service
-        // 3. Append the transcribed text to EntryContent
     }
 }

@@ -37,6 +37,13 @@ public static class MauiProgram
 
 		builder.Services.AddSingleton<Services.ITimeCapsuleService, Services.TimeCapsuleService>();
 		builder.Services.AddSingleton<Services.IJournalEntryService, Services.JournalEntryService>();
+		
+		// Register speech-to-text service (platform-specific)
+#if ANDROID
+		builder.Services.AddSingleton<Services.ISpeechToTextService, Platforms.Android.SpeechToTextService>();
+#else
+		builder.Services.AddSingleton<Services.ISpeechToTextService, Services.SpeechToTextService>();
+#endif
 
 		// Register view models
 		builder.Services.AddTransient<ViewModels.MainViewModel>();
