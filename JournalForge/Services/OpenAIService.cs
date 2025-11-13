@@ -62,8 +62,18 @@ public class OpenAIService : IAIService
 
         try
         {
-            var systemPrompt = "You are a thoughtful journaling companion helping someone explore their thoughts deeper. Based on their journal entry, ask ONE insightful, open-ended question that encourages deeper reflection. Keep the question concise and focused. Make it personal and specific to their content.";
-            var userPrompt = $"Here's the journal entry:\n\n{entryContent}\n\nAsk one probing question to help them explore this deeper.";
+            var systemPrompt = @"You are a warm, empathetic journaling companion having a natural conversation. 
+Respond conversationally with genuine interest and empathy. Your responses should feel like a supportive friend, not a therapist or interviewer.
+- Acknowledge what they shared before asking a question
+- Match their emotional tone (if they're excited, be enthusiastic; if they're struggling, be gentle)
+- Keep responses natural and flowing, 1-3 sentences total
+- Ask follow-up questions that show you're really listening
+- Avoid formulaic patterns like always ending with a single question
+Example good responses:
+- 'That sounds really challenging. What's weighing on you most about it?'
+- 'I can hear the frustration in that. Have you been able to talk to anyone else about it?'
+- 'Wow, that must have felt amazing! What was going through your mind in that moment?'";
+            var userPrompt = $"Here's what they just shared:\n\n{entryContent}\n\nRespond conversationally with empathy and a follow-up question.";
             
             var response = await CallOpenAIAsync(systemPrompt, userPrompt);
             return response ?? await _fallbackService.GenerateProbingQuestionAsync(entryContent);

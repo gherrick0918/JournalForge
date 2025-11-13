@@ -45,19 +45,27 @@ public class SpeechToTextService : ISpeechToTextService
             return _tcs.Task;
         }
 
-        if (_speechRecognizer == null)
+        // Dispose of the old recognizer and create a fresh one to avoid state issues
+        if (_speechRecognizer != null)
         {
-            _speechRecognizer = SpeechRecognizer.CreateSpeechRecognizer(activity);
-            _listener = new SpeechRecognitionListener(_tcs);
-            _speechRecognizer.SetRecognitionListener(_listener);
+            _speechRecognizer.Destroy();
+            _speechRecognizer = null;
         }
+
+        _speechRecognizer = SpeechRecognizer.CreateSpeechRecognizer(activity);
+        _listener = new SpeechRecognitionListener(_tcs);
+        _speechRecognizer.SetRecognitionListener(_listener);
 
         var intent = new Intent(RecognizerIntent.ActionRecognizeSpeech);
         intent.PutExtra(RecognizerIntent.ExtraLanguageModel, RecognizerIntent.LanguageModelFreeForm);
         intent.PutExtra(RecognizerIntent.ExtraLanguage, Java.Util.Locale.Default);
         intent.PutExtra(RecognizerIntent.ExtraPartialResults, true);
-        intent.PutExtra(RecognizerIntent.ExtraSpeechInputCompleteSilenceLengthMillis, 2000);
-        intent.PutExtra(RecognizerIntent.ExtraSpeechInputPossiblyCompleteSilenceLengthMillis, 2000);
+        // Reduced silence times for faster response
+        intent.PutExtra(RecognizerIntent.ExtraSpeechInputCompleteSilenceLengthMillis, 1500);
+        intent.PutExtra(RecognizerIntent.ExtraSpeechInputPossiblyCompleteSilenceLengthMillis, 1500);
+        intent.PutExtra(RecognizerIntent.ExtraMaxResults, 1);
+        // Disable beep sounds that can be delayed
+        intent.PutExtra(RecognizerIntent.ExtraPreferOffline, false);
 
         _speechRecognizer.StartListening(intent);
 
