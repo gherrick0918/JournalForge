@@ -35,6 +35,39 @@ public class JournalEntryViewModel : BaseViewModel
         AddAIMessage("Welcome, Chronicler! I'm here to help you explore your thoughts. What's on your mind today?");
     }
 
+    public async Task LoadEntryAsync(string entryId)
+    {
+        var entry = await _journalService.GetEntryByIdAsync(entryId);
+        if (entry != null)
+        {
+            _currentEntry = entry;
+            Title = "View Entry";
+            EntryTitle = entry.Title;
+            
+            // Load conversation messages
+            ConversationMessages.Clear();
+            foreach (var message in entry.ConversationMessages)
+            {
+                ConversationMessages.Add(message);
+            }
+        }
+    }
+
+    public void ResetForNewEntry()
+    {
+        // Reset to new entry state
+        _currentEntry = new JournalEntry();
+        Title = "New Journal Entry";
+        EntryTitle = string.Empty;
+        CurrentMessage = string.Empty;
+        IsRecording = false;
+        RecordingStatus = string.Empty;
+        
+        // Clear and re-add initial AI greeting
+        ConversationMessages.Clear();
+        AddAIMessage("Welcome, Chronicler! I'm here to help you explore your thoughts. What's on your mind today?");
+    }
+
     public string EntryTitle
     {
         get => _currentEntry.Title;

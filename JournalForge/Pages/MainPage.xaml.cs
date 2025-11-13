@@ -25,11 +25,8 @@ public partial class MainPage : ContentPage
 	{
 		if (e.CurrentSelection.FirstOrDefault() is JournalEntry selectedEntry)
 		{
-			// Show the entry details
-			await DisplayAlert(
-				selectedEntry.Title,
-				$"Created: {selectedEntry.CreatedDate:MMMM dd, yyyy}\n\n{selectedEntry.Content}",
-				"OK");
+			// Navigate to the entry page with the entry ID
+			await Shell.Current.GoToAsync($"{nameof(JournalEntryPage)}?entryId={selectedEntry.Id}");
 			
 			// Clear the selection
 			((CollectionView)sender).SelectedItem = null;
