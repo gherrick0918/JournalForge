@@ -453,7 +453,7 @@ public class JournalEntryViewModel : BaseViewModel
             }
 
             IsRecording = true;
-            RecordingStatus = "🎙️ Listening... Start speaking now";
+            RecordingStatus = "🎙️ Listening... Speak clearly into your microphone";
             
             // Start listening
             var transcribedText = await _speechToTextService.ListenAsync();
@@ -473,13 +473,13 @@ public class JournalEntryViewModel : BaseViewModel
             }
             else
             {
-                RecordingStatus = "⚠️ No speech detected. Try speaking louder or closer to the microphone.";
+                RecordingStatus = "⚠️ No speech detected. Please:\n• Speak louder and closer to the microphone\n• Check if your microphone is working\n• Make sure background noise is minimal\n• Try speaking for longer (at least 2-3 seconds)";
             }
             
             IsRecording = false;
             
             // Clear status after a longer delay to give user time to see the message
-            await Task.Delay(4000);
+            await Task.Delay(5000);
             RecordingStatus = string.Empty;
         }
         catch (PlatformNotSupportedException)
