@@ -54,8 +54,10 @@ public class JournalEntryViewModel : BaseViewModel
         }
     }
     
-    private async Task<string> GeneratePersonalizedGreetingAsync(List<JournalEntry> recentEntries)
+    private Task<string> GeneratePersonalizedGreetingAsync(List<JournalEntry> recentEntries)
     {
+        string greeting;
+        
         if (recentEntries.Count == 0)
         {
             // No previous entries, use welcoming greetings
@@ -65,57 +67,61 @@ public class JournalEntryViewModel : BaseViewModel
                 "Greetings, adventurer! ⚔️ Let's embark on a journey of self-discovery together. What's on your mind?",
                 "Welcome to your journal! 🔮 I'm here to listen and help you dive deeper into your experiences. Where shall we begin?"
             };
-            return firstTimeGreetings[new Random().Next(firstTimeGreetings.Length)];
-        }
-
-        // Get the most recent entry date
-        var lastEntryDate = recentEntries[0].CreatedDate;
-        var daysSinceLastEntry = (DateTime.Now - lastEntryDate).Days;
-        
-        if (daysSinceLastEntry == 0)
-        {
-            // Same day - acknowledge their dedication
-            var sameDayGreetings = new[]
-            {
-                "Back already? I love your dedication! 📖 What else is on your mind today?",
-                "Welcome back, Chronicler! What new thoughts have emerged since we last spoke?",
-                "Great to see you again today! 🌟 Ready to explore more of what's happening in your world?"
-            };
-            return sameDayGreetings[new Random().Next(sameDayGreetings.Length)];
-        }
-        else if (daysSinceLastEntry == 1)
-        {
-            // Yesterday - warm welcome back
-            var nextDayGreetings = new[]
-            {
-                "Welcome back! It's great to continue our journey together. What's new today?",
-                "Good to see you again! 🌅 How has your day been unfolding?",
-                "Hey there! Ready to reflect on another day's adventures?"
-            };
-            return nextDayGreetings[new Random().Next(nextDayGreetings.Length)];
-        }
-        else if (daysSinceLastEntry <= 7)
-        {
-            // This week - acknowledge the gap
-            var thisWeekGreetings = new[]
-            {
-                $"Welcome back! It's been {daysSinceLastEntry} days. I'm curious to hear what's been happening! 📜",
-                $"Great to see you again after {daysSinceLastEntry} days! What's been on your mind lately?",
-                $"Welcome, Chronicler! What stories from the past {daysSinceLastEntry} days would you like to share?"
-            };
-            return thisWeekGreetings[new Random().Next(thisWeekGreetings.Length)];
+            greeting = firstTimeGreetings[new Random().Next(firstTimeGreetings.Length)];
         }
         else
         {
-            // Longer absence - warm welcome
-            var longAbsenceGreetings = new[]
+            // Get the most recent entry date
+            var lastEntryDate = recentEntries[0].CreatedDate;
+            var daysSinceLastEntry = (DateTime.Now - lastEntryDate).Days;
+            
+            if (daysSinceLastEntry == 0)
             {
-                "Welcome back, friend! It's been a while. I'm here whenever you need to reflect. What's on your mind?",
-                "So good to see you again! 🌟 No judgment here - let's pick up where we left off. What would you like to talk about?",
-                "Welcome back to your journal! I've missed our conversations. What's been happening in your world?"
-            };
-            return longAbsenceGreetings[new Random().Next(longAbsenceGreetings.Length)];
+                // Same day - acknowledge their dedication
+                var sameDayGreetings = new[]
+                {
+                    "Back already? I love your dedication! 📖 What else is on your mind today?",
+                    "Welcome back, Chronicler! What new thoughts have emerged since we last spoke?",
+                    "Great to see you again today! 🌟 Ready to explore more of what's happening in your world?"
+                };
+                greeting = sameDayGreetings[new Random().Next(sameDayGreetings.Length)];
+            }
+            else if (daysSinceLastEntry == 1)
+            {
+                // Yesterday - warm welcome back
+                var nextDayGreetings = new[]
+                {
+                    "Welcome back! It's great to continue our journey together. What's new today?",
+                    "Good to see you again! 🌅 How has your day been unfolding?",
+                    "Hey there! Ready to reflect on another day's adventures?"
+                };
+                greeting = nextDayGreetings[new Random().Next(nextDayGreetings.Length)];
+            }
+            else if (daysSinceLastEntry <= 7)
+            {
+                // This week - acknowledge the gap
+                var thisWeekGreetings = new[]
+                {
+                    $"Welcome back! It's been {daysSinceLastEntry} days. I'm curious to hear what's been happening! 📜",
+                    $"Great to see you again after {daysSinceLastEntry} days! What's been on your mind lately?",
+                    $"Welcome, Chronicler! What stories from the past {daysSinceLastEntry} days would you like to share?"
+                };
+                greeting = thisWeekGreetings[new Random().Next(thisWeekGreetings.Length)];
+            }
+            else
+            {
+                // Longer absence - warm welcome
+                var longAbsenceGreetings = new[]
+                {
+                    "Welcome back, friend! It's been a while. I'm here whenever you need to reflect. What's on your mind?",
+                    "So good to see you again! 🌟 No judgment here - let's pick up where we left off. What would you like to talk about?",
+                    "Welcome back to your journal! I've missed our conversations. What's been happening in your world?"
+                };
+                greeting = longAbsenceGreetings[new Random().Next(longAbsenceGreetings.Length)];
+            }
         }
+        
+        return Task.FromResult(greeting);
     }
 
     public async Task LoadEntryAsync(string entryId)
@@ -372,7 +378,7 @@ public class JournalEntryViewModel : BaseViewModel
         }
     }
     
-    private async Task<List<string>> GenerateEntryInsightsAsync(JournalEntry entry)
+    private Task<List<string>> GenerateEntryInsightsAsync(JournalEntry entry)
     {
         var insights = new List<string>();
         
@@ -429,7 +435,7 @@ public class JournalEntryViewModel : BaseViewModel
             insights.Add("🔮 Continue your journaling journey - each entry adds to your story!");
         }
         
-        return insights;
+        return Task.FromResult(insights);
     }
 
     private async Task StartRecordingAsync()
