@@ -86,11 +86,11 @@ public class MainViewModel : BaseViewModel
 
     private async Task NavigateToNewEntry()
     {
-        await Shell.Current.GoToAsync(nameof(Pages.JournalEntryPage));
+        await Shell.Current.GoToAsync("JournalEntryPage");
     }
 
     private async Task NavigateToTimeCapsule()
     {
-        await Shell.Current.GoToAsync(nameof(Pages.TimeCapsulePage));
+        await Shell.Current.GoToAsync("TimeCapsulePage");
     }
 }
