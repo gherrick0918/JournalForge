@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:JournalForge.ViewModels"
+             xmlns:models="clr-namespace:JournalForge.Models"
              x:Class="JournalForge.Pages.MainPage"
              x:DataType="viewmodels:MainViewModel"
              Title="{Binding Title}">
@@ -72,7 +73,7 @@
                                     SelectionMode="Single"
                                     SelectionChanged="OnEntrySelected">
                         <CollectionView.ItemTemplate>
-                            <DataTemplate>
+                            <DataTemplate x:DataType="models:JournalEntry">
                                 <Frame BackgroundColor="{StaticResource RPGParchment}"
                                        BorderColor="{StaticResource RPGBrown}"
                                        CornerRadius="5"
