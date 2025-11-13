@@ -82,8 +82,7 @@
         <!-- Voice Recording Section -->
         <Frame Grid.Row="2" 
                Style="{StaticResource RPGCard}"
-               Margin="20,10"
-               IsVisible="{Binding RecordingStatus, Converter={StaticResource StringNotEmptyConverter}}">
+               Margin="20,10">
             <VerticalStackLayout Spacing="8">
                 <HorizontalStackLayout Spacing="15" HorizontalOptions="Center">
                     <Button Text="🎙️ Start Recording"
@@ -98,7 +97,8 @@
                 <Label Text="{Binding RecordingStatus}" 
                        Style="{StaticResource RPGBodyText}"
                        FontSize="12"
-                       HorizontalOptions="Center"/>
+                       HorizontalOptions="Center"
+                       IsVisible="{Binding RecordingStatus, Converter={StaticResource StringNotEmptyConverter}}"/>
             </VerticalStackLayout>
         </Frame>
 
