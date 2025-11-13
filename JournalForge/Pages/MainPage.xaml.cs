@@ -26,7 +26,7 @@ public partial class MainPage : ContentPage
 		if (e.CurrentSelection.FirstOrDefault() is JournalEntry selectedEntry)
 		{
 			// Navigate to the entry page with the entry ID
-			await Shell.Current.GoToAsync($"{nameof(JournalEntryPage)}?entryId={selectedEntry.Id}");
+			await Shell.Current.GoToAsync($"{nameof(Pages.JournalEntryPage)}?entryId={selectedEntry.Id}");
 			
 			// Clear the selection
 			((CollectionView)sender).SelectedItem = null;
