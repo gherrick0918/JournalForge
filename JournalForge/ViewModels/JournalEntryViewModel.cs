@@ -15,6 +15,7 @@ public class JournalEntryViewModel : BaseViewModel
     private string _currentMessage = string.Empty;
     private bool _isRecording;
     private string _recordingStatus = string.Empty;
+    private bool _isViewMode;
 
     public JournalEntryViewModel(
         IAIService aiService,
@@ -46,6 +47,7 @@ public class JournalEntryViewModel : BaseViewModel
             _currentEntry = entry;
             Title = "View Entry";
             EntryTitle = entry.Title;
+            IsViewMode = true;
             
             // Load conversation messages
             ConversationMessages.Clear();
@@ -65,6 +67,7 @@ public class JournalEntryViewModel : BaseViewModel
         CurrentMessage = string.Empty;
         IsRecording = false;
         RecordingStatus = string.Empty;
+        IsViewMode = false;
         
         // Clear and re-add initial AI greeting
         ConversationMessages.Clear();
@@ -107,6 +110,12 @@ public class JournalEntryViewModel : BaseViewModel
     {
         get => _recordingStatus;
         set => SetProperty(ref _recordingStatus, value);
+    }
+
+    public bool IsViewMode
+    {
+        get => _isViewMode;
+        set => SetProperty(ref _isViewMode, value);
     }
 
     public ICommand SaveCommand { get; }
@@ -293,17 +302,17 @@ public class JournalEntryViewModel : BaseViewModel
                 {
                     CurrentMessage += " " + transcribedText;
                 }
-                RecordingStatus = "Speech recognized successfully!";
+                RecordingStatus = $"✅ Text added: \"{transcribedText.Substring(0, Math.Min(50, transcribedText.Length))}{(transcribedText.Length > 50 ? "..." : "")}\" - Tap send when ready!";
             }
             else
             {
-                RecordingStatus = "No speech detected. Please try again.";
+                RecordingStatus = "❌ No speech detected. Please try again.";
             }
             
             IsRecording = false;
             
-            // Clear status after a delay
-            await Task.Delay(2000);
+            // Clear status after a longer delay to give user time to see the message
+            await Task.Delay(5000);
             RecordingStatus = string.Empty;
         }
         catch (PlatformNotSupportedException)
