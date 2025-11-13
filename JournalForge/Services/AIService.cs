@@ -56,46 +56,96 @@ public class AIService : IAIService
         var content = entryContent.ToLower();
         string question;
         
-        // Context-aware question selection based on keywords
+        // Context-aware question selection based on keywords - more conversational responses
         if (content.Contains("feel") || content.Contains("felt") || content.Contains("emotion"))
         {
-            question = "How did that make you feel in the moment?";
+            var responses = new[]
+            {
+                "I hear you. How did that make you feel in the moment?",
+                "That sounds intense. What emotions were coming up for you?"
+            };
+            question = responses[_random.Next(responses.Length)];
         }
         else if (content.Contains("learned") || content.Contains("discovered") || content.Contains("realized"))
         {
-            question = "What lesson is hidden within this experience?";
+            var responses = new[]
+            {
+                "That's an interesting realization. What do you think this means for you?",
+                "Sounds like an important discovery. How might this change things going forward?"
+            };
+            question = responses[_random.Next(responses.Length)];
         }
-        else if (content.Contains("today") || content.Contains("day"))
+        else if (content.Contains("rough") || content.Contains("bad") || content.Contains("tough"))
         {
-            question = "How does this connect to your larger journey?";
+            var responses = new[]
+            {
+                "That sounds really tough. What made the day especially rough?",
+                "I'm sorry to hear it's been rough. What's been weighing on you most?"
+            };
+            question = responses[_random.Next(responses.Length)];
         }
         else if (content.Contains("friend") || content.Contains("family") || content.Contains("person") || content.Contains("someone"))
         {
-            question = "How did this interaction change your perspective?";
+            var responses = new[]
+            {
+                "How did that interaction feel for you?",
+                "That's interesting. How did this change your perspective on things?"
+            };
+            question = responses[_random.Next(responses.Length)];
         }
         else if (content.Contains("work") || content.Contains("job") || content.Contains("career"))
         {
-            question = "How does this relate to your values and goals?";
+            var responses = new[]
+            {
+                "Work can be complex. How does this fit with what you value?",
+                "How are you feeling about this work situation?"
+            };
+            question = responses[_random.Next(responses.Length)];
         }
         else if (content.Contains("challenge") || content.Contains("difficult") || content.Contains("hard") || content.Contains("struggle"))
         {
-            question = "What strength did you discover in yourself?";
+            var responses = new[]
+            {
+                "That sounds challenging. What strengths are you drawing on to get through this?",
+                "I can hear that this is difficult. What's helping you cope?"
+            };
+            question = responses[_random.Next(responses.Length)];
         }
         else if (content.Contains("happy") || content.Contains("joy") || content.Contains("excited") || content.Contains("wonderful"))
         {
-            question = "What made this moment particularly special for you?";
+            var responses = new[]
+            {
+                "That's wonderful! What made this moment so special?",
+                "I love hearing this! What's standing out most about this experience?"
+            };
+            question = responses[_random.Next(responses.Length)];
         }
         else if (content.Contains("sad") || content.Contains("upset") || content.Contains("angry") || content.Contains("frustrated"))
         {
-            question = "What do you need right now to process these feelings?";
+            var responses = new[]
+            {
+                "That sounds really hard. What do you need right now?",
+                "I'm here with you. What would help you process these feelings?"
+            };
+            question = responses[_random.Next(responses.Length)];
         }
         else if (content.Contains("future") || content.Contains("tomorrow") || content.Contains("next"))
         {
-            question = "How will this shape your path forward?";
+            var responses = new[]
+            {
+                "Interesting. How do you see this shaping your path forward?",
+                "What are you hoping will happen next?"
+            };
+            question = responses[_random.Next(responses.Length)];
         }
         else if (content.Contains("past") || content.Contains("before") || content.Contains("ago"))
         {
-            question = "What would you tell your past self about this?";
+            var responses = new[]
+            {
+                "Looking back can be powerful. What would you tell your past self about this?",
+                "How do you see this differently now compared to then?"
+            };
+            question = responses[_random.Next(responses.Length)];
         }
         else
         {

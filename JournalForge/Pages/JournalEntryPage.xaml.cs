@@ -34,8 +34,8 @@ public partial class JournalEntryPage : ContentPage
 		}
 		else
 		{
-			// Reset for a new entry
-			_viewModel.ResetForNewEntry();
+			// Reset for a new entry with personalized greeting
+			await _viewModel.ResetForNewEntryAsync();
 		}
 		
 		// Update toolbar based on view mode
