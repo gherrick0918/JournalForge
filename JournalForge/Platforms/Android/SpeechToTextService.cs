@@ -10,9 +10,28 @@ public class SpeechToTextService : ISpeechToTextService
     private SpeechRecognizer? _speechRecognizer;
     private TaskCompletionSource<string>? _tcs;
 
-    public Task<bool> RequestPermissionsAsync()
+    public async Task<bool> RequestPermissionsAsync()
     {
-        return Task.FromResult(SpeechRecognizer.IsRecognitionAvailable(Platform.CurrentActivity));
+        try
+        {
+            var status = await Permissions.CheckStatusAsync<Permissions.Microphone>();
+            
+            if (status != PermissionStatus.Granted)
+            {
+                status = await Permissions.RequestAsync<Permissions.Microphone>();
+            }
+
+            if (status != PermissionStatus.Granted)
+            {
+                return false;
+            }
+
+            return SpeechRecognizer.IsRecognitionAvailable(Platform.CurrentActivity);
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     public Task<string> ListenAsync()
