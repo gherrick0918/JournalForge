@@ -67,8 +67,9 @@ public class SpeechToTextService : ISpeechToTextService
         intent.PutExtra(RecognizerIntent.ExtraSpeechInputPossiblyCompleteSilenceLengthMillis, 5000);
         intent.PutExtra(RecognizerIntent.ExtraSpeechInputMinimumLengthMillis, 10000);
         intent.PutExtra(RecognizerIntent.ExtraMaxResults, 5);
-        // Prefer online for better accuracy, but allow offline fallback
-        intent.PutExtra(RecognizerIntent.ExtraPreferOffline, false);
+        // Prefer offline for better emulator support and reliability
+        // Online mode often fails with ServerDisconnected on emulators
+        intent.PutExtra(RecognizerIntent.ExtraPreferOffline, true);
         // Add prompt for better user experience
         intent.PutExtra(RecognizerIntent.ExtraPrompt, "Speak now...");
 
@@ -152,6 +153,15 @@ public class SpeechToTextService : ISpeechToTextService
             // This allows the UI to show a friendlier message
             if (error == SpeechRecognizerError.NoMatch || error == SpeechRecognizerError.SpeechTimeout)
             {
+                _tcs.TrySetResult(string.Empty);
+                return;
+            }
+            
+            // Handle ServerDisconnected - common on emulators
+            // Return empty string so user gets the "no speech detected" message
+            if (error == SpeechRecognizerError.ServerDisconnected)
+            {
+                System.Diagnostics.Debug.WriteLine("ServerDisconnected - this is common on emulators. Speech recognition may need device setup.");
                 _tcs.TrySetResult(string.Empty);
                 return;
             }
