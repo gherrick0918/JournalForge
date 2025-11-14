@@ -71,8 +71,6 @@ public class SpeechToTextService : ISpeechToTextService
         intent.PutExtra(RecognizerIntent.ExtraPreferOffline, false);
         // Add prompt for better user experience
         intent.PutExtra(RecognizerIntent.ExtraPrompt, "Speak now...");
-        // Enable secure on-device recognition when available
-        intent.PutExtra(RecognizerIntent.ExtraSecureOnDevice, false);
 
         try
         {
