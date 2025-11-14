@@ -60,10 +60,12 @@ public class SpeechToTextService : ISpeechToTextService
         intent.PutExtra(RecognizerIntent.ExtraLanguageModel, RecognizerIntent.LanguageModelFreeForm);
         intent.PutExtra(RecognizerIntent.ExtraLanguage, Java.Util.Locale.Default);
         intent.PutExtra(RecognizerIntent.ExtraPartialResults, true);
-        // Increased silence times to give users more time to speak
-        intent.PutExtra(RecognizerIntent.ExtraSpeechInputCompleteSilenceLengthMillis, 3000);
-        intent.PutExtra(RecognizerIntent.ExtraSpeechInputPossiblyCompleteSilenceLengthMillis, 2000);
-        intent.PutExtra(RecognizerIntent.ExtraMaxResults, 1);
+        // Significantly increased silence times to give users more time to speak
+        // This helps with longer pauses and reduces "no speech detected" errors
+        intent.PutExtra(RecognizerIntent.ExtraSpeechInputCompleteSilenceLengthMillis, 5000);
+        intent.PutExtra(RecognizerIntent.ExtraSpeechInputPossiblyCompleteSilenceLengthMillis, 3000);
+        intent.PutExtra(RecognizerIntent.ExtraSpeechInputMinimumLengthMillis, 8000);
+        intent.PutExtra(RecognizerIntent.ExtraMaxResults, 5);
         // Prefer online for better accuracy
         intent.PutExtra(RecognizerIntent.ExtraPreferOffline, false);
 

@@ -7,6 +7,8 @@ public partial class JournalEntryPage : ContentPage
 {
 	private readonly JournalEntryViewModel _viewModel;
 	private ToolbarItem? _saveToolbarItem;
+	private string? _entryId;
+	private bool _isNavigatingToEntry;
 
 	public JournalEntryPage(JournalEntryViewModel viewModel)
 	{
@@ -21,22 +23,34 @@ public partial class JournalEntryPage : ContentPage
 		_viewModel.PropertyChanged += OnViewModelPropertyChanged;
 	}
 
-	public string? EntryId { get; set; }
+	public string? EntryId 
+	{ 
+		get => _entryId;
+		set
+		{
+			_entryId = value;
+			_isNavigatingToEntry = !string.IsNullOrEmpty(value);
+		}
+	}
 
 	protected override async void OnAppearing()
 	{
 		base.OnAppearing();
 		
 		// Load existing entry if EntryId is provided
-		if (!string.IsNullOrEmpty(EntryId))
+		if (_isNavigatingToEntry && !string.IsNullOrEmpty(_entryId))
 		{
-			await _viewModel.LoadEntryAsync(EntryId);
+			await _viewModel.LoadEntryAsync(_entryId);
+			_isNavigatingToEntry = false; // Reset flag after loading
 		}
-		else
+		else if (!_isNavigatingToEntry)
 		{
 			// Reset for a new entry with personalized greeting
 			await _viewModel.ResetForNewEntryAsync();
 		}
+		
+		// Clear the EntryId after loading to allow new entries next time
+		_entryId = null;
 		
 		// Update toolbar based on view mode
 		UpdateToolbarItems();
