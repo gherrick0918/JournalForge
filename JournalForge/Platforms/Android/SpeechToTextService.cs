@@ -62,14 +62,27 @@ public class SpeechToTextService : ISpeechToTextService
         intent.PutExtra(RecognizerIntent.ExtraPartialResults, true);
         // Significantly increased silence times to give users more time to speak
         // This helps with longer pauses and reduces "no speech detected" errors
-        intent.PutExtra(RecognizerIntent.ExtraSpeechInputCompleteSilenceLengthMillis, 5000);
-        intent.PutExtra(RecognizerIntent.ExtraSpeechInputPossiblyCompleteSilenceLengthMillis, 3000);
-        intent.PutExtra(RecognizerIntent.ExtraSpeechInputMinimumLengthMillis, 8000);
+        // These values are especially important for emulators where audio input may have delays
+        intent.PutExtra(RecognizerIntent.ExtraSpeechInputCompleteSilenceLengthMillis, 8000);
+        intent.PutExtra(RecognizerIntent.ExtraSpeechInputPossiblyCompleteSilenceLengthMillis, 5000);
+        intent.PutExtra(RecognizerIntent.ExtraSpeechInputMinimumLengthMillis, 10000);
         intent.PutExtra(RecognizerIntent.ExtraMaxResults, 5);
-        // Prefer online for better accuracy
+        // Prefer online for better accuracy, but allow offline fallback
         intent.PutExtra(RecognizerIntent.ExtraPreferOffline, false);
+        // Add prompt for better user experience
+        intent.PutExtra(RecognizerIntent.ExtraPrompt, "Speak now...");
+        // Enable secure on-device recognition when available
+        intent.PutExtra(RecognizerIntent.ExtraSecureOnDevice, false);
 
-        _speechRecognizer.StartListening(intent);
+        try
+        {
+            _speechRecognizer.StartListening(intent);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"SpeechToTextService.ListenAsync error: {ex.Message}");
+            _tcs.TrySetException(new Exception($"Failed to start speech recognition: {ex.Message}"));
+        }
 
         return _tcs.Task;
     }
@@ -120,18 +133,23 @@ public class SpeechToTextService : ISpeechToTextService
 
         public void OnBeginningOfSpeech()
         {
+            System.Diagnostics.Debug.WriteLine("SpeechRecognitionListener.OnBeginningOfSpeech - User has started speaking");
         }
 
         public void OnBufferReceived(byte[]? buffer)
         {
+            System.Diagnostics.Debug.WriteLine($"SpeechRecognitionListener.OnBufferReceived - Received audio buffer");
         }
 
         public void OnEndOfSpeech()
         {
+            System.Diagnostics.Debug.WriteLine("SpeechRecognitionListener.OnEndOfSpeech - User has stopped speaking");
         }
 
         public void OnError(SpeechRecognizerError error)
         {
+            System.Diagnostics.Debug.WriteLine($"SpeechRecognitionListener.OnError: {error}");
+            
             // For NoMatch and SpeechTimeout, return empty string instead of error
             // This allows the UI to show a friendlier message
             if (error == SpeechRecognizerError.NoMatch || error == SpeechRecognizerError.SpeechTimeout)
@@ -144,13 +162,14 @@ public class SpeechToTextService : ISpeechToTextService
             {
                 SpeechRecognizerError.NetworkTimeout => "Network timeout. Please check your connection.",
                 SpeechRecognizerError.Network => "Network error. Please check your connection.",
-                SpeechRecognizerError.Audio => "Audio recording error.",
+                SpeechRecognizerError.Audio => "Audio recording error. Please check your microphone.",
                 SpeechRecognizerError.Server => "Server error. Please try again.",
                 SpeechRecognizerError.Client => "Client error.",
-                SpeechRecognizerError.RecognizerBusy => "Speech recognizer is busy.",
+                SpeechRecognizerError.RecognizerBusy => "Speech recognizer is busy. Please wait and try again.",
                 SpeechRecognizerError.InsufficientPermissions => "Microphone permission required.",
-                _ => "Speech recognition error."
+                _ => $"Speech recognition error: {error}."
             };
+            System.Diagnostics.Debug.WriteLine($"SpeechRecognitionListener error message: {errorMessage}");
             _tcs.TrySetException(new Exception(errorMessage));
         }
 
@@ -164,12 +183,15 @@ public class SpeechToTextService : ISpeechToTextService
 
         public void OnReadyForSpeech(global::Android.OS.Bundle? @params)
         {
+            System.Diagnostics.Debug.WriteLine("SpeechRecognitionListener.OnReadyForSpeech - Ready to listen");
         }
 
         public void OnResults(global::Android.OS.Bundle? results)
         {
+            System.Diagnostics.Debug.WriteLine("SpeechRecognitionListener.OnResults - Received final results");
             if (results == null)
             {
+                System.Diagnostics.Debug.WriteLine("SpeechRecognitionListener.OnResults - Results bundle is null");
                 _tcs.TrySetResult(string.Empty);
                 return;
             }
@@ -178,16 +200,24 @@ public class SpeechToTextService : ISpeechToTextService
             if (matches != null && matches.Count > 0)
             {
                 var text = matches[0] ?? string.Empty;
+                System.Diagnostics.Debug.WriteLine($"SpeechRecognitionListener.OnResults - Transcribed: '{text}'");
                 _tcs.TrySetResult(text);
             }
             else
             {
+                System.Diagnostics.Debug.WriteLine("SpeechRecognitionListener.OnResults - No matches found");
                 _tcs.TrySetResult(string.Empty);
             }
         }
 
         public void OnRmsChanged(float rmsdB)
         {
+            // Log periodically to show audio is being received
+            // Only log every ~0.5 seconds to avoid spam (RMS updates frequently)
+            if (DateTime.Now.Millisecond < 100)
+            {
+                System.Diagnostics.Debug.WriteLine($"SpeechRecognitionListener.OnRmsChanged - Audio level: {rmsdB} dB");
+            }
         }
     }
 }

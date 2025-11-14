@@ -131,7 +131,6 @@ public class JournalEntryViewModel : BaseViewModel
         {
             _currentEntry = entry;
             Title = "View Entry";
-            EntryTitle = entry.Title;
             IsViewMode = true;
             
             // Load conversation messages
@@ -140,6 +139,9 @@ public class JournalEntryViewModel : BaseViewModel
             {
                 ConversationMessages.Add(message);
             }
+            
+            // Notify property change for EntryTitle after _currentEntry is set
+            OnPropertyChanged(nameof(EntryTitle));
         }
     }
 
@@ -453,7 +455,7 @@ public class JournalEntryViewModel : BaseViewModel
             }
 
             IsRecording = true;
-            RecordingStatus = "🎙️ Listening... Speak clearly into your microphone";
+            RecordingStatus = "🎙️ Listening... Speak clearly into your microphone.\nMake sure to speak for at least 2-3 seconds.";
             
             // Start listening
             var transcribedText = await _speechToTextService.ListenAsync();
@@ -473,13 +475,13 @@ public class JournalEntryViewModel : BaseViewModel
             }
             else
             {
-                RecordingStatus = "⚠️ No speech detected. Please:\n• Speak louder and closer to the microphone\n• Check if your microphone is working\n• Make sure background noise is minimal\n• Try speaking for longer (at least 2-3 seconds)";
+                RecordingStatus = "⚠️ No speech detected. Please:\n• Speak louder and closer to the microphone\n• Check if your microphone is working (Settings > Apps > JournalForge > Permissions)\n• Make sure background noise is minimal\n• Try speaking for at least 3-4 seconds\n• On emulator: Ensure host audio input is properly configured";
             }
             
             IsRecording = false;
             
             // Clear status after a longer delay to give user time to see the message
-            await Task.Delay(5000);
+            await Task.Delay(6000);
             RecordingStatus = string.Empty;
         }
         catch (PlatformNotSupportedException)
@@ -492,8 +494,8 @@ public class JournalEntryViewModel : BaseViewModel
         catch (Exception ex)
         {
             IsRecording = false;
-            RecordingStatus = $"❌ Error: {ex.Message}";
-            await Task.Delay(3000);
+            RecordingStatus = $"❌ Error: {ex.Message}\n\nTips:\n• Check microphone permissions\n• Try restarting the app\n• On emulator: Verify audio input is configured";
+            await Task.Delay(5000);
             RecordingStatus = string.Empty;
         }
     }
