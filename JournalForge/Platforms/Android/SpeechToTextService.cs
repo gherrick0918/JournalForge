@@ -76,7 +76,37 @@ public class SpeechToTextService : ISpeechToTextService
 
     public void StopListening()
     {
-        _speechRecognizer?.StopListening();
+        try
+        {
+            _speechRecognizer?.StopListening();
+        }
+        catch (System.Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"SpeechToTextService.StopListening error: {ex.Message}");
+        }
+    }
+
+    public void Dispose()
+    {
+        try
+        {
+            if (_speechRecognizer != null)
+            {
+                _speechRecognizer.Destroy();
+                _speechRecognizer.Dispose();
+                _speechRecognizer = null;
+            }
+
+            if (_listener != null)
+            {
+                _listener.Dispose();
+                _listener = null;
+            }
+        }
+        catch (System.Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"SpeechToTextService.Dispose error: {ex.Message}");
+        }
     }
 
     private class SpeechRecognitionListener : Java.Lang.Object, IRecognitionListener

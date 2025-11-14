@@ -11,5 +11,29 @@ public class MainApplication : MauiApplication
 	{
 	}
 
-	protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
+	protected override MauiApp CreateMauiApp()
+	{
+		try
+		{
+			return MauiProgram.CreateMauiApp();
+		}
+		catch (System.Exception ex)
+		{
+			System.Diagnostics.Debug.WriteLine($"MainApplication.CreateMauiApp error: {ex.Message}");
+			throw;
+		}
+	}
+
+	public override void OnCreate()
+	{
+		try
+		{
+			base.OnCreate();
+		}
+		catch (System.Exception ex)
+		{
+			System.Diagnostics.Debug.WriteLine($"MainApplication.OnCreate error: {ex.Message}");
+			throw;
+		}
+	}
 }

@@ -47,6 +47,9 @@
 		<RunAOTCompilation>false</RunAOTCompilation>
 		<!-- Embed assemblies into APK to disable Fast Deployment and fix XA0129 error -->
 		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+		<!-- Additional settings to fix launcher issues -->
+		<AndroidUseAssemblyStore>false</AndroidUseAssemblyStore>
+		<AndroidEnableAssemblyCompression>false</AndroidEnableAssemblyCompression>
 	</PropertyGroup>
 	
 	<!-- Disable linking in Debug builds to prevent assembly loading issues -->
