@@ -17,4 +17,9 @@ public class SpeechToTextService : ISpeechToTextService
     {
         // No-op for unsupported platforms
     }
+
+    public void Dispose()
+    {
+        // No-op for unsupported platforms
+    }
 }

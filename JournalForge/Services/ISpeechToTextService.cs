@@ -1,6 +1,6 @@
 namespace JournalForge.Services;
 
-public interface ISpeechToTextService
+public interface ISpeechToTextService : IDisposable
 {
     Task<bool> RequestPermissionsAsync();
     Task<string> ListenAsync();
