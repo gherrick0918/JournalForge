@@ -45,6 +45,8 @@
 		<!-- Disable AOT to prevent startup crashes -->
 		<AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
 		<RunAOTCompilation>false</RunAOTCompilation>
+		<!-- Embed assemblies into APK to disable Fast Deployment and fix XA0129 error -->
+		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
 	</PropertyGroup>
 	
 	<!-- Disable linking in Debug builds to prevent assembly loading issues -->
