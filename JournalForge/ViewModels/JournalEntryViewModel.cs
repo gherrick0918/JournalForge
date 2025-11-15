@@ -126,9 +126,14 @@ public class JournalEntryViewModel : BaseViewModel
 
     public async Task LoadEntryAsync(string entryId)
     {
+        System.Diagnostics.Debug.WriteLine($"JournalEntryViewModel.LoadEntryAsync - Starting to load entry with ID: {entryId}");
+        
         var entry = await _journalService.GetEntryByIdAsync(entryId);
+        
         if (entry != null)
         {
+            System.Diagnostics.Debug.WriteLine($"JournalEntryViewModel.LoadEntryAsync - Entry found: {entry.Title}, Messages: {entry.ConversationMessages.Count}");
+            
             _currentEntry = entry;
             Title = "View Entry";
             IsViewMode = true;
@@ -140,8 +145,16 @@ public class JournalEntryViewModel : BaseViewModel
                 ConversationMessages.Add(message);
             }
             
+            System.Diagnostics.Debug.WriteLine($"JournalEntryViewModel.LoadEntryAsync - Loaded {ConversationMessages.Count} messages");
+            
             // Notify property change for EntryTitle after _currentEntry is set
             OnPropertyChanged(nameof(EntryTitle));
+            
+            System.Diagnostics.Debug.WriteLine($"JournalEntryViewModel.LoadEntryAsync - Entry loaded successfully, IsViewMode: {IsViewMode}");
+        }
+        else
+        {
+            System.Diagnostics.Debug.WriteLine($"JournalEntryViewModel.LoadEntryAsync - Entry not found for ID: {entryId}");
         }
     }
 

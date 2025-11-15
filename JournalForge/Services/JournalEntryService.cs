@@ -34,7 +34,25 @@ public class JournalEntryService : IJournalEntryService
 
     public Task<JournalEntry?> GetEntryByIdAsync(string id)
     {
+        System.Diagnostics.Debug.WriteLine($"JournalEntryService.GetEntryByIdAsync - Looking for entry ID: {id}");
+        System.Diagnostics.Debug.WriteLine($"JournalEntryService.GetEntryByIdAsync - Total entries in memory: {_entries.Count}");
+        
         var entry = _entries.FirstOrDefault(e => e.Id == id);
+        
+        if (entry != null)
+        {
+            System.Diagnostics.Debug.WriteLine($"JournalEntryService.GetEntryByIdAsync - Entry found: {entry.Title}");
+        }
+        else
+        {
+            System.Diagnostics.Debug.WriteLine($"JournalEntryService.GetEntryByIdAsync - Entry not found");
+            // Log all entry IDs for debugging
+            foreach (var e in _entries)
+            {
+                System.Diagnostics.Debug.WriteLine($"  Available entry ID: {e.Id}, Title: {e.Title}");
+            }
+        }
+        
         return Task.FromResult(entry);
     }
 
