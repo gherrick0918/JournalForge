@@ -21,6 +21,9 @@ public partial class JournalEntryPage : ContentPage
 		
 		// Subscribe to property changes
 		_viewModel.PropertyChanged += OnViewModelPropertyChanged;
+		
+		// Subscribe to conversation updates for auto-scroll
+		_viewModel.ConversationMessages.CollectionChanged += OnConversationMessagesChanged;
 	}
 
 	public string? EntryId 
@@ -90,6 +93,17 @@ public partial class JournalEntryPage : ContentPage
 			{
 				ToolbarItems.Add(_saveToolbarItem);
 			}
+		}
+	}
+	
+	private async void OnConversationMessagesChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+	{
+		// When new messages are added, scroll to the bottom
+		if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+		{
+			// Small delay to allow UI to update before scrolling
+			await Task.Delay(100);
+			await ConversationScrollView.ScrollToAsync(0, double.MaxValue, animated: true);
 		}
 	}
 }

@@ -6,8 +6,9 @@ public interface IAIService
 {
     Task<string> GenerateDailyPromptAsync();
     Task<string> GenerateProbingQuestionAsync(string entryContent);
+    Task<string> GenerateProbingQuestionAsync(List<Models.ConversationMessage> conversationHistory);
     Task<string> SuggestEntryEndingAsync(string entryContent);
-    Task<List<string>> GetDailyInsightsAsync(List<JournalEntry> recentEntries);
+    Task<List<string>> GetDailyInsightsAsync(List<Models.JournalEntry> recentEntries);
 }
 
 public class AIService : IAIService
@@ -154,6 +155,18 @@ public class AIService : IAIService
         }
         
         return Task.FromResult(question);
+    }
+
+    public Task<string> GenerateProbingQuestionAsync(List<Models.ConversationMessage> conversationHistory)
+    {
+        // For fallback service, just use the last user message
+        var lastUserMessage = conversationHistory.LastOrDefault(m => m.Sender == "User");
+        if (lastUserMessage != null)
+        {
+            return GenerateProbingQuestionAsync(lastUserMessage.Content);
+        }
+        
+        return Task.FromResult(_probingQuestions[_random.Next(_probingQuestions.Count)]);
     }
 
     public Task<string> SuggestEntryEndingAsync(string entryContent)

@@ -84,6 +84,35 @@ Example good responses:
         }
     }
 
+    public async Task<string> GenerateProbingQuestionAsync(List<Models.ConversationMessage> conversationHistory)
+    {
+        if (!IsConfigured)
+        {
+            return await _fallbackService.GenerateProbingQuestionAsync(conversationHistory);
+        }
+
+        try
+        {
+            var systemPrompt = @"You are a warm, empathetic journaling companion having a natural conversation. 
+Respond conversationally with genuine interest and empathy. Your responses should feel like a supportive friend, not a therapist or interviewer.
+- Acknowledge what they shared before asking a question
+- Match their emotional tone (if they're excited, be enthusiastic; if they're struggling, be gentle)
+- Keep responses natural and flowing, 1-3 sentences total
+- Ask follow-up questions that show you're really listening and building on the conversation
+- Vary your responses - don't repeat yourself or ask similar questions
+- Reference earlier parts of the conversation when relevant
+- Avoid formulaic patterns like always ending with a single question
+IMPORTANT: Keep track of the full conversation. Don't repeat questions or responses you've already given.";
+            
+            var response = await CallOpenAIWithHistoryAsync(systemPrompt, conversationHistory);
+            return response ?? await _fallbackService.GenerateProbingQuestionAsync(conversationHistory);
+        }
+        catch
+        {
+            return await _fallbackService.GenerateProbingQuestionAsync(conversationHistory);
+        }
+    }
+
     public async Task<string> SuggestEntryEndingAsync(string entryContent)
     {
         if (!IsConfigured)
@@ -114,23 +143,73 @@ Example good responses:
 
         try
         {
-            var entrySummary = string.Join("\n", recentEntries.Select((e, i) => 
-                $"Entry {i + 1} ({e.CreatedDate:MMM dd}): {e.Title}"));
+            // Build comprehensive entry summary with conversation context
+            var entrySummary = new StringBuilder();
+            foreach (var (entry, index) in recentEntries.Select((e, i) => (e, i)))
+            {
+                entrySummary.AppendLine($"\nEntry {index + 1} ({entry.CreatedDate:MMM dd, yyyy}):");
+                entrySummary.AppendLine($"Title: {entry.Title}");
+                
+                // Include conversation exchanges for richer context
+                if (entry.ConversationMessages.Any())
+                {
+                    var userMessages = entry.ConversationMessages.Where(m => m.Sender == "User").ToList();
+                    entrySummary.AppendLine($"Conversation depth: {userMessages.Count} exchanges");
+                    
+                    // Include first and last user messages for context
+                    if (userMessages.Count > 0)
+                    {
+                        var firstMsg = userMessages.First().Content;
+                        entrySummary.AppendLine($"Opening: {(firstMsg.Length > 100 ? firstMsg.Substring(0, 97) + "..." : firstMsg)}");
+                        
+                        if (userMessages.Count > 1)
+                        {
+                            var lastMsg = userMessages.Last().Content;
+                            entrySummary.AppendLine($"Closing: {(lastMsg.Length > 100 ? lastMsg.Substring(0, 97) + "..." : lastMsg)}");
+                        }
+                    }
+                }
+            }
             
-            var systemPrompt = "You are a thoughtful journaling companion. Based on recent journal entries, provide 3-4 brief insights about their journaling patterns, growth, or themes. Each insight should be one sentence. Use encouraging language and RPG/fantasy themed emojis (⚔️📜🔮⏰📖🔥).";
-            var userPrompt = $"Recent entries:\n{entrySummary}\n\nProvide insights about their journaling journey.";
+            var systemPrompt = @"You are a thoughtful journaling companion analyzing someone's recent journal entries. 
+Based on their entries, provide 3-5 meaningful, personalized insights about:
+- Patterns or themes in their reflections
+- Growth or progress you notice
+- Emotional journey or shifts
+- Depth of self-reflection
+- Consistency and engagement
+
+Each insight should be:
+- One concise sentence (max 15 words)
+- Personal and specific to their entries
+- Encouraging and supportive in tone
+- Use RPG/fantasy themed emojis (⚔️📜🔮⏰📖🔥💭🌟)
+- Varied in focus (don't repeat similar observations)
+
+Example insights:
+- '🔥 Your 5-day writing streak shows real commitment to self-discovery!'
+- '💭 I notice you're exploring work-life balance themes deeply.'
+- '⚔️ You're tackling challenging emotions with courage and honesty.'
+- '🌟 Your reflections are becoming more nuanced and detailed.'";
             
-            var response = await CallOpenAIAsync(systemPrompt, userPrompt);
+            var userPrompt = $"Recent journal entries:\n{entrySummary}\n\nProvide 3-5 personalized insights about their journaling journey.";
+            
+            var response = await CallOpenAIAsync(systemPrompt, userPrompt, maxTokens: 250);
             
             if (response != null)
             {
                 // Parse multi-line response into list
                 var insights = response.Split('\n', StringSplitOptions.RemoveEmptyEntries)
                     .Select(s => s.Trim())
-                    .Where(s => !string.IsNullOrWhiteSpace(s))
+                    .Where(s => !string.IsNullOrWhiteSpace(s) && 
+                               (s.Contains('•') || s.Contains('-') || 
+                                s.Any(c => char.IsDigit(c) && c <= '9')))
+                    .Select(s => s.TrimStart('•', '-', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', ' '))
+                    .Where(s => s.Length > 10) // Filter out too-short lines
+                    .Take(5)
                     .ToList();
                 
-                if (insights.Count > 0)
+                if (insights.Count >= 3)
                 {
                     return insights;
                 }
@@ -144,7 +223,7 @@ Example good responses:
         }
     }
 
-    private async Task<string?> CallOpenAIAsync(string systemPrompt, string userPrompt)
+    private async Task<string?> CallOpenAIAsync(string systemPrompt, string userPrompt, int maxTokens = 150)
     {
         var requestBody = new
         {
@@ -155,7 +234,52 @@ Example good responses:
                 new { role = "user", content = userPrompt }
             },
             temperature = 0.7,
-            max_tokens = 150
+            max_tokens = maxTokens
+        };
+
+        var json = JsonSerializer.Serialize(requestBody);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var response = await _httpClient.PostAsync("chat/completions", content);
+        
+        if (!response.IsSuccessStatusCode)
+        {
+            return null;
+        }
+
+        var responseJson = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<JsonDocument>(responseJson);
+        
+        return result?.RootElement
+            .GetProperty("choices")[0]
+            .GetProperty("message")
+            .GetProperty("content")
+            .GetString()?.Trim();
+    }
+
+    private async Task<string?> CallOpenAIWithHistoryAsync(string systemPrompt, List<Models.ConversationMessage> conversationHistory)
+    {
+        // Build the messages array with full conversation history
+        var messages = new List<object>
+        {
+            new { role = "system", content = systemPrompt }
+        };
+        
+        // Add all conversation messages
+        foreach (var msg in conversationHistory)
+        {
+            var role = msg.Sender == "User" ? "user" : "assistant";
+            messages.Add(new { role, content = msg.Content });
+        }
+
+        var requestBody = new
+        {
+            model = _model,
+            messages = messages.ToArray(),
+            temperature = 0.8, // Slightly higher for more varied responses
+            max_tokens = 200,
+            presence_penalty = 0.6, // Discourage repetition
+            frequency_penalty = 0.6  // Discourage using same phrases
         };
 
         var json = JsonSerializer.Serialize(requestBody);

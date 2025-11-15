@@ -28,7 +28,7 @@
         </VerticalStackLayout>
 
         <!-- Conversation Thread -->
-        <ScrollView Grid.Row="1" Padding="20,0">
+        <ScrollView x:Name="ConversationScrollView" Grid.Row="1" Padding="20,0">
             <VerticalStackLayout Spacing="10">
                 <CollectionView ItemsSource="{Binding ConversationMessages}">
                     <CollectionView.ItemTemplate>

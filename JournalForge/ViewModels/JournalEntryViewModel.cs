@@ -239,12 +239,6 @@ public class JournalEntryViewModel : BaseViewModel
         ConversationMessages.Add(userMessage);
         _currentEntry.ConversationMessages.Add(userMessage);
 
-        // Build content from all user messages for context
-        var allUserContent = string.Join(" ", 
-            _currentEntry.ConversationMessages
-                .Where(m => m.Sender == "User")
-                .Select(m => m.Content));
-
         // Clear input
         var messageText = CurrentMessage;
         CurrentMessage = string.Empty;
@@ -253,8 +247,8 @@ public class JournalEntryViewModel : BaseViewModel
         {
             IsBusy = true;
 
-            // Get AI response based on the conversation
-            var aiResponse = await _aiService.GenerateProbingQuestionAsync(allUserContent);
+            // Get AI response based on the full conversation history
+            var aiResponse = await _aiService.GenerateProbingQuestionAsync(_currentEntry.ConversationMessages.ToList());
             AddAIMessage(aiResponse);
         }
         catch (Exception ex)
@@ -284,7 +278,8 @@ public class JournalEntryViewModel : BaseViewModel
         try
         {
             IsBusy = true;
-            var question = await _aiService.GenerateProbingQuestionAsync(allUserContent);
+            // Use full conversation history for better context
+            var question = await _aiService.GenerateProbingQuestionAsync(_currentEntry.ConversationMessages.ToList());
             AddAIMessage(question);
         }
         catch (Exception ex)
