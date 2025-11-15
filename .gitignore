@@ -71,3 +71,5 @@ secrets.json
 # Also ignore any JSON file with "secret" or "key" in the name
 **/*secret*.json
 **/*key*.json
+*.jks
+*.keystore

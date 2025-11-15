@@ -36,6 +36,7 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+		<AndroidSigningKeyStore>journalforge.keystore</AndroidSigningKeyStore>
 	</PropertyGroup>
 
 	<!-- Android-specific configuration to handle build directory issues -->
@@ -60,6 +61,21 @@
 	<!-- Use SdkOnly linking in Release builds for better performance -->
 	<PropertyGroup Condition="'$(Configuration)' == 'Release' AND '$(TargetFramework)' == 'net9.0-android'">
 		<AndroidLinkMode>SdkOnly</AndroidLinkMode>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-android|AnyCPU'">
+	  <AndroidUseAapt2>True</AndroidUseAapt2>
+	  <AndroidCreatePackagePerAbi>False</AndroidCreatePackagePerAbi>
+	  <AndroidPackageFormat>apk</AndroidPackageFormat>
+	  <AndroidKeyStore>True</AndroidKeyStore>
+	  <AndroidSigningStorePass>C9i2r5y8l!</AndroidSigningStorePass>
+	  <AndroidSigningKeyAlias>journalforge</AndroidSigningKeyAlias>
+	  <AndroidSigningKeyPass>C9i2r5y8l!</AndroidSigningKeyPass>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android|AnyCPU'">
+	  <AndroidKeyStore>True</AndroidKeyStore>
+	  <AndroidSigningStorePass>C9i2r5y8l!</AndroidSigningStorePass>
+	  <AndroidSigningKeyAlias>journalforge</AndroidSigningKeyAlias>
+	  <AndroidSigningKeyPass>C9i2r5y8l!</AndroidSigningKeyPass>
 	</PropertyGroup>
 
 	<!-- Target to create Android resource directories before build tasks need them -->
