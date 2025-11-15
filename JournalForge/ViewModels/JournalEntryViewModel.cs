@@ -488,13 +488,21 @@ public class JournalEntryViewModel : BaseViewModel
             }
             else
             {
-                RecordingStatus = "⚠️ No speech detected. Please:\n• Speak louder and closer to the microphone\n• Check if your microphone is working (Settings > Apps > JournalForge > Permissions)\n• Make sure background noise is minimal\n• Try speaking for at least 3-4 seconds\n• On emulator: Ensure host audio input is properly configured";
+                RecordingStatus = "⚠️ No speech detected. Please try the following:\n\n" +
+                                 "• Speak louder and closer to the microphone\n" +
+                                 "• Check microphone permissions (Settings > Apps > JournalForge)\n" +
+                                 "• Ensure minimal background noise\n" +
+                                 "• Speak for at least 3-4 seconds\n\n" +
+                                 "📱 If using an emulator:\n" +
+                                 "• Speech recognition may not work reliably\n" +
+                                 "• Try using a physical device instead\n" +
+                                 "• Or use the keyboard to type your entry";
             }
             
             IsRecording = false;
             
             // Clear status after a longer delay to give user time to see the message
-            await Task.Delay(6000);
+            await Task.Delay(8000);
             RecordingStatus = string.Empty;
         }
         catch (PlatformNotSupportedException)
@@ -507,8 +515,13 @@ public class JournalEntryViewModel : BaseViewModel
         catch (Exception ex)
         {
             IsRecording = false;
-            RecordingStatus = $"❌ Error: {ex.Message}\n\nTips:\n• Check microphone permissions\n• Try restarting the app\n• On emulator: Verify audio input is configured";
-            await Task.Delay(5000);
+            RecordingStatus = $"❌ Error: {ex.Message}\n\n" +
+                             "Troubleshooting:\n" +
+                             "• Check microphone permissions\n" +
+                             "• Try restarting the app\n" +
+                             "• If on emulator, try a physical device\n" +
+                             "• You can also type your entry instead";
+            await Task.Delay(6000);
             RecordingStatus = string.Empty;
         }
     }

@@ -74,7 +74,8 @@
                            TextColor="{StaticResource RPGTextSecondary}"
                            HorizontalOptions="Center"
                            Margin="0,0,0,5"/>
-                    <CollectionView ItemsSource="{Binding RecentEntries}">
+                    <CollectionView ItemsSource="{Binding RecentEntries}"
+                                    SelectionMode="None">
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:JournalEntry">
                                 <Frame BackgroundColor="{StaticResource RPGParchment}"
