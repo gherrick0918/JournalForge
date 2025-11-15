@@ -28,8 +28,10 @@ public partial class JournalEntryPage : ContentPage
 		get => _entryId;
 		set
 		{
+			System.Diagnostics.Debug.WriteLine($"JournalEntryPage.EntryId setter called with value: {value}");
 			_entryId = value;
 			_isNavigatingToEntry = !string.IsNullOrEmpty(value);
+			System.Diagnostics.Debug.WriteLine($"JournalEntryPage.EntryId - _isNavigatingToEntry set to: {_isNavigatingToEntry}");
 		}
 	}
 
@@ -37,14 +39,19 @@ public partial class JournalEntryPage : ContentPage
 	{
 		base.OnAppearing();
 		
+		System.Diagnostics.Debug.WriteLine($"JournalEntryPage.OnAppearing - EntryId: {_entryId}, _isNavigatingToEntry: {_isNavigatingToEntry}");
+		
 		// Load existing entry if EntryId is provided
 		if (_isNavigatingToEntry && !string.IsNullOrEmpty(_entryId))
 		{
+			System.Diagnostics.Debug.WriteLine($"JournalEntryPage.OnAppearing - Loading entry with ID: {_entryId}");
 			await _viewModel.LoadEntryAsync(_entryId);
 			_isNavigatingToEntry = false; // Reset flag after loading
+			System.Diagnostics.Debug.WriteLine($"JournalEntryPage.OnAppearing - Entry loaded successfully");
 		}
 		else if (!_isNavigatingToEntry)
 		{
+			System.Diagnostics.Debug.WriteLine($"JournalEntryPage.OnAppearing - Resetting for new entry");
 			// Reset for a new entry with personalized greeting
 			await _viewModel.ResetForNewEntryAsync();
 		}

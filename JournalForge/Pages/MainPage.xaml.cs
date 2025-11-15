@@ -36,23 +36,31 @@ public partial class MainPage : ContentPage
 		}
 	}
 
-	private async void OnEntrySelected(object sender, SelectionChangedEventArgs e)
+	private async void OnEntryTapped(object sender, TappedEventArgs e)
 	{
-		if (e.CurrentSelection.FirstOrDefault() is JournalEntry selectedEntry)
+		if (e.Parameter is JournalEntry selectedEntry)
 		{
 			try
 			{
-				// Clear the selection first to allow re-selecting the same item
-				((CollectionView)sender).SelectedItem = null;
+				System.Diagnostics.Debug.WriteLine($"MainPage.OnEntryTapped - Tapped entry ID: {selectedEntry.Id}, Title: {selectedEntry.Title}");
 				
 				// Navigate to the entry page with the entry ID
-				await Shell.Current.GoToAsync($"JournalEntryPage?entryId={selectedEntry.Id}");
+				var route = $"JournalEntryPage?entryId={Uri.EscapeDataString(selectedEntry.Id)}";
+				System.Diagnostics.Debug.WriteLine($"MainPage.OnEntryTapped - Navigating to: {route}");
+				await Shell.Current.GoToAsync(route);
+				
+				System.Diagnostics.Debug.WriteLine($"MainPage.OnEntryTapped - Navigation completed successfully");
 			}
 			catch (Exception ex)
 			{
-				System.Diagnostics.Debug.WriteLine($"MainPage.OnEntrySelected navigation error: {ex.Message}");
-				await DisplayAlert("Error", "Unable to open entry. Please try again.", "OK");
+				System.Diagnostics.Debug.WriteLine($"MainPage.OnEntryTapped navigation error: {ex.Message}");
+				System.Diagnostics.Debug.WriteLine($"MainPage.OnEntryTapped stack trace: {ex.StackTrace}");
+				await DisplayAlert("Error", $"Unable to open entry: {ex.Message}", "OK");
 			}
+		}
+		else
+		{
+			System.Diagnostics.Debug.WriteLine($"MainPage.OnEntryTapped - Parameter is not a JournalEntry");
 		}
 	}
 }
