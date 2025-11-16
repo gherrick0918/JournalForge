@@ -468,18 +468,15 @@ public class JournalEntryViewModel : BaseViewModel
             // Start listening with Auto method (will use Intent-based by default for better reliability)
             var transcribedText = await _speechToTextService.ListenAsync(SpeechRecognitionMethod.Auto);
             
-            // Add transcribed text to current message
+            // Add transcribed text directly to conversation
             if (!string.IsNullOrWhiteSpace(transcribedText))
             {
-                if (string.IsNullOrWhiteSpace(CurrentMessage))
-                {
-                    CurrentMessage = transcribedText;
-                }
-                else
-                {
-                    CurrentMessage += " " + transcribedText;
-                }
+                // Set the message and send it directly to the conversation
+                CurrentMessage = transcribedText;
                 RecordingStatus = $"✅ Transcribed: \"{transcribedText.Substring(0, Math.Min(50, transcribedText.Length))}{(transcribedText.Length > 50 ? "..." : "")}\"";
+                
+                // Automatically send the transcribed text to the conversation
+                await SendMessageAsync();
             }
             else
             {
