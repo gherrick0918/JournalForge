@@ -95,7 +95,8 @@ bool IsMethodAvailable(SpeechRecognitionMethod method);
 3. Dialog shows "Speak now..." with animated microphone
 4. User sees real-time audio level feedback
 5. Speech is transcribed and returned to app
-6. Success! Text appears in the message field
+6. Success! Text is automatically added to the conversation
+7. AI responds with a probing question
 
 ### Visual Feedback
 - **Before**: Minimal feedback, just app status text
@@ -139,7 +140,8 @@ if (_speechToTextService.IsMethodAvailable(SpeechRecognitionMethod.IntentBased))
 4. Tap microphone button
 5. Verify Google speech dialog appears
 6. Speak clearly: "This is a test of speech recognition"
-7. Verify text appears in message field
+7. Verify text is automatically added to the conversation
+8. Verify AI responds with a probing question
 
 ### Test Cases
 1. **Happy Path**: Speech recognition works on first try
