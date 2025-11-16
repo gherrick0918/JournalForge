@@ -1,4 +1,5 @@
 using Android.App;
+using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 
@@ -18,5 +19,13 @@ public class MainActivity : MauiAppCompatActivity
             System.Diagnostics.Debug.WriteLine($"MainActivity.OnCreate error: {ex.Message}");
             throw;
         }
+    }
+
+    protected override void OnActivityResult(int requestCode, Result resultCode, Intent? data)
+    {
+        base.OnActivityResult(requestCode, resultCode, data);
+        
+        // Forward to SpeechToTextService for handling
+        Platforms.Android.SpeechToTextService.HandleActivityResult(requestCode, resultCode, data);
     }
 }
