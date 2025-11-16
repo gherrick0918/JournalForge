@@ -463,10 +463,10 @@ public class JournalEntryViewModel : BaseViewModel
             }
 
             IsRecording = true;
-            RecordingStatus = "🎙️ Listening... Speak clearly into your microphone.\nMake sure to speak for at least 2-3 seconds.";
+            RecordingStatus = "🎙️ Starting speech recognition...\nPlease speak when prompted.";
             
-            // Start listening
-            var transcribedText = await _speechToTextService.ListenAsync();
+            // Start listening with Auto method (will use Intent-based by default for better reliability)
+            var transcribedText = await _speechToTextService.ListenAsync(SpeechRecognitionMethod.Auto);
             
             // Add transcribed text to current message
             if (!string.IsNullOrWhiteSpace(transcribedText))
@@ -484,14 +484,14 @@ public class JournalEntryViewModel : BaseViewModel
             else
             {
                 RecordingStatus = "⚠️ No speech detected. Please try the following:\n\n" +
+                                 "• Speak clearly when prompted by the speech dialog\n" +
                                  "• Speak louder and closer to the microphone\n" +
-                                 "• Check microphone permissions (Settings > Apps > JournalForge)\n" +
                                  "• Ensure minimal background noise\n" +
-                                 "• Speak for at least 3-4 seconds\n\n" +
-                                 "📱 If using an emulator:\n" +
-                                 "• Speech recognition may not work reliably\n" +
-                                 "• Try using a physical device instead\n" +
-                                 "• Or use the keyboard to type your entry";
+                                 "• Check microphone permissions (Settings > Apps > JournalForge)\n\n" +
+                                 "📱 Troubleshooting:\n" +
+                                 "• Try tapping the microphone button again\n" +
+                                 "• Restart the app if the issue persists\n" +
+                                 "• You can also type your entry using the keyboard";
             }
             
             IsRecording = false;
@@ -514,7 +514,7 @@ public class JournalEntryViewModel : BaseViewModel
                              "Troubleshooting:\n" +
                              "• Check microphone permissions\n" +
                              "• Try restarting the app\n" +
-                             "• If on emulator, try a physical device\n" +
+                             "• Ensure Google app is updated (for speech recognition)\n" +
                              "• You can also type your entry instead";
             await Task.Delay(6000);
             RecordingStatus = string.Empty;

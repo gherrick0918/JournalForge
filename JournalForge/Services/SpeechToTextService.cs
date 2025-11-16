@@ -8,7 +8,7 @@ public class SpeechToTextService : ISpeechToTextService
         return Task.FromResult(false);
     }
 
-    public Task<string> ListenAsync()
+    public Task<string> ListenAsync(SpeechRecognitionMethod method = SpeechRecognitionMethod.Auto)
     {
         throw new PlatformNotSupportedException("Speech-to-text is not supported on this platform.");
     }
@@ -16,6 +16,11 @@ public class SpeechToTextService : ISpeechToTextService
     public void StopListening()
     {
         // No-op for unsupported platforms
+    }
+
+    public bool IsMethodAvailable(SpeechRecognitionMethod method)
+    {
+        return false;
     }
 
     public void Dispose()

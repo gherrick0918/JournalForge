@@ -150,8 +150,8 @@ dotnet build -t:Run -f net9.0-ios
 ## Future Enhancements
 
 ### Planned Features
-1. **Voice Integration**: Implement actual speech-to-text for vocal dictation
-2. **AI Integration**: Connect to real AI service (OpenAI, Azure AI, etc.)
+1. ~~**Voice Integration**: Implement actual speech-to-text for vocal dictation~~ ✅ **COMPLETED**
+2. ~~**AI Integration**: Connect to real AI service (OpenAI, Azure AI, etc.)~~ ✅ **COMPLETED**
 3. **Data Persistence**: Add local database (SQLite) for storing entries
 4. **Export/Backup**: Allow exporting entries to PDF or cloud storage
 5. **Tags & Search**: Add tagging system and search functionality
@@ -160,6 +160,7 @@ dotnet build -t:Run -f net9.0-ios
 8. **Themes**: Additional theme options (dark mode, other RPG styles)
 9. **Media Attachments**: Support for images and audio recordings
 10. **Cloud Sync**: Multi-device synchronization
+11. **Enhanced Voice Features**: Offline mode, multi-language support, custom vocabulary
 
 ### Technical Improvements
 - Unit tests for ViewModels and Services
@@ -171,11 +172,19 @@ dotnet build -t:Run -f net9.0-ios
 ## Development Notes
 
 ### Voice Recording
-The current implementation includes UI for voice recording but uses placeholder methods. To implement:
-1. Use platform-specific audio recording APIs
-2. Integrate speech-to-text service
-3. Store audio files locally
-4. Link recordings to journal entries
+✅ **Speech-to-Text Implemented!** The app now supports voice dictation with multiple recognition methods:
+- **Intent-Based Recognition (Primary)**: Uses Google's speech UI for maximum reliability
+- **Service-Based Recognition (Fallback)**: Background recognition without UI
+- **Auto Selection**: Automatically chooses the best available method
+- Works on Android devices with Google services
+- Requires microphone permission and internet connection
+- 📘 See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) if experiencing issues
+
+Future enhancements:
+1. Offline speech recognition
+2. Support for additional languages
+3. Custom vocabulary for better accuracy
+4. Integration with other speech services (Azure, AWS)
 
 ### AI Service
 ✅ **OpenAI Integration Complete!** The app now supports real AI with OpenAI's API:
@@ -197,6 +206,15 @@ Current services store data in memory. To persist:
 2. Create repository pattern
 3. Implement data migration
 4. Add backup/restore functionality
+
+## Troubleshooting
+
+Having issues with speech recognition or other features? Check out our comprehensive [TROUBLESHOOTING.md](TROUBLESHOOTING.md) guide.
+
+Common issues:
+- "No speech detected" error → [See troubleshooting guide](TROUBLESHOOTING.md#no-speech-detected-error)
+- Microphone permission → [See troubleshooting guide](TROUBLESHOOTING.md#check-microphone-permission)
+- Device-specific issues → [See troubleshooting guide](TROUBLESHOOTING.md#device-specific-issues)
 
 ## License
 [Your License Here]
