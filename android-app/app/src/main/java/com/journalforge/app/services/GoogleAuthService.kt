@@ -28,7 +28,7 @@ class GoogleAuthService(private val context: Context) {
     init {
         // Configure Google Sign-In
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken("339764184212-YOUR_CLIENT_ID_HERE.apps.googleusercontent.com") // TODO: Replace with actual Web Client ID from Firebase Console
+            .requestIdToken("339764184212-pnoc61tvah2fdl4fvms20lbnoksesgic.apps.googleusercontent.com")
             .requestEmail()
             .build()
         
