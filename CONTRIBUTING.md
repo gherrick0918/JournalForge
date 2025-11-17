@@ -418,39 +418,34 @@ Any other relevant information
 When adding a new feature:
 
 1. **Model** (if needed)
-   - Add to `Models/` directory
-   - Include properties and basic logic
+   - Add to `models/` directory in android-app
+   - Create Kotlin data classes
 
 2. **Service** (if needed)
-   - Create interface in `Services/`
-   - Implement interface
-   - Register in `MauiProgram.cs`
+   - Create service class in `services/`
+   - Implement business logic
+   - Use dependency injection if needed
 
-3. **ViewModel**
-   - Add to `ViewModels/`
-   - Inherit from `BaseViewModel`
-   - Implement commands and properties
+3. **Activity/Fragment**
+   - Add to `ui/` directory
+   - Create layout XML in `res/layout/`
+   - Implement view logic
 
-4. **View**
-   - Add XAML to `Pages/`
-   - Create code-behind
-   - Wire up to ViewModel
+4. **Navigation**
+   - Update navigation graph if using Navigation Component
+   - Add menu items if needed
 
-5. **Navigation**
-   - Register route in `AppShell.xaml.cs`
-   - Add to Shell if needed
-
-6. **Tests**
-   - Add unit tests for service
-   - Add unit tests for ViewModel
-   - Add integration tests if needed
+5. **Tests**
+   - Add unit tests for services
+   - Add instrumentation tests for UI
+   - Aim for good test coverage
 
 ## Resources
 
 ### Documentation
-- [.NET MAUI Docs](https://docs.microsoft.com/dotnet/maui/)
-- [MVVM Pattern](https://docs.microsoft.com/xamarin/xamarin-forms/enterprise-application-patterns/mvvm)
-- [C# Coding Conventions](https://docs.microsoft.com/dotnet/csharp/fundamentals/coding-style/coding-conventions)
+- [Android Developer Docs](https://developer.android.com/docs)
+- [Kotlin Documentation](https://kotlinlang.org/docs/home.html)
+- [Firebase for Android](https://firebase.google.com/docs/android/setup)
 
 ### Community
 - GitHub Issues for questions
