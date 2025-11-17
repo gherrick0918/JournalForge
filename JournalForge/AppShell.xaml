@@ -56,4 +56,11 @@
             Route="TimeCapsulePage" />
     </FlyoutItem>
 
+    <FlyoutItem Title="Settings" Icon="settings.png">
+        <ShellContent
+            Title="Settings"
+            ContentTemplate="{DataTemplate local:SettingsPage}"
+            Route="SettingsPage" />
+    </FlyoutItem>
+
 </Shell>
