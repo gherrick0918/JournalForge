@@ -232,40 +232,47 @@ class ExampleService(private val context: Context) {
     android:text="@string/btn_save" />
 ```
 
-#### Bindings
+#### View Binding
 
-```xaml
-<!-- One-way binding (default) -->
-<Label Text="{Binding Title}" />
-
-<!-- Two-way binding for inputs -->
-<Entry Text="{Binding Title, Mode=TwoWay}" />
-
-<!-- With value converter -->
-<Label IsVisible="{Binding HasContent, Converter={StaticResource BoolConverter}}" />
+```kotlin
+// Use ViewBinding for type-safe access to views
+class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        
+        // Access views safely
+        binding.titleText.text = viewModel.title
+        binding.saveButton.setOnClickListener {
+            viewModel.saveEntry()
+        }
+    }
+}
 ```
 
 ### Comments
 
-```csharp
+```kotlin
 // Use comments sparingly - code should be self-documenting
 
 // Good: Explains WHY
 // Using exponential backoff to prevent API rate limiting
-await Task.Delay(delay * 2);
+delay(delay * 2)
 
 // Bad: Explains WHAT (obvious from code)
 // Increment counter by 1
-counter++;
+counter++
 
-// Use XML comments for public APIs
-/// <summary>
-/// Saves a journal entry to storage.
-/// </summary>
-/// <param name="entry">The entry to save.</param>
-/// <returns>True if successful, false otherwise.</returns>
-public async Task<bool> SaveEntryAsync(JournalEntry entry)
-{
+// Use KDoc for public APIs
+/**
+ * Saves a journal entry to storage.
+ * @param entry The entry to save
+ * @return True if successful, false otherwise
+ */
+suspend fun saveEntry(entry: JournalEntry): Boolean {
     // Implementation
 }
 ```
@@ -274,23 +281,21 @@ public async Task<bool> SaveEntryAsync(JournalEntry entry)
 
 ### Unit Tests
 
-```csharp
-[Fact]
-public async Task SaveEntry_ValidEntry_ReturnsTrue()
-{
+```kotlin
+@Test
+fun `saveEntry with valid entry returns true`() = runTest {
     // Arrange
-    var service = new JournalEntryService();
-    var entry = new JournalEntry 
-    { 
-        Title = "Test",
-        Content = "Content" 
-    };
+    val service = JournalEntryService()
+    val entry = JournalEntry(
+        title = "Test",
+        content = "Content"
+    )
     
     // Act
-    var result = await service.SaveEntryAsync(entry);
+    val result = service.saveEntry(entry)
     
     // Assert
-    Assert.True(result);
+    assertTrue(result)
 }
 ```
 
