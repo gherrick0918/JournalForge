@@ -12,13 +12,13 @@ This is the native Android version of JournalForge, migrated from .NET MAUI for 
 
 ## Requirements
 
-- **Android Studio Hedgehog or later** (Required for building Android apps)
+- **Android Studio Hedgehog or later** (Recommended for development)
 - Android SDK 26+ (minimum)
-- Android SDK 34+ (target)  
-- JDK 8+
-- Gradle 7.0+ (included with Android Studio)
+- Android SDK 36 (target)  
+- JDK 17+ (recommended)
+- Gradle 8.5 (included via Gradle wrapper)
 
-**Note**: This project requires Android Studio to build. The Android Gradle Plugin is not available in standard Gradle installations.
+**Note**: This project uses the Gradle wrapper to ensure consistent builds across all environments. You don't need to install Gradle separately.
 
 ## Firebase Setup
 
