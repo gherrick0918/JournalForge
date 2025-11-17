@@ -29,24 +29,24 @@ Thank you for your interest in contributing to JournalForge! This document provi
 
 ### Prerequisites
 1. Read [GETTING_STARTED.md](GETTING_STARTED.md) for setup
-2. Review [DESIGN.md](DESIGN.md) for architecture
-3. Check [FEATURES.md](FEATURES.md) for feature details
+2. Review [README.md](README.md) for architecture and features
+3. Familiarize yourself with Kotlin and Android development
 
 ### Setting Up Development Environment
 
 ```bash
 # Clone repository
 git clone https://github.com/gherrick0918/JournalForge.git
-cd JournalForge
+cd JournalForge/android-app
 
 # Create a new branch
 git checkout -b feature/your-feature-name
 
-# Install dependencies
-dotnet restore
+# Open in Android Studio
+# File → Open → Select android-app directory
 
-# Build and run
-dotnet build
+# Build the project
+./gradlew assembleDebug
 ```
 
 ## Development Process
@@ -78,8 +78,8 @@ dotnet build
    - Update documentation
 
 4. **Test**
-   - Run unit tests
-   - Test on multiple platforms
+   - Run unit tests: `./gradlew test`
+   - Test on Android emulator or device
    - Check for regressions
 
 5. **Commit**
@@ -94,187 +94,185 @@ dotnet build
    ```
 
 7. **Pull Request**
-   - Open PR to `develop` branch
+   - Open PR to `main` branch
    - Fill out PR template
    - Request review
 
 ## Coding Standards
 
-### C# Style Guide
+### Kotlin Style Guide
 
 #### Naming Conventions
 
-```csharp
-// Classes, Methods, Properties: PascalCase
-public class JournalEntry { }
-public void SaveEntry() { }
-public string Title { get; set; }
+```kotlin
+// Classes, Interfaces: PascalCase
+class JournalEntry { }
+interface AIService { }
 
-// Private fields: _camelCase with underscore
-private string _entryId;
+// Functions, Properties: camelCase
+fun saveEntry() { }
+val title: String = ""
 
-// Local variables, parameters: camelCase
-public void Method(string parameterName)
-{
-    var localVariable = "value";
-}
+// Private properties: camelCase (no underscore)
+private val entryId: String = ""
 
-// Constants: UPPER_CASE
-private const string MAX_LENGTH = 1000;
+// Constants: UPPER_SNAKE_CASE
+private const val MAX_LENGTH = 1000
 
-// Interfaces: I + PascalCase
-public interface IAIService { }
+// Package names: lowercase
+package com.journalforge.app.services
 ```
 
 #### Code Organization
 
-```csharp
-// 1. Usings (sorted alphabetically)
-using System;
-using System.Collections.Generic;
-using JournalForge.Models;
+```kotlin
+// 1. Package declaration
+package com.journalforge.app.services
 
-// 2. Namespace
-namespace JournalForge.Services;
+// 2. Imports (sorted)
+import android.content.Context
+import com.google.firebase.auth.FirebaseAuth
+import com.journalforge.app.models.JournalEntry
 
 // 3. Class with proper ordering
-public class ExampleService
-{
-    // Private fields
-    private readonly IAIService _aiService;
+class ExampleService(private val context: Context) {
     
-    // Constructor
-    public ExampleService(IAIService aiService)
-    {
-        _aiService = aiService;
+    // Companion object (if needed)
+    companion object {
+        private const val TAG = "ExampleService"
     }
     
-    // Public properties
-    public string Name { get; set; }
+    // Properties
+    private val firebaseAuth = FirebaseAuth.getInstance()
+    
+    // Init block
+    init {
+        // Initialization code
+    }
     
     // Public methods
-    public async Task DoSomethingAsync()
-    {
-        // Implementation
-    }
+    fun publicMethod() { }
     
     // Private methods
-    private void HelperMethod()
-    {
-        // Implementation
-    }
+    private fun privateMethod() { }
 }
 ```
 
 #### Best Practices
 
-1. **Async/Await**
-   ```csharp
+1. **Coroutines for Async**
+   ```kotlin
    // Good
-   public async Task<JournalEntry> GetEntryAsync(string id)
-   {
-       return await _service.FetchAsync(id);
+   suspend fun getEntry(id: String): JournalEntry {
+       return withContext(Dispatchers.IO) {
+           service.fetch(id)
+       }
    }
    
-   // Bad
-   public JournalEntry GetEntry(string id)
-   {
-       return _service.FetchAsync(id).Result; // Blocks thread
+   // Usage in Activity/Fragment
+   lifecycleScope.launch {
+       val entry = viewModel.getEntry(id)
    }
    ```
 
 2. **Null Safety**
-   ```csharp
+   ```kotlin
    // Good
-   public string GetTitle(JournalEntry? entry)
-   {
-       return entry?.Title ?? "Untitled";
+   fun getTitle(entry: JournalEntry?): String {
+       return entry?.title ?: "Untitled"
    }
    
-   // Bad
-   public string GetTitle(JournalEntry entry)
-   {
-       return entry.Title; // Might throw NullReferenceException
-   }
-   ```
-
-3. **LINQ Usage**
-   ```csharp
-   // Good
-   var recent = entries
-       .OrderByDescending(e => e.CreatedDate)
-       .Take(10)
-       .ToList();
+   // Use safe calls
+   val email = user?.email
    
-   // Bad
-   var recent = new List<JournalEntry>();
-   foreach (var entry in entries)
-   {
-       if (recent.Count < 10)
-           recent.Add(entry);
-   }
+   // Use non-null assertion only when certain
+   val name = user!!.name  // Use sparingly
    ```
 
-### XAML Style Guide
+3. **Collections**
+   ```kotlin
+   // Good - Use Kotlin collection extensions
+   val recent = entries
+       .sortedByDescending { it.createdDate }
+       .take(10)
+   
+   // Use immutable collections when possible
+   val list: List<String> = listOf("a", "b", "c")
+   ```
+
+### XML Layout Style Guide
 
 #### Structure
 
-```xaml
+```xml
 <!-- Good structure -->
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="JournalForge.Pages.ExamplePage"
-             Title="Example">
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
     
     <!-- Content here -->
     
-</ContentPage>
+</androidx.constraintlayout.widget.ConstraintLayout>
 ```
 
 #### Naming
 
-```xaml
-<!-- Use x:Name for elements you need to reference -->
-<Entry x:Name="TitleEntry" />
+```xml
+<!-- Use snake_case for IDs -->
+<EditText
+    android:id="@+id/title_entry"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" />
 
 <!-- Use descriptive names -->
-<Button x:Name="SaveButton" Text="Save" />
+<Button
+    android:id="@+id/btn_save"
+    android:text="@string/btn_save" />
 ```
 
-#### Bindings
+#### View Binding
 
-```xaml
-<!-- One-way binding (default) -->
-<Label Text="{Binding Title}" />
-
-<!-- Two-way binding for inputs -->
-<Entry Text="{Binding Title, Mode=TwoWay}" />
-
-<!-- With value converter -->
-<Label IsVisible="{Binding HasContent, Converter={StaticResource BoolConverter}}" />
+```kotlin
+// Use ViewBinding for type-safe access to views
+class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        
+        // Access views safely
+        binding.titleText.text = viewModel.title
+        binding.saveButton.setOnClickListener {
+            viewModel.saveEntry()
+        }
+    }
+}
 ```
 
 ### Comments
 
-```csharp
+```kotlin
 // Use comments sparingly - code should be self-documenting
 
 // Good: Explains WHY
 // Using exponential backoff to prevent API rate limiting
-await Task.Delay(delay * 2);
+delay(delay * 2)
 
 // Bad: Explains WHAT (obvious from code)
 // Increment counter by 1
-counter++;
+counter++
 
-// Use XML comments for public APIs
-/// <summary>
-/// Saves a journal entry to storage.
-/// </summary>
-/// <param name="entry">The entry to save.</param>
-/// <returns>True if successful, false otherwise.</returns>
-public async Task<bool> SaveEntryAsync(JournalEntry entry)
-{
+// Use KDoc for public APIs
+/**
+ * Saves a journal entry to storage.
+ * @param entry The entry to save
+ * @return True if successful, false otherwise
+ */
+suspend fun saveEntry(entry: JournalEntry): Boolean {
     // Implementation
 }
 ```
@@ -283,23 +281,21 @@ public async Task<bool> SaveEntryAsync(JournalEntry entry)
 
 ### Unit Tests
 
-```csharp
-[Fact]
-public async Task SaveEntry_ValidEntry_ReturnsTrue()
-{
+```kotlin
+@Test
+fun `saveEntry with valid entry returns true`() = runTest {
     // Arrange
-    var service = new JournalEntryService();
-    var entry = new JournalEntry 
-    { 
-        Title = "Test",
-        Content = "Content" 
-    };
+    val service = JournalEntryService()
+    val entry = JournalEntry(
+        title = "Test",
+        content = "Content"
+    )
     
     // Act
-    var result = await service.SaveEntryAsync(entry);
+    val result = service.saveEntry(entry)
     
     // Assert
-    Assert.True(result);
+    assertTrue(result)
 }
 ```
 
@@ -427,39 +423,34 @@ Any other relevant information
 When adding a new feature:
 
 1. **Model** (if needed)
-   - Add to `Models/` directory
-   - Include properties and basic logic
+   - Add to `models/` directory in android-app
+   - Create Kotlin data classes
 
 2. **Service** (if needed)
-   - Create interface in `Services/`
-   - Implement interface
-   - Register in `MauiProgram.cs`
+   - Create service class in `services/`
+   - Implement business logic
+   - Use dependency injection if needed
 
-3. **ViewModel**
-   - Add to `ViewModels/`
-   - Inherit from `BaseViewModel`
-   - Implement commands and properties
+3. **Activity/Fragment**
+   - Add to `ui/` directory
+   - Create layout XML in `res/layout/`
+   - Implement view logic
 
-4. **View**
-   - Add XAML to `Pages/`
-   - Create code-behind
-   - Wire up to ViewModel
+4. **Navigation**
+   - Update navigation graph if using Navigation Component
+   - Add menu items if needed
 
-5. **Navigation**
-   - Register route in `AppShell.xaml.cs`
-   - Add to Shell if needed
-
-6. **Tests**
-   - Add unit tests for service
-   - Add unit tests for ViewModel
-   - Add integration tests if needed
+5. **Tests**
+   - Add unit tests for services
+   - Add instrumentation tests for UI
+   - Aim for good test coverage
 
 ## Resources
 
 ### Documentation
-- [.NET MAUI Docs](https://docs.microsoft.com/dotnet/maui/)
-- [MVVM Pattern](https://docs.microsoft.com/xamarin/xamarin-forms/enterprise-application-patterns/mvvm)
-- [C# Coding Conventions](https://docs.microsoft.com/dotnet/csharp/fundamentals/coding-style/coding-conventions)
+- [Android Developer Docs](https://developer.android.com/docs)
+- [Kotlin Documentation](https://kotlinlang.org/docs/home.html)
+- [Firebase for Android](https://firebase.google.com/docs/android/setup)
 
 ### Community
 - GitHub Issues for questions

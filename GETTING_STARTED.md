@@ -1,40 +1,27 @@
 # Getting Started with JournalForge
 
-This guide will help you set up and run the JournalForge MAUI application.
+This guide will help you set up and run the JournalForge native Android application.
 
 ## Prerequisites
 
 ### Required Software
 
-1. **.NET 9.0 SDK** (or later)
-   - Download from: https://dotnet.microsoft.com/download
-   - Verify installation: `dotnet --version`
+1. **Android Studio** (latest version recommended)
+   - Download from: https://developer.android.com/studio
+   - Includes Android SDK and build tools
 
-2. **.NET MAUI Workload**
-   ```bash
-   dotnet workload install maui
-   ```
+2. **Java Development Kit (JDK) 17** or later
+   - Usually bundled with Android Studio
+   - Verify installation: `java -version`
 
-3. **IDE (Choose one)**
-   - Visual Studio 2022 (17.8 or later) with MAUI workload
-   - Visual Studio Code with C# Dev Kit extension
-   - JetBrains Rider (2023.3 or later)
+3. **Git** (for cloning the repository)
+   - Download from: https://git-scm.com/
 
-### Platform-Specific Requirements
-
-#### For Android Development
-- Android SDK (API 21 or higher)
-- Android Emulator or physical Android device
-- Java Development Kit (JDK) 11 or later
-
-#### For iOS Development (macOS only)
-- Xcode 15 or later
-- iOS Simulator or physical iOS device
-- Apple Developer account (for device testing)
-
-#### For Windows Development
-- Windows 10 version 1809 or higher
-- Windows App SDK
+### Android SDK Requirements
+- Minimum SDK: API 26 (Android 8.0)
+- Target SDK: API 36 (Android 14+)
+- Build Tools: Latest version
+- Android Emulator or physical Android device for testing
 
 ## Setup Instructions
 
@@ -42,184 +29,197 @@ This guide will help you set up and run the JournalForge MAUI application.
 
 ```bash
 git clone https://github.com/gherrick0918/JournalForge.git
-cd JournalForge
+cd JournalForge/android-app
 ```
 
-### 2. Install Dependencies
+### 2. Open in Android Studio
+
+1. Launch Android Studio
+2. Select **File → Open**
+3. Navigate to the `android-app` directory
+4. Click **OK**
+5. Wait for Gradle sync to complete
+
+### 3. Install Dependencies
+
+Dependencies are managed by Gradle and will be automatically downloaded during sync.
 
 ```bash
 # Restore NuGet packages
 dotnet restore
+# Verify Gradle sync completed
+./gradlew tasks
 ```
 
-### 3. Add Required Fonts (Optional)
+### 4. Configure Firebase (for Google Sign-In)
 
-The app uses OpenSans fonts. To include them:
-
-1. Download OpenSans fonts from [Google Fonts](https://fonts.google.com/specimen/Open+Sans)
-2. Place the following files in `JournalForge/Resources/Fonts/`:
-   - `OpenSans-Regular.ttf`
-   - `OpenSans-Semibold.ttf`
-
-If fonts are not added, the app will use system default fonts.
-
-### 4. Verify Setup
-
-Check that MAUI is properly installed:
-
-```bash
-dotnet workload list
-```
-
-You should see `maui` in the installed workloads list.
+See the [README.md](README.md#setting-up-google-sign-in) for detailed instructions on setting up Google Sign-In.
 
 ## Running the Application
 
-### Using .NET CLI
+### Using Android Studio (Recommended)
 
-#### Android
+1. Click the **Run** button (green play icon) or press `Shift+F10`
+2. Select a device or emulator from the dropdown
+3. Wait for the app to build and install
+4. The app will launch automatically
+
+### Using Gradle Command Line
+
+#### Build Debug APK
 ```bash
-# Build for Android
-dotnet build -t:Run -f net9.0-android
-
-# Or specify a device
-dotnet build -t:Run -f net9.0-android -p:AndroidEmulator="pixel_5"
+./gradlew assembleDebug
 ```
 
-#### iOS (macOS only)
-```bash
-# Build for iOS simulator
-dotnet build -t:Run -f net9.0-ios
+The APK will be in `app/build/outputs/apk/debug/app-debug.apk`
 
-# Build for iOS device
-dotnet build -t:Run -f net9.0-ios -p:RuntimeIdentifier=ios-arm64
+#### Install on Device
+```bash
+./gradlew installDebug
 ```
 
-#### Windows
+#### Build and Run
 ```bash
-# Build for Windows
-dotnet build -t:Run -f net9.0-windows10.0.19041.0
+./gradlew installDebug
+adb shell am start -n com.journalforge.app/.ui.MainActivity
 ```
 
-### Using Visual Studio 2022
+#### Build Release APK (requires keystore)
+```bash
+./gradlew assembleRelease
+```
 
-1. Open `JournalForge.sln`
-2. Select target framework from dropdown (Android, iOS, Windows)
-3. Select device/emulator
-4. Press F5 or click "Start Debugging"
+### Using an Emulator
 
-### Using Visual Studio Code
-
-1. Open the project folder
-2. Install recommended extensions (C# Dev Kit)
-3. Open Command Palette (Ctrl+Shift+P / Cmd+Shift+P)
-4. Run "MAUI: Pick Android Device"
-5. Press F5 to start debugging
+1. In Android Studio, go to **Tools → Device Manager**
+2. Click **Create Device**
+3. Select a device definition (e.g., Pixel 5)
+4. Select a system image (API 26 or higher)
+5. Click **Finish**
+6. Run the app with the new emulator selected
 
 ## Project Structure Overview
 
 ```
-JournalForge/
-├── Models/              # Data models for the application
-├── Services/            # Business logic and data services
-├── ViewModels/          # MVVM view models
-├── Pages/               # XAML UI pages
-├── Converters/          # Data binding converters
-└── Resources/           # App resources (styles, images, fonts)
+android-app/
+├── app/
+│   ├── src/main/
+│   │   ├── java/com/journalforge/app/
+│   │   │   ├── models/          # Data classes
+│   │   │   ├── services/        # Business logic
+│   │   │   └── ui/              # Activities and fragments
+│   │   ├── res/
+│   │   │   ├── layout/          # XML layouts
+│   │   │   ├── values/          # Strings, colors, themes
+│   │   │   └── drawable/        # Images and icons
+│   │   └── AndroidManifest.xml  # App configuration
+│   └── build.gradle             # App dependencies
+├── build.gradle                 # Project configuration
+└── settings.gradle              # Module settings
 ```
 
 ## Key Features to Explore
 
-1. **Home Page**: View daily prompts and recent entries
+1. **Main Activity**: View daily prompts and recent entries
 2. **Journal Entry**: Create new entries with AI assistance
-3. **Time Capsule**: Seal entries for future opening
-4. **Voice Dictation**: Placeholder UI for voice recording
-5. **RPG Theme**: Fantasy-themed UI with medieval aesthetics
+3. **History**: View all your journal entries
+4. **Time Capsule**: Seal entries for future opening
+5. **Settings**: Google Sign-In and cloud sync
+6. **RPG Theme**: Fantasy-themed UI with medieval aesthetics
 
 ## Troubleshooting
 
 ### Build Errors
 
-#### "MAUI workload not installed"
-```bash
-dotnet workload install maui
-```
+#### "SDK location not found"
+1. Create `local.properties` in the `android-app` directory
+2. Add: `sdk.dir=/path/to/Android/Sdk`
+   - Windows: `C:\\Users\\YourName\\AppData\\Local\\Android\\Sdk`
+   - macOS: `/Users/YourName/Library/Android/sdk`
+   - Linux: `/home/YourName/Android/Sdk`
 
-#### "Android SDK not found"
-1. Install Android SDK through Android Studio or Visual Studio
-2. Set `ANDROID_HOME` environment variable
-3. Add Android SDK tools to PATH
+#### "Could not resolve dependencies"
+1. Check your internet connection
+2. Try: `./gradlew --refresh-dependencies`
+3. Invalidate caches in Android Studio: **File → Invalidate Caches / Restart**
 
-#### "iOS build failed" (macOS)
+#### "Gradle sync failed"
 1. Open Xcode and accept license agreements
 2. Install Xcode command line tools:
    ```bash
-   xcode-select --install
-   ```
+1. Check Gradle version compatibility
+2. Update Gradle wrapper: `./gradlew wrapper --gradle-version=8.2`
+3. Sync project with Gradle files in Android Studio
 
 ### Runtime Errors
 
-#### "Font not found"
-- This is expected if you haven't added custom fonts
-- The app will use system default fonts
+#### "App crashes on launch"
+- Check Logcat in Android Studio for error messages
+- Look for `AndroidRuntime` or `FATAL EXCEPTION` tags
+- Verify `google-services.json` is present and valid
 
-#### "Service not registered"
-- Ensure all services are registered in `MauiProgram.cs`
-- Check for typos in service/viewmodel names
+#### "Google Sign-In fails"
+- See [README.md](README.md#setting-up-google-sign-in) for configuration
+- Check that SHA-1 fingerprint is registered in Firebase
+- Verify Web Client ID is configured
 
 ### Common Issues
 
-#### Hot Reload not working
-```bash
-# Clean and rebuild
-dotnet clean
-dotnet build
-```
+#### "Could not find google-services.json"
+1. Ensure file is in `android-app/app/` directory
+2. The file should be at the same level as `build.gradle`
+3. Check that google-services plugin is applied in `build.gradle`
 
 #### Android emulator slow
-- Enable hardware acceleration in BIOS
-- Use x86 emulator images on x86 machines
+- Enable hardware acceleration (HAXM on Intel, WHPX on Windows)
+- Use x86_64 system images on x86 machines
 - Increase emulator RAM allocation
+- Consider using a physical device for better performance
 
 ## Development Tips
 
 ### Debugging
 
-1. **Debug Output**: Check the Debug Output window for logs
-2. **Breakpoints**: Set breakpoints in ViewModels and Services
-3. **XAML Live Preview**: Use Hot Reload for UI changes
+1. **Logcat**: View logs in Android Studio's Logcat window
+2. **Breakpoints**: Set breakpoints in Kotlin code for step-through debugging
+3. **Layout Inspector**: Inspect view hierarchy at runtime
 
 ### Testing on Physical Devices
 
-#### Android
-1. Enable Developer Options on your device
-2. Enable USB Debugging
+1. Enable **Developer Options** on your Android device:
+   - Go to **Settings → About Phone**
+   - Tap **Build Number** 7 times
+2. Enable **USB Debugging** in Developer Options
 3. Connect device via USB
 4. Trust the computer on the device
+5. Device should appear in Android Studio's device dropdown
 
-#### iOS (macOS only)
-1. Connect device via USB
-2. Trust the computer on the device
-3. Sign the app with your Apple Developer account
+### Performance Profiling
+
+- Use Android Studio's **Profiler** to monitor CPU, memory, and network usage
+- Check for memory leaks with the Memory Profiler
+- Optimize database queries and API calls
 
 ## Next Steps
 
-1. **Explore the Code**: Review Models, Services, and ViewModels
-2. **Customize the Theme**: Modify colors in `Resources/Styles/Colors.xaml`
-3. **Add Features**: Extend services with database persistence
-4. **Integrate AI**: Connect to OpenAI or other AI services
+1. **Explore the Code**: Review models, services, and activities in `app/src/main/java`
+2. **Customize the Theme**: Modify colors in `res/values/colors.xml`
+3. **Add Features**: Extend services with Firestore integration
+4. **Integrate AI**: Configure OpenAI API key in `AIService.kt`
+5. **Configure Google Sign-In**: Follow the setup guide in [README.md](README.md)
 
 ## Resources
 
-- [.NET MAUI Documentation](https://docs.microsoft.com/dotnet/maui/)
-- [MAUI Community Toolkit](https://github.com/CommunityToolkit/Maui)
-- [MVVM Pattern](https://docs.microsoft.com/xamarin/xamarin-forms/enterprise-application-patterns/mvvm)
+- [Android Developer Documentation](https://developer.android.com/docs)
+- [Kotlin Documentation](https://kotlinlang.org/docs/home.html)
+- [Firebase for Android](https://firebase.google.com/docs/android/setup)
+- [Material Design 3](https://m3.material.io/)
 
 ## Support
 
 For issues or questions:
-1. Check the [README.md](README.md) for architecture details
-2. Review the code comments
+1. Check the [README.md](README.md) for setup details
+2. Review [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 3. Open an issue on GitHub
 
 ---

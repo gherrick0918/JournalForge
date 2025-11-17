@@ -117,7 +117,7 @@ If speech recognition still doesn't work after trying all the above:
 
 #### AI Features Not Working
 - AI features require OpenAI API key (optional)
-- See OPENAI_SETUP.md for configuration
+- Configure your API key in `AIService.kt`
 - App works without AI using fallback responses
 
 ## Getting More Help
