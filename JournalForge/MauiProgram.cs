@@ -37,6 +37,7 @@ public static class MauiProgram
 
 		builder.Services.AddSingleton<Services.ITimeCapsuleService, Services.TimeCapsuleService>();
 		builder.Services.AddSingleton<Services.IJournalEntryService, Services.JournalEntryService>();
+		builder.Services.AddSingleton<Services.IExportService, Services.ExportService>();
 		
 		// Register speech-to-text service (platform-specific)
 #if ANDROID
@@ -48,11 +49,13 @@ public static class MauiProgram
 		// Register view models
 		builder.Services.AddTransient<ViewModels.MainViewModel>();
 		builder.Services.AddTransient<ViewModels.JournalEntryViewModel>();
+		builder.Services.AddTransient<ViewModels.HistoryViewModel>();
 		builder.Services.AddTransient<ViewModels.TimeCapsuleViewModel>();
 
 		// Register pages
 		builder.Services.AddTransient<Pages.MainPage>();
 		builder.Services.AddTransient<Pages.JournalEntryPage>();
+		builder.Services.AddTransient<Pages.HistoryPage>();
 		builder.Services.AddTransient<Pages.TimeCapsulePage>();
 
 #if DEBUG
