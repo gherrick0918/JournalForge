@@ -1,63 +1,233 @@
-# Testing the Android Build Directory Fix
+# Testing JournalForge Android App
 
-This document describes how to test the fix for the XAGR7023 and XARDF7024 Android build errors.
+This document describes how to test the JournalForge Android application.
 
 ## Prerequisites
 
-Ensure you have the .NET MAUI workload installed:
-```bash
-dotnet workload install maui
-```
+- Android Studio (latest version)
+- Android SDK 26 or higher
+- Physical Android device or emulator
+- JDK 17 or higher
 
 ## Testing Steps
 
 ### 1. Clean the Project
 ```bash
-# Remove any existing build artifacts
-dotnet clean
-# Or manually delete obj and bin directories
-rm -rf JournalForge/obj JournalForge/bin
+cd android-app
+
+# Clean build artifacts
+./gradlew clean
+
+# Or manually delete build directories
+rm -rf app/build .gradle
 ```
 
 ### 2. Restore Dependencies
 ```bash
-dotnet restore
+# Gradle will automatically download dependencies during build
+./gradlew dependencies
 ```
 
-### 3. Build for Android
+### 3. Build the App
 ```bash
-# Build the Android target specifically
-dotnet build -f net9.0-android
+# Build debug APK
+./gradlew assembleDebug
+
+# Build release APK (requires keystore)
+./gradlew assembleRelease
 ```
 
-### 4. Verify Success
-The build should complete without the following errors:
-- **XAGR7023**: `System.IO.DirectoryNotFoundException: Could not find a part of the path '...\obj\Debug\net9.0-android\res'`
-- **XARDF7024**: `System.IO.IOException: The directory is not empty`
+### 4. Run Tests
+```bash
+# Run unit tests
+./gradlew test
 
-## What the Fix Does
+# Run instrumentation tests (requires connected device/emulator)
+./gradlew connectedAndroidTest
 
-The changes in `JournalForge.csproj` add:
+# Generate test coverage report
+./gradlew jacocoTestReport
+```
 
-1. **Directory Pre-Creation**: The `CreateAndroidResourceDirectories` target ensures that required directories (`res` and `lp`) exist before Android build tasks try to access them.
+## Manual Testing Checklist
 
-2. **Clean Error Handling**: The `CleanAndroidDirectories` target handles directory cleanup issues by continuing on error, preventing build failures when directories are locked or in use.
+### Basic Functionality
+- [ ] App launches successfully
+- [ ] Main activity displays correctly
+- [ ] Navigation between screens works
+- [ ] Journal entries can be created
+- [ ] Journal entries can be saved
+- [ ] Journal entries can be viewed in history
+- [ ] Entries can be deleted
 
-3. **Resource File Configuration**: The `AndroidResgenFile` property ensures proper resource designer file generation.
+### Google Sign-In
+- [ ] Settings page opens
+- [ ] "Sign In with Google" button is visible
+- [ ] Clicking sign-in opens Google account picker
+- [ ] Selecting account completes authentication
+- [ ] User email displays after sign-in
+- [ ] Sign-out works correctly
+
+### AI Features
+- [ ] Daily prompts display on main page
+- [ ] AI suggestions can be requested
+- [ ] AI conversation appears in journal entry
+
+### Time Capsule
+- [ ] Time capsules can be created
+- [ ] Capsules show sealed status
+- [ ] Future dates can be set
+- [ ] Capsules can be unsealed when ready
+
+### Voice Dictation (Android only)
+- [ ] Microphone permission is requested
+- [ ] Voice recording starts
+- [ ] Speech is transcribed to text
+- [ ] Transcription appears in entry field
+
+## Test on Multiple Devices
+
+Test the app on various configurations:
+
+### Device Types
+- Phone (small screen)
+- Tablet (large screen)
+- Foldable device (if available)
+
+### Android Versions
+- Android 8.0 (API 26) - Minimum supported
+- Android 10 (API 29)
+- Android 12 (API 31)
+- Android 14+ (API 34+) - Latest
+
+### Screen Densities
+- mdpi (160dpi)
+- hdpi (240dpi)
+- xhdpi (320dpi)
+- xxhdpi (480dpi)
+- xxxhdpi (640dpi)
 
 ## Expected Behavior
 
-### Before the Fix
-- Build fails with `DirectoryNotFoundException` when `GenerateRtxt` task tries to enumerate the `res` directory
-- Clean operation fails with `IOException` when trying to delete non-empty directories
+### Successful Build
+- No compilation errors
+- No lint warnings (or acceptable warnings documented)
+- APK generated in `app/build/outputs/apk/debug/`
 
-### After the Fix
-- Required directories are created automatically before build tasks need them
-- Clean operation handles errors gracefully
-- Build completes successfully for Android target
+### Successful Installation
+- App installs without errors
+- App icon appears in launcher
+- App can be opened from launcher
+
+### Runtime Stability
+- No crashes on normal usage
+- No ANR (Application Not Responding) errors
+- Smooth scrolling and transitions
+- Fast response times
+
+## Common Test Failures
+
+### Build Failures
+
+**Error: "SDK location not found"**
+- Create `local.properties` with SDK path
+- Example: `sdk.dir=/Users/yourname/Library/Android/sdk`
+
+**Error: "Could not resolve dependencies"**
+- Check internet connection
+- Run `./gradlew --refresh-dependencies`
+- Check proxy settings if behind corporate firewall
+
+### Test Failures
+
+**Instrumentation tests fail**
+- Ensure device/emulator is connected: `adb devices`
+- Unlock the device screen
+- Grant necessary permissions before running tests
+
+**Unit tests fail**
+- Check test assertions are correct
+- Verify mock data is properly set up
+- Review test logs for specific failure reasons
+
+## Debugging Tests
+
+### View Test Results
+```bash
+# Test results are in:
+app/build/reports/tests/testDebugUnitTest/index.html
+
+# Open in browser:
+open app/build/reports/tests/testDebugUnitTest/index.html
+```
+
+### Run Specific Test
+```bash
+# Run a specific test class
+./gradlew test --tests "com.journalforge.app.ExampleTest"
+
+# Run a specific test method
+./gradlew test --tests "com.journalforge.app.ExampleTest.testMethod"
+```
+
+### Debug with Android Studio
+1. Right-click on test class or method
+2. Select "Debug 'TestName'"
+3. Set breakpoints as needed
+4. Step through code execution
+
+## Performance Testing
+
+### Memory Profiling
+1. Open Android Studio Profiler
+2. Select your running app
+3. Monitor memory usage
+4. Look for memory leaks
+
+### Network Profiling
+1. Monitor API calls in Profiler
+2. Check request/response times
+3. Verify proper error handling
+
+### Battery Usage
+1. Settings → Battery → Battery Usage
+2. Check JournalForge battery consumption
+3. Should be minimal when app is in background
+
+## Continuous Integration
+
+When setting up CI/CD:
+
+```yaml
+# Example GitHub Actions workflow
+- name: Run Tests
+  run: |
+    cd android-app
+    ./gradlew test
+    ./gradlew connectedAndroidTest
+
+- name: Upload Test Reports
+  uses: actions/upload-artifact@v2
+  with:
+    name: test-reports
+    path: android-app/app/build/reports/
+```
 
 ## Additional Notes
 
-- These changes only affect the Android target (`net9.0-android`)
-- Other targets (iOS, Windows, MacCatalyst) are not affected
-- The fix is minimal and follows MSBuild best practices for handling intermediate build directories
+- Always test on both debug and release builds
+- Test with and without Google Play Services
+- Test with different network conditions (WiFi, mobile data, offline)
+- Test with different system languages if app is localized
+- Test accessibility features (TalkBack, large text, etc.)
+
+## Resources
+
+- [Android Testing Documentation](https://developer.android.com/training/testing)
+- [JUnit Documentation](https://junit.org/junit4/)
+- [Espresso Testing](https://developer.android.com/training/testing/espresso)
+- [Mockito Documentation](https://site.mockito.org/)
+
+---
+
+For issues or questions about testing, see [TROUBLESHOOTING.md](TROUBLESHOOTING.md) or open an issue on GitHub.
