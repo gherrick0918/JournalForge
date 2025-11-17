@@ -42,11 +42,25 @@
             Route="JournalEntryPage" />
     </FlyoutItem>
 
+    <FlyoutItem Title="History" Icon="history.png">
+        <ShellContent
+            Title="Chronicle History"
+            ContentTemplate="{DataTemplate local:HistoryPage}"
+            Route="HistoryPage" />
+    </FlyoutItem>
+
     <FlyoutItem Title="Time Capsule" Icon="timecapsule.png">
         <ShellContent
             Title="Time Capsule"
             ContentTemplate="{DataTemplate local:TimeCapsulePage}"
             Route="TimeCapsulePage" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Settings" Icon="settings.png">
+        <ShellContent
+            Title="Settings"
+            ContentTemplate="{DataTemplate local:SettingsPage}"
+            Route="SettingsPage" />
     </FlyoutItem>
 
 </Shell>

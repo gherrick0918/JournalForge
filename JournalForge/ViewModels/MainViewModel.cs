@@ -27,6 +27,7 @@ public class MainViewModel : BaseViewModel
         
         NewEntryCommand = new Command(async () => await NavigateToNewEntry());
         ViewTimeCapsuleCommand = new Command(async () => await NavigateToTimeCapsule());
+        ViewHistoryCommand = new Command(async () => await NavigateToHistory());
         RefreshCommand = new Command(async () => await LoadDataAsync());
         
         Task.Run(async () => await LoadDataAsync());
@@ -52,6 +53,7 @@ public class MainViewModel : BaseViewModel
 
     public ICommand NewEntryCommand { get; }
     public ICommand ViewTimeCapsuleCommand { get; }
+    public ICommand ViewHistoryCommand { get; }
     public ICommand RefreshCommand { get; }
 
     private async Task LoadDataAsync()
@@ -92,5 +94,10 @@ public class MainViewModel : BaseViewModel
     private async Task NavigateToTimeCapsule()
     {
         await Shell.Current.GoToAsync("TimeCapsulePage");
+    }
+
+    private async Task NavigateToHistory()
+    {
+        await Shell.Current.GoToAsync("HistoryPage");
     }
 }

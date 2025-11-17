@@ -66,9 +66,18 @@
             <!-- Recent Entries -->
             <Frame Style="{StaticResource RPGCard}">
                 <VerticalStackLayout Spacing="10">
-                    <Label Text="📖 Recent Chronicles" 
-                           Style="{StaticResource RPGHeaderMedium}"
-                           TextColor="{StaticResource RPGGreen}"/>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="📖 Recent Chronicles" 
+                               Style="{StaticResource RPGHeaderMedium}"
+                               TextColor="{StaticResource RPGGreen}"
+                               Grid.Column="0"/>
+                        <Button Text="View All ➡️"
+                                Command="{Binding ViewHistoryCommand}"
+                                Style="{StaticResource RPGButtonSecondary}"
+                                FontSize="12"
+                                Padding="10,5"
+                                Grid.Column="1"/>
+                    </Grid>
                     <Label Text="(Tap any entry to view)" 
                            FontSize="12"
                            TextColor="{StaticResource RPGTextSecondary}"

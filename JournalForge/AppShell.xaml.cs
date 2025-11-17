@@ -11,6 +11,8 @@ public partial class AppShell : Shell
 		// But we register them here to support programmatic navigation with parameters
 		Routing.RegisterRoute("MainPage", typeof(Pages.MainPage));
 		Routing.RegisterRoute("JournalEntryPage", typeof(Pages.JournalEntryPage));
+		Routing.RegisterRoute("HistoryPage", typeof(Pages.HistoryPage));
 		Routing.RegisterRoute("TimeCapsulePage", typeof(Pages.TimeCapsulePage));
+		Routing.RegisterRoute("SettingsPage", typeof(Pages.SettingsPage));
 	}
 }
