@@ -9,7 +9,7 @@
 
 ## What Was Wrong
 
-Your app had a common Android development issue in `SettingsActivity.kt`. The code was checking if the result code was `RESULT_OK` before processing the sign-in result:
+Your app had a common Android development issue in **both** `LoginActivity.kt` (the launcher screen) and `SettingsActivity.kt`. The code was checking if the result code was `RESULT_OK` before processing the sign-in result:
 
 ```kotlin
 // OLD CODE (PROBLEMATIC)
@@ -98,15 +98,21 @@ Already configured in your `strings.xml` ✅:
 
 ## Files Changed
 
-1. `android-app/app/src/main/java/com/journalforge/app/ui/SettingsActivity.kt` - Fixed result handling
-2. `android-app/app/src/main/java/com/journalforge/app/services/GoogleAuthService.kt` - Added better logging
-3. `GOOGLE_SIGNIN_REDIRECT_FIX.md` - Detailed technical documentation
+1. `android-app/app/src/main/java/com/journalforge/app/ui/LoginActivity.kt` - **[NEW FIX]** Fixed result handling in the launcher activity
+2. `android-app/app/src/main/java/com/journalforge/app/ui/SettingsActivity.kt` - Fixed result handling
+3. `android-app/app/src/main/java/com/journalforge/app/services/GoogleAuthService.kt` - Added better logging
+4. `GOOGLE_SIGNIN_REDIRECT_FIX.md` - Detailed technical documentation
+
+## Important Note
+
+The initial fix only addressed `SettingsActivity.kt`, but the same issue existed in `LoginActivity.kt` (the first screen users see when opening the app). **Both activities have now been fixed** to ensure Google Sign-In works correctly everywhere in the app.
 
 ## Summary
 
-✅ **Fixed**: The "stays on sign-in screen" issue by removing the restrictive result code check  
+✅ **Fixed**: The "stays on sign-in screen" issue by removing the restrictive result code check **in both LoginActivity and SettingsActivity**  
 ✅ **No configuration needed**: OAuth redirect settings are NOT required for Android  
-✅ **Minimal changes**: Only 2 files modified, ~15 lines of code changed  
+✅ **Minimal changes**: Only 3 files modified, ~30 lines of code changed total  
 ✅ **Better diagnostics**: Added logging to help debug any future issues  
+✅ **Complete coverage**: Both the launcher screen and settings screen now properly handle Google Sign-In
 
 Your Google Sign-In should now work correctly! The issue was purely in the app code, not in any Firebase or OAuth settings.
