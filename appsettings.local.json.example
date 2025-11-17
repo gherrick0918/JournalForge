@@ -1,6 +1,0 @@
-{
-  "OpenAI": {
-    "ApiKey": "sk-your-api-key-here",
-    "Model": "gpt-4o-mini"
-  }
-}
