@@ -7,10 +7,37 @@ JournalForge is a cross-platform (Android-focused) mobile application built with
 
 ### ✍️ Journal Entries
 - Create and save journal entries with titles and content
-- Voice dictation support (placeholder for recording functionality)
+- Voice dictation support with speech-to-text ✅
 - AI-powered probing questions to help you explore your thoughts deeper
 - AI suggestions for entry endings
 - Conversation history with AI to guide reflection
+- Full entry history with search and filtering
+- Export entries to plain text or JSON format
+
+### 📚 Chronicle History
+- **New!** Complete history view of all journal entries
+- Search functionality to find specific entries
+- Sort by date (newest/oldest first)
+- Filter entries by search terms
+- View, export, or delete individual entries
+- Export all entries at once
+- Entry count and empty state messaging
+
+### 📤 Export & Backup
+- **New!** Export single or multiple entries
+- Plain text format - Human-readable, formatted export
+- JSON format - Machine-readable, structured export
+- Uses MAUI Share API to save to any location
+- Includes entry metadata (title, date, mood, tags, AI conversation)
+- Bulk export of filtered entries
+
+### ☁️ Cloud Sync (Setup Required)
+- **New!** Google Sign-In infrastructure
+- Settings page for account management
+- Cloud backup preparation
+- Sync status tracking
+- Framework ready for Firebase or Google Drive integration
+- 📘 See [GOOGLE_SIGNIN_SETUP.md](GOOGLE_SIGNIN_SETUP.md) for configuration
 
 ### ⏰ Time Capsule System
 - Seal journal entries to be opened in the future
@@ -46,16 +73,23 @@ JournalForge/
 │   ├── Services/            # Business logic and data services
 │   │   ├── AIService.cs
 │   │   ├── JournalEntryService.cs
-│   │   └── TimeCapsuleService.cs
+│   │   ├── TimeCapsuleService.cs
+│   │   ├── ExportService.cs
+│   │   ├── GoogleAuthService.cs
+│   │   └── CloudSyncService.cs
 │   ├── ViewModels/          # MVVM ViewModels
 │   │   ├── BaseViewModel.cs
 │   │   ├── MainViewModel.cs
 │   │   ├── JournalEntryViewModel.cs
-│   │   └── TimeCapsuleViewModel.cs
+│   │   ├── HistoryViewModel.cs
+│   │   ├── TimeCapsuleViewModel.cs
+│   │   └── SettingsViewModel.cs
 │   ├── Pages/               # XAML pages
 │   │   ├── MainPage.xaml
 │   │   ├── JournalEntryPage.xaml
-│   │   └── TimeCapsulePage.xaml
+│   │   ├── HistoryPage.xaml
+│   │   ├── TimeCapsulePage.xaml
+│   │   └── SettingsPage.xaml
 │   ├── Converters/          # Value converters for bindings
 │   │   └── CommonConverters.cs
 │   ├── Resources/           # App resources
@@ -86,6 +120,9 @@ Service interfaces and implementations provide:
 - **AIService**: Generates prompts, questions, and insights
 - **JournalEntryService**: Manages journal entries (CRUD operations)
 - **TimeCapsuleService**: Handles time capsule sealing and unsealing
+- **ExportService**: Exports entries in various formats (text, JSON)
+- **GoogleAuthService**: Manages Google Sign-In authentication
+- **CloudSyncService**: Handles cloud backup and synchronization
 
 ### Dependency Injection
 Services and ViewModels are registered in `MauiProgram.cs` for dependency injection.
@@ -95,8 +132,8 @@ Services and ViewModels are registered in `MauiProgram.cs` for dependency inject
 ### 1. MainPage (Home/Dashboard)
 - Displays daily AI-generated prompt
 - Shows daily insights
-- Lists recent journal entries
-- Quick access buttons to create new entry or view time capsules
+- Lists recent journal entries (last 5)
+- Quick access buttons to create new entry, view full history, or manage time capsules
 
 ### 2. JournalEntryPage
 - Text editor for writing journal entries
@@ -105,11 +142,26 @@ Services and ViewModels are registered in `MauiProgram.cs` for dependency inject
 - Suggest ending button
 - Save functionality
 
-### 3. TimeCapsulePage
+### 3. HistoryPage (New!)
+- Complete list of all journal entries
+- Search bar for filtering entries
+- Sort by date (newest/oldest first)
+- Individual entry actions: view, export, delete
+- Bulk export functionality
+- Entry count display
+
+### 4. TimeCapsulePage
 - List of sealed time capsules
 - Create new time capsule form
 - Unseal functionality for capsules that are ready
 - Status indicators (sealed/unsealed)
+
+### 5. SettingsPage (New!)
+- Google Sign-In integration
+- Account management (sign in/sign out)
+- Cloud sync controls
+- Last sync time display
+- App information and version
 
 ## RPG Theme
 
@@ -149,18 +201,23 @@ dotnet build -t:Run -f net9.0-ios
 
 ## Future Enhancements
 
-### Planned Features
+### Completed Features ✅
 1. ~~**Voice Integration**: Implement actual speech-to-text for vocal dictation~~ ✅ **COMPLETED**
 2. ~~**AI Integration**: Connect to real AI service (OpenAI, Azure AI, etc.)~~ ✅ **COMPLETED**
-3. **Data Persistence**: Add local database (SQLite) for storing entries
-4. **Export/Backup**: Allow exporting entries to PDF or cloud storage
-5. **Tags & Search**: Add tagging system and search functionality
-6. **Mood Tracking**: Visual mood tracking over time
-7. **Reminders**: Notification system for unsealing time capsules
-8. **Themes**: Additional theme options (dark mode, other RPG styles)
-9. **Media Attachments**: Support for images and audio recordings
-10. **Cloud Sync**: Multi-device synchronization
-11. **Enhanced Voice Features**: Offline mode, multi-language support, custom vocabulary
+3. ~~**Export/Backup**: Allow exporting entries~~ ✅ **COMPLETED** - Export to plain text and JSON formats
+4. ~~**Full History View**: Complete entry history with search~~ ✅ **COMPLETED** - History page with filtering and search
+5. ~~**Cloud Sync Infrastructure**: Google Sign-In and cloud backup~~ ✅ **COMPLETED** - Framework ready for OAuth configuration
+
+### Planned Features
+1. **Data Persistence**: Add local database (SQLite) for storing entries
+2. **Tags & Search**: Add tagging system and advanced search functionality
+3. **Mood Tracking**: Visual mood tracking over time
+4. **Reminders**: Notification system for unsealing time capsules
+5. **Themes**: Additional theme options (dark mode, other RPG styles)
+6. **Media Attachments**: Support for images and audio recordings
+7. **Full Cloud Sync**: Complete Google Drive/Firebase integration with OAuth
+8. **Enhanced Voice Features**: Offline mode, multi-language support, custom vocabulary
+9. **PDF Export**: Export journal entries as formatted PDF documents
 
 ### Technical Improvements
 - Unit tests for ViewModels and Services
@@ -201,11 +258,41 @@ Future enhancements:
 3. Local AI option for privacy-focused users
 
 ### Data Persistence
-Current services store data in memory. To persist:
-1. Add SQLite database
-2. Create repository pattern
-3. Implement data migration
-4. Add backup/restore functionality
+✅ **Local JSON Storage Implemented!** The app now persists data:
+- Journal entries are saved to JSON files in app data directory
+- Automatic loading on app start
+- Thread-safe file operations
+- Data survives app restarts
+
+Current storage uses JSON files. Future enhancement with SQLite database will provide:
+1. Better performance for large datasets
+2. Advanced querying capabilities
+3. Relationships between data
+4. Efficient indexing for search
+
+### Export Functionality
+✅ **Export Feature Implemented!** Export your journal entries:
+- **Plain Text Format**: Human-readable, formatted export with metadata
+- **JSON Format**: Machine-readable, structured export for backup
+- **Single Entry Export**: Export individual entries
+- **Bulk Export**: Export all filtered entries at once
+- Uses MAUI Share API to save files anywhere (Google Drive, email, etc.)
+- Automatic filename generation with sanitization
+
+### Cloud Sync
+✅ **Google Sign-In Infrastructure Ready!** Framework implemented for cloud backup:
+- **Google Authentication Service**: Interface and structure ready for OAuth
+- **Cloud Sync Service**: Framework for uploading/downloading entries
+- **Settings UI**: Complete user interface for account management
+- **Sync Status Tracking**: Last sync time and status display
+- **Ready for Integration**: See [GOOGLE_SIGNIN_SETUP.md](GOOGLE_SIGNIN_SETUP.md) for OAuth configuration
+
+To fully enable cloud sync:
+1. Set up Google Cloud project with OAuth credentials
+2. Choose Firebase or Google Sign-In SDK
+3. Install required NuGet packages
+4. Update services with actual OAuth implementation
+5. Configure cloud storage (Firestore or Google Drive)
 
 ## Troubleshooting
 
