@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.JournalForge" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/gold</item>
+        <item name="colorPrimaryVariant">@color/dark_brown</item>
+        <item name="colorOnPrimary">@color/dark_brown</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/stone_gray</item>
+        <item name="colorSecondaryVariant">@color/dark_gray</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">@color/dark_brown</item>
+        <!-- Background color. -->
+        <item name="android:windowBackground">@color/light_parchment</item>
+        <item name="colorSurface">@color/parchment</item>
+        <item name="colorOnSurface">@color/dark_brown</item>
+    </style>
+
+    <!-- Card style for RPG theme -->
+    <style name="RPGCard" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/parchment</item>
+        <item name="cardElevation">4dp</item>
+        <item name="cardCornerRadius">8dp</item>
+        <item name="contentPadding">16dp</item>
+    </style>
+
+    <!-- Button style for RPG theme -->
+    <style name="RPGButton" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/gold</item>
+        <item name="android:textColor">@color/dark_brown</item>
+        <item name="cornerRadius">8dp</item>
+    </style>
+
+    <!-- Text style for titles -->
+    <style name="RPGTitle" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="android:textColor">@color/dark_brown</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Text style for body -->
+    <style name="RPGBody" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textColor">@color/dark_brown</item>
+    </style>
+</resources>

@@ -1,7 +1,16 @@
-# JournalForge - AI Journaling MAUI App
+# JournalForge - AI Journaling App
+
+## 🔄 Important: Native Android Migration in Progress
+
+**This project has been migrated from .NET MAUI to native Android** due to slow build times and better Firebase integration. 
+
+- **Legacy MAUI Code**: The original .NET MAUI code is in the root directory (for reference)
+- **New Native Android App**: The new native Android app is in the `android-app/` directory
+- **Migration Guide**: See [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) for details
+- **Firebase Setup**: See [FIREBASE_SIGNIN_COMPLETION.md](FIREBASE_SIGNIN_COMPLETION.md) to complete Google Sign-In
 
 ## Overview
-JournalForge is a cross-platform (Android-focused) mobile application built with .NET MAUI that provides an AI-powered journaling experience with an old-school RPG visual theme.
+JournalForge is an Android mobile application that provides an AI-powered journaling experience with an old-school RPG visual theme. Originally built with .NET MAUI, it has been migrated to native Android (Kotlin) for improved performance and Firebase integration.
 
 ## Features
 

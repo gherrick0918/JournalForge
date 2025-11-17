@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">JournalForge</string>
+    
+    <!-- Navigation -->
+    <string name="nav_home">⚔️ Quest Log</string>
+    <string name="nav_new_entry">📜 New Entry</string>
+    <string name="nav_history">📚 Chronicle</string>
+    <string name="nav_time_capsule">⏰ Time Capsules</string>
+    <string name="nav_settings">⚙️ Settings</string>
+    
+    <!-- Main Page -->
+    <string name="daily_prompt_title">📜 Daily Quest Prompt</string>
+    <string name="daily_insight_title">🔮 Daily Insight</string>
+    <string name="recent_entries_title">Recent Quest Entries</string>
+    <string name="no_entries">No entries yet. Start your adventure!</string>
+    <string name="btn_new_entry">✍️ Begin Entry</string>
+    <string name="btn_view_history">📚 View Chronicle</string>
+    <string name="btn_time_capsules">⏰ Time Capsules</string>
+    
+    <!-- Journal Entry Page -->
+    <string name="entry_title_hint">Quest Title</string>
+    <string name="entry_content_hint">Share your thoughts and adventures…</string>
+    <string name="btn_start_recording">🎤 Start Dictation</string>
+    <string name="btn_stop_recording">⏹ Stop</string>
+    <string name="btn_ask_ai">🤖 Ask AI</string>
+    <string name="btn_suggest_ending">💡 Suggest Ending</string>
+    <string name="btn_save">💾 Save Entry</string>
+    <string name="ai_conversation_title">🤖 AI Companion</string>
+    <string name="no_ai_conversation">The AI companion awaits your thoughts…</string>
+    
+    <!-- History Page -->
+    <string name="search_hint">Search chronicles…</string>
+    <string name="btn_export_all">📤 Export All</string>
+    <string name="entry_count">%d entries</string>
+    <string name="sort_newest">Newest First</string>
+    <string name="sort_oldest">Oldest First</string>
+    <string name="no_entries_found">No entries found</string>
+    
+    <!-- Time Capsule Page -->
+    <string name="create_capsule_title">🔒 Seal Time Capsule</string>
+    <string name="capsule_title_hint">Capsule Title</string>
+    <string name="capsule_message_hint">Message to your future self…</string>
+    <string name="btn_seal_capsule">🔒 Seal Capsule</string>
+    <string name="btn_unseal">🔓 Unseal</string>
+    <string name="capsule_sealed">Sealed until %s</string>
+    <string name="capsule_ready">Ready to unseal!</string>
+    <string name="no_capsules">No time capsules yet</string>
+    
+    <!-- Settings Page -->
+    <string name="settings_account_title">Account</string>
+    <string name="settings_cloud_sync_title">Cloud Sync</string>
+    <string name="btn_sign_in_google">Sign In with Google</string>
+    <string name="btn_sign_out">Sign Out</string>
+    <string name="signed_in_as">Signed in as: %s</string>
+    <string name="last_sync">Last sync: %s</string>
+    <string name="never_synced">Never synced</string>
+    <string name="btn_sync_now">Sync Now</string>
+    <string name="settings_app_info">App Information</string>
+    <string name="app_version">Version %s</string>
+    
+    <!-- Common -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="export">Export</string>
+    <string name="share">Share</string>
+    <string name="error">Error</string>
+    <string name="success">Success</string>
+    <string name="loading">Loading…</string>
+    
+    <!-- Messages -->
+    <string name="entry_saved">Entry saved successfully!</string>
+    <string name="entry_deleted">Entry deleted</string>
+    <string name="sync_success">Sync completed successfully</string>
+    <string name="sync_failed">Sync failed. Please try again.</string>
+    <string name="sign_in_success">Signed in successfully!</string>
+    <string name="sign_in_failed">Sign in failed. Please try again.</string>
+    <string name="microphone_permission_required">Microphone permission is required for voice dictation</string>
+</resources>
