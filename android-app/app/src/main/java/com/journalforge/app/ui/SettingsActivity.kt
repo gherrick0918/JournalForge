@@ -29,11 +29,9 @@ class SettingsActivity : AppCompatActivity() {
     private val signInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            handleSignInResult(result.data)
-        } else {
-            Toast.makeText(this, "Sign-in cancelled", Toast.LENGTH_SHORT).show()
-        }
+        // Always attempt to handle the sign-in result, regardless of result code
+        // Google Sign-In may return data even when resultCode is not RESULT_OK
+        handleSignInResult(result.data)
     }
     
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,6 +79,12 @@ class SettingsActivity : AppCompatActivity() {
     private fun handleSignInResult(data: Intent?) {
         lifecycleScope.launch {
             try {
+                // Check if data is null (user cancelled sign-in)
+                if (data == null) {
+                    Toast.makeText(this@SettingsActivity, "Sign-in cancelled", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+                
                 val success = app.googleAuthService.handleSignInResult(data)
                 if (success) {
                     Toast.makeText(this@SettingsActivity, R.string.sign_in_success, Toast.LENGTH_SHORT).show()
