@@ -57,13 +57,14 @@ class GoogleAuthService(private val context: Context) {
             val account = task.getResult(ApiException::class.java)
 
             if (account != null) {
+                Log.d(TAG, "Google sign-in successful for account: ${account.email}")
                 firebaseAuthWithGoogle(account)
             } else {
                 Log.e(TAG, "Google sign-in account is null")
                 false
             }
         } catch (e: ApiException) {
-            Log.e(TAG, "Google sign-in failed", e)
+            Log.e(TAG, "Google sign-in failed with status code: ${e.statusCode}", e)
             false
         }
     }
