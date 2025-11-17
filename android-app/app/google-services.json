@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "339764184212",
+    "project_id": "journalforge-478513",
+    "storage_bucket": "journalforge-478513.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:339764184212:android:984113b19e6a5b2c726081",
+        "android_client_info": {
+          "package_name": "com.journalforge.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBE1A4qZNPfmAnRWgZLLhQlVaiW1jEpgYA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
