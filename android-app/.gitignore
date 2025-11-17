@@ -64,3 +64,5 @@ vcs.xml
 
 # Android Studio Captures folder
 captures/
+
+keystore.properties

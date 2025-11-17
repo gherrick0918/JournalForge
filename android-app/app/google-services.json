@@ -1,26 +1,60 @@
 {
   "project_info": {
-    "project_number": "339764184212",
-    "project_id": "journalforge-478513",
-    "storage_bucket": "journalforge-478513.firebasestorage.app"
+    "project_number": "774563628600",
+    "project_id": "journalforgeapp",
+    "storage_bucket": "journalforgeapp.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:339764184212:android:984113b19e6a5b2c726081",
+        "mobilesdk_app_id": "1:774563628600:android:58b0b90784cad2c83f88cd",
         "android_client_info": {
           "package_name": "com.journalforge.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "774563628600-4h9rr7us94a1pmttffc463ar9ebik88p.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.journalforge.app",
+            "certificate_hash": "ee2e34336debb4f42f438f3c51b5c549327faf03"
+          }
+        },
+        {
+          "client_id": "774563628600-5spvud6kcm5g7u9mon63pi9iqphd3nma.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.journalforge.app",
+            "certificate_hash": "ddca0703a85b818166a1e95e7c7489ad45d82d23"
+          }
+        },
+        {
+          "client_id": "774563628600-v1gq17km8787evobu9qb72b4e456auin.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.journalforge.app",
+            "certificate_hash": "f36cac722d68a0860fa3a7cd755a079976d1c66a"
+          }
+        },
+        {
+          "client_id": "774563628600-v77alhhdahp5cvuka6krperk85beeg4h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyBE1A4qZNPfmAnRWgZLLhQlVaiW1jEpgYA"
+          "current_key": "AIzaSyDQ9BjX8FHPd6lfZKRHcQ4ouUVMZLRZ_K4"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "774563628600-v77alhhdahp5cvuka6krperk85beeg4h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

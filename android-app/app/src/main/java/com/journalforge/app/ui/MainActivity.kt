@@ -15,11 +15,8 @@ import com.journalforge.app.R
 import com.journalforge.app.models.JournalEntry
 import kotlinx.coroutines.launch
 
-/**
- * Main activity showing dashboard with daily prompt, insights, and recent entries
- */
 class MainActivity : AppCompatActivity() {
-    
+
     private lateinit var app: JournalForgeApplication
     private lateinit var tvDailyPrompt: TextView
     private lateinit var tvDailyInsight: TextView
@@ -28,17 +25,24 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnNewEntry: Button
     private lateinit var btnViewHistory: Button
     private lateinit var btnTimeCapsules: Button
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        
+
         app = application as JournalForgeApplication
-        
+
+        if (!app.googleAuthService.isSignedIn()) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+            return
+        }
+
+        setContentView(R.layout.activity_main)
+
         // Setup toolbar
         setSupportActionBar(findViewById(R.id.toolbar))
         supportActionBar?.title = "⚔️ Quest Log"
-        
+
         // Initialize views
         tvDailyPrompt = findViewById(R.id.tv_daily_prompt)
         tvDailyInsight = findViewById(R.id.tv_daily_insight)
@@ -47,40 +51,42 @@ class MainActivity : AppCompatActivity() {
         btnNewEntry = findViewById(R.id.btn_new_entry)
         btnViewHistory = findViewById(R.id.btn_view_history)
         btnTimeCapsules = findViewById(R.id.btn_time_capsules)
-        
+
         // Setup RecyclerView
         rvRecentEntries.layoutManager = LinearLayoutManager(this)
-        
+
         // Setup button listeners
         btnNewEntry.setOnClickListener {
             startActivity(Intent(this, JournalEntryActivity::class.java))
         }
-        
+
         btnViewHistory.setOnClickListener {
             startActivity(Intent(this, HistoryActivity::class.java))
         }
-        
+
         btnTimeCapsules.setOnClickListener {
             startActivity(Intent(this, TimeCapsuleActivity::class.java))
         }
-        
+
         // Load data
         loadDailyContent()
         loadRecentEntries()
     }
-    
+
     override fun onResume() {
         super.onResume()
         // Refresh entries when returning to this activity
-        loadRecentEntries()
+        if (app.googleAuthService.isSignedIn()) {
+            loadRecentEntries()
+        }
     }
-    
+
     private fun loadDailyContent() {
         lifecycleScope.launch {
             try {
                 val prompt = app.aiService.generateDailyPrompt()
                 tvDailyPrompt.text = prompt
-                
+
                 val insight = app.aiService.generateDailyInsight()
                 tvDailyInsight.text = insight
             } catch (e: Exception) {
@@ -89,7 +95,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    
+
     private fun loadRecentEntries() {
         lifecycleScope.launch {
             try {
@@ -110,22 +116,30 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    
+
     private fun openEntry(entry: JournalEntry) {
         val intent = Intent(this, JournalEntryActivity::class.java)
         intent.putExtra("ENTRY_ID", entry.id)
         startActivity(intent)
     }
-    
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
         return true
     }
-    
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))
+                true
+            }
+            R.id.menu_sign_out -> {
+                lifecycleScope.launch {
+                    app.googleAuthService.signOut()
+                    startActivity(Intent(this@MainActivity, LoginActivity::class.java))
+                    finish()
+                }
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -133,26 +147,23 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-/**
- * Simple adapter for displaying recent entries
- */
 class EntryAdapter(
     private val entries: List<JournalEntry>,
     private val onItemClick: (JournalEntry) -> Unit
 ) : RecyclerView.Adapter<EntryAdapter.ViewHolder>() {
-    
+
     class ViewHolder(view: android.view.View) : RecyclerView.ViewHolder(view) {
         val tvTitle: TextView = view.findViewById(R.id.tv_entry_title)
         val tvDate: TextView = view.findViewById(R.id.tv_entry_date)
         val tvPreview: TextView = view.findViewById(R.id.tv_entry_preview)
     }
-    
+
     override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): ViewHolder {
         val view = android.view.LayoutInflater.from(parent.context)
             .inflate(R.layout.item_entry, parent, false)
         return ViewHolder(view)
     }
-    
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val entry = entries[position]
         holder.tvTitle.text = entry.title
@@ -160,6 +171,6 @@ class EntryAdapter(
         holder.tvPreview.text = entry.getPreview()
         holder.itemView.setOnClickListener { onItemClick(entry) }
     }
-    
+
     override fun getItemCount() = entries.size
 }
