@@ -77,4 +77,6 @@
     <string name="sign_in_success">Signed in successfully!</string>
     <string name="sign_in_failed">Sign in failed. Please try again.</string>
     <string name="microphone_permission_required">Microphone permission is required for voice dictation</string>
+
+    <string name="default_web_client_id">774563628600-v77alhhdahp5cvuka6krperk85beeg4h.apps.googleusercontent.com</string>
 </resources>
