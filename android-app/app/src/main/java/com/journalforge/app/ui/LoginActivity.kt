@@ -17,18 +17,9 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var googleAuthService: GoogleAuthService
 
     private val signInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK) {
-            lifecycleScope.launch {
-                val success = googleAuthService.handleSignInResult(result.data)
-                if (success) {
-                    startActivity(Intent(this@LoginActivity, MainActivity::class.java))
-                    finish()
-                } else {
-                    // Handle sign-in failure
-                    Log.e("LoginActivity", "Sign-in failed")
-                }
-            }
-        }
+        // Always attempt to handle the sign-in result, regardless of result code
+        // Google Sign-In may return data even when resultCode is not RESULT_OK
+        handleSignInResult(result.data)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,5 +32,32 @@ class LoginActivity : AppCompatActivity() {
             val signInIntent = googleAuthService.getSignInClient().signInIntent
             signInLauncher.launch(signInIntent)
         }
+    }
+
+    private fun handleSignInResult(data: Intent?) {
+        lifecycleScope.launch {
+            try {
+                // Check if data is null (user cancelled sign-in)
+                if (data == null) {
+                    Log.d(TAG, "Sign-in cancelled by user")
+                    return@launch
+                }
+
+                val success = googleAuthService.handleSignInResult(data)
+                if (success) {
+                    Log.d(TAG, "Sign-in successful, navigating to MainActivity")
+                    startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                    finish()
+                } else {
+                    Log.e(TAG, "Sign-in failed")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling sign-in result", e)
+            }
+        }
+    }
+
+    companion object {
+        private const val TAG = "LoginActivity"
     }
 }
