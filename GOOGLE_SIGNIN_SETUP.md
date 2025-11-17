@@ -11,6 +11,8 @@ JournalForge supports Google Sign-In to enable cloud backup and synchronization 
 - **Prevent data loss** - entries are safely stored even if you lose your device
 - **Secure authentication** - protected by Google's security infrastructure
 
+**Important Note**: Google Sign-In functionality is implemented through OAuth 2.0 credentials and scopes, not through a separate API that needs to be enabled in the Google Cloud Console. The setup process involves configuring the OAuth consent screen and creating OAuth client ID credentials.
+
 ## Current Status
 
 ⚠️ **Note**: The Google Sign-In infrastructure is implemented but requires additional configuration to be fully functional. The app includes:
@@ -31,13 +33,9 @@ To enable Google Sign-In in JournalForge, follow these steps:
 2. Create a new project or select an existing one
 3. Note your project ID for later use
 
-### 2. Enable Google Sign-In API
+### 2. Configure OAuth Consent Screen
 
-1. In the Google Cloud Console, navigate to **APIs & Services** > **Library**
-2. Search for "Google Sign-In API"
-3. Click **Enable**
-
-### 3. Configure OAuth Consent Screen
+**Important**: Google Sign-In is now handled through OAuth 2.0 credentials and scopes. There is no separate "Google Sign-In API" to enable in the APIs & Services Library.
 
 1. Go to **APIs & Services** > **OAuth consent screen**
 2. Select **External** user type (or Internal if for organization only)
@@ -45,18 +43,26 @@ To enable Google Sign-In in JournalForge, follow these steps:
    - App name: "JournalForge"
    - User support email: Your email
    - Developer contact: Your email
-4. Add scopes (at minimum):
-   - `openid`
-   - `profile`
-   - `email`
-5. Save and continue
+4. Click **Save and Continue**
+5. On the **Scopes** page, click **Add or Remove Scopes**
+6. Add the following scopes for basic Google Sign-In:
+   - `openid` - Required for authentication
+   - `.../auth/userinfo.email` - Access to user's email address
+   - `.../auth/userinfo.profile` - Access to user's basic profile info (name, picture)
+7. Click **Update** and then **Save and Continue**
+8. Add test users if needed (for testing while in development)
+9. Review and complete the OAuth consent screen setup
 
-### 4. Create OAuth Credentials
+**Note**: These OAuth scopes are what enable the functionality previously known as "Google Sign-In". No additional API needs to be enabled.
+
+### 3. Create OAuth Credentials
+
+Creating OAuth Client ID credentials is the fundamental step that enables Google Sign-In for your application. The client ID and secret are what your application uses to communicate with Google's authentication servers.
 
 #### For Android:
 
 1. Go to **APIs & Services** > **Credentials**
-2. Click **Create Credentials** > **OAuth client ID**
+2. Click **+ CREATE CREDENTIALS** > **OAuth client ID**
 3. Select **Android** as application type
 4. Enter:
    - Name: "JournalForge Android"
@@ -82,7 +88,7 @@ keytool -list -v -keystore journalforge.keystore -alias journalforge
    - Bundle ID: `com.journalforge.app`
 3. Note the **Client ID**
 
-### 5. Choose Integration Method
+### 4. Choose Integration Method
 
 You have two main options for implementing Google Sign-In:
 
@@ -118,7 +124,7 @@ Use the standalone Google Sign-In SDK without Firebase.
 2. **Update `GoogleAuthService.cs`:**
    Implement OAuth flow using Google Sign-In SDK.
 
-### 6. Configure Cloud Storage
+### 5. Configure Cloud Storage
 
 Choose a backend for storing journal entries:
 
@@ -148,7 +154,7 @@ service cloud.firestore {
 3. Install Google Drive API client
 4. Update `CloudSyncService.cs` to use Drive API
 
-### 7. Update Configuration Files
+### 6. Update Configuration Files
 
 #### For Android:
 
@@ -162,7 +168,7 @@ service cloud.firestore {
 
 3. Add initialization code to Android `MainActivity.cs` or platform-specific code.
 
-### 8. Implement Authentication Flow
+### 7. Implement Authentication Flow
 
 Update `Services/GoogleAuthService.cs` with actual OAuth implementation:
 
@@ -202,7 +208,7 @@ public async Task<bool> SignInAsync()
 }
 ```
 
-### 9. Implement Cloud Sync
+### 8. Implement Cloud Sync
 
 Update `Services/CloudSyncService.cs` with actual cloud storage implementation:
 
@@ -254,8 +260,8 @@ public async Task<bool> SyncEntriesAsync()
 
 - Verify OAuth client ID is correct
 - Check SHA-1 fingerprint matches your keystore
-- Ensure Google Sign-In API is enabled
-- Check package name matches in all configurations
+- Ensure OAuth consent screen is properly configured with required scopes
+- Verify package name matches in all configurations (OAuth client ID and app)
 
 ### "Permission Denied" Error
 
