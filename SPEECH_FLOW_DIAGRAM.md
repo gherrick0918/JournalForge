@@ -81,7 +81,7 @@
 │     ▼                                                     │
 │  9. Text returned to ViewModel                           │
 │     ▼                                                     │
-│ 10. Text appears in message field ✅                     │
+│ 10. Text automatically added to conversation ✅          │
 │                                                           │
 ├──────────────────────────────────────────────────────────┤
 │ Success Rate: ~95%                                        │
@@ -118,7 +118,7 @@
 │     ▼                                                     │
 │  9. Text returned to ViewModel                           │
 │     ▼                                                     │
-│ 10. Text appears in message field ✅                     │
+│ 10. Text automatically added to conversation ✅          │
 │                                                           │
 ├──────────────────────────────────────────────────────────┤
 │ Success Rate: ~70%                                        │
@@ -197,9 +197,12 @@ Processing:   [Google processes speech]
               ↓
 Result:       ✅ "This is my entry"
               ↓
+Auto-Send:    [Message added to conversation]
+              [AI responds with probing question]
+              ↓
 User:         😊 Happy
               ↓
-Outcome:      Successful transcription
+Outcome:      Successful transcription & conversation
 
 Success Rate: ~95%
 User Satisfaction: High
@@ -247,7 +250,7 @@ User Satisfaction: High
 │                 ▼                                           │
 │  ┌────────────────────────────────────────────────┐       │
 │  │  JournalEntryViewModel                         │       │
-│  │  • Updates UI with transcribed text            │       │
+│  │  • Automatically sends text to conversation    │       │
 │  │  • Displays status messages                    │       │
 │  │  • Handles errors gracefully                   │       │
 │  └────────────────────────────────────────────────┘       │

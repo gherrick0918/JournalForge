@@ -41,11 +41,12 @@ The heart of the journaling experience:
 - **Auto-Save**: (Planned) Automatic saving as you type
 - **Character Count**: (Planned) Track your writing progress
 
-#### Voice Dictation
+#### Voice Dictation ✅
 - **Record Button**: Start voice recording with one tap
 - **Visual Feedback**: Clear indication when recording is active
-- **Speech-to-Text**: (Planned) Convert spoken words to text
-- **Playback**: (Planned) Review your recordings before saving
+- **Speech-to-Text**: ✅ Convert spoken words to text using Google's speech recognition
+- **Auto-Send**: ✅ Transcribed text is automatically added to the conversation
+- **Multiple Recognition Methods**: Intent-based (primary) and Service-based (fallback)
 
 #### AI Conversation Assistant
 - **Probe Deeper**: Get thoughtful questions based on your writing
