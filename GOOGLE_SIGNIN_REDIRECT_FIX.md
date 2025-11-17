@@ -2,11 +2,11 @@
 
 ## Issue Resolved
 
-Fixed the issue where tapping "Sign In with Google", selecting an account, and then staying on the sign-in screen without being redirected back to the Settings page.
+Fixed the issue where tapping "Sign In with Google", selecting an account, and then staying on the sign-in screen without being redirected.
 
 ## What Was Wrong
 
-The previous implementation in `SettingsActivity.kt` only processed Google Sign-In results when the activity result code was `RESULT_OK`:
+The previous implementation in **both `LoginActivity.kt` (the launcher screen) and `SettingsActivity.kt`** only processed Google Sign-In results when the activity result code was `RESULT_OK`:
 
 ```kotlin
 // OLD CODE - PROBLEMATIC
@@ -83,15 +83,20 @@ To verify the fix works:
    ```
 
 2. **Test the sign-in flow**:
-   - Open the app
-   - Navigate to Settings (⚙️ Settings)
-   - Tap "Sign In with Google"
+   - Open the app (LoginActivity will be shown first)
+   - Tap "Sign In with Google" on the login screen
    - Select your Google account
-   - **Expected behavior**: You should now be redirected back to the Settings page and see "Signed in as: your@email.com"
+   - **Expected behavior**: You should now be redirected to MainActivity
+   - To test from Settings:
+     - Go to Settings (⚙️ Settings)
+     - Sign out if already signed in
+     - Tap "Sign In with Google"
+     - Select your Google account
+     - **Expected behavior**: You should now be redirected back to the Settings page and see "Signed in as: your@email.com"
 
 3. **Check logs** (if needed):
    ```bash
-   adb logcat | grep -E "GoogleAuthService|SettingsActivity"
+   adb logcat | grep -E "GoogleAuthService|SettingsActivity|LoginActivity"
    ```
 
 ## Common Issues and Solutions
@@ -139,9 +144,12 @@ Note: Unlike web-based OAuth flows, Android Google Sign-In using Firebase **does
 ## Summary
 
 The fix addresses the root cause of the "stays on sign-in screen" issue by:
-- ✅ Removing the restrictive `RESULT_OK` check
+- ✅ Removing the restrictive `RESULT_OK` check **in both LoginActivity and SettingsActivity**
 - ✅ Always attempting to process sign-in results
 - ✅ Properly handling null data (user cancellation)
 - ✅ Adding better logging for diagnostics
+- ✅ Applying consistent error handling across all sign-in screens
 
-This is a minimal, surgical fix that resolves the issue without requiring any Firebase or OAuth configuration changes.
+This is a minimal, surgical fix that resolves the issue without requiring any Firebase or OAuth configuration changes. The fix has been applied to **both activities** where users can sign in:
+1. **LoginActivity.kt** - The launcher screen (first screen users see)
+2. **SettingsActivity.kt** - The settings screen (for re-authentication or sign-in after using the app)
