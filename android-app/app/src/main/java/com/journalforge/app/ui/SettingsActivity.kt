@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.journalforge.app.JournalForgeApplication
 import com.journalforge.app.R
+import com.journalforge.app.services.SignInResult
 import kotlinx.coroutines.launch
 
 /**
@@ -85,12 +86,14 @@ class SettingsActivity : AppCompatActivity() {
                     return@launch
                 }
                 
-                val success = app.googleAuthService.handleSignInResult(data)
-                if (success) {
+                val result = app.googleAuthService.handleSignInResult(data)
+                if (result.success) {
                     Toast.makeText(this@SettingsActivity, R.string.sign_in_success, Toast.LENGTH_SHORT).show()
                     updateUI(true)
                 } else {
-                    Toast.makeText(this@SettingsActivity, R.string.sign_in_failed, Toast.LENGTH_SHORT).show()
+                    // Show specific error message to user
+                    val errorMsg = result.errorMessage ?: getString(R.string.sign_in_failed)
+                    Toast.makeText(this@SettingsActivity, errorMsg, Toast.LENGTH_LONG).show()
                 }
             } catch (e: Exception) {
                 Toast.makeText(this@SettingsActivity, R.string.sign_in_failed, Toast.LENGTH_SHORT).show()

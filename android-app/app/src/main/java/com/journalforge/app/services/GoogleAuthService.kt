@@ -16,6 +16,15 @@ import com.journalforge.app.models.UserProfile
 import kotlinx.coroutines.tasks.await
 
 /**
+ * Result of a Google Sign-In attempt
+ */
+data class SignInResult(
+    val success: Boolean,
+    val errorMessage: String? = null,
+    val errorCode: Int? = null
+)
+
+/**
  * Service for handling Google Sign-In with Firebase Authentication
  */
 class GoogleAuthService(private val context: Context) {
@@ -49,9 +58,9 @@ class GoogleAuthService(private val context: Context) {
     /**
      * Handle the sign-in result from the Google Sign-In intent
      * @param data The intent data returned from the sign-in activity
-     * @return True if sign-in was successful
+     * @return SignInResult with success status and error details if applicable
      */
-    suspend fun handleSignInResult(data: android.content.Intent?): Boolean {
+    suspend fun handleSignInResult(data: android.content.Intent?): SignInResult {
         return try {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             val account = task.getResult(ApiException::class.java)
@@ -61,30 +70,49 @@ class GoogleAuthService(private val context: Context) {
                 firebaseAuthWithGoogle(account)
             } else {
                 Log.e(TAG, "Google sign-in account is null")
-                false
+                SignInResult(
+                    success = false,
+                    errorMessage = "Unable to retrieve account information. Please try again."
+                )
             }
         } catch (e: ApiException) {
             Log.e(TAG, "Google sign-in failed with status code: ${e.statusCode}", e)
-            false
+            val errorMessage = when (e.statusCode) {
+                10 -> "Developer error: Please ensure SHA-1 fingerprint is configured in Firebase Console."
+                12500 -> "Configuration error: Please check your Firebase setup and google-services.json file."
+                7 -> "Network error: Please check your internet connection and try again."
+                else -> "Sign in failed (Error ${e.statusCode}). Please try again or contact support."
+            }
+            SignInResult(
+                success = false,
+                errorMessage = errorMessage,
+                errorCode = e.statusCode
+            )
         } catch (e: Exception) {
             Log.e(TAG, "Unexpected error during Google sign-in", e)
-            false
+            SignInResult(
+                success = false,
+                errorMessage = "An unexpected error occurred: ${e.message ?: "Unknown error"}"
+            )
         }
     }
 
     /**
      * Authenticate with Firebase using Google credentials
      */
-    private suspend fun firebaseAuthWithGoogle(account: GoogleSignInAccount): Boolean {
+    private suspend fun firebaseAuthWithGoogle(account: GoogleSignInAccount): SignInResult {
         return try {
             val credential = GoogleAuthProvider.getCredential(account.idToken, null)
             val result = auth.signInWithCredential(credential).await()
 
             Log.d(TAG, "Firebase authentication successful: ${result.user?.email}")
-            true
+            SignInResult(success = true)
         } catch (e: Exception) {
             Log.e(TAG, "Firebase authentication failed", e)
-            false
+            SignInResult(
+                success = false,
+                errorMessage = "Firebase authentication failed: ${e.message ?: "Unknown error"}"
+            )
         }
     }
 
