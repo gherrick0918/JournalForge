@@ -30,6 +30,14 @@
           }
         },
         {
+          "client_id": "774563628600-gqicigl8mueplku038lq32eov9q2d405.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.journalforge.app",
+            "certificate_hash": "8b86a6d46490b2c11d0ae4c7ef753fb15a760e48"
+          }
+        },
+        {
           "client_id": "774563628600-v1gq17km8787evobu9qb72b4e456auin.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
