@@ -18,16 +18,24 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var googleAuthService: GoogleAuthService
 
+    private var isHandlingSignIn = false
+    
     private val signInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         // Always attempt to handle the sign-in result, regardless of result code
         // Google Sign-In may return data even when resultCode is not RESULT_OK
-        handleSignInResult(result.data)
+        // Prevent multiple simultaneous handling of sign-in results
+        if (!isHandlingSignIn) {
+            handleSignInResult(result.data)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
         googleAuthService = (application as JournalForgeApplication).googleAuthService
+        
+        // Reset the handling flag on each onCreate
+        isHandlingSignIn = false
         
         // Check if user is already signed in
         if (googleAuthService.isSignedIn()) {
@@ -54,12 +62,16 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun handleSignInResult(data: Intent?) {
+        // Set flag to prevent duplicate handling
+        isHandlingSignIn = true
+        
         lifecycleScope.launch {
             try {
                 // Check if data is null (user cancelled sign-in)
                 if (data == null) {
                     Log.d(TAG, "Sign-in cancelled by user")
                     Toast.makeText(this@LoginActivity, "Sign-in cancelled", Toast.LENGTH_SHORT).show()
+                    isHandlingSignIn = false
                     return@launch
                 }
 
@@ -99,16 +111,19 @@ class LoginActivity : AppCompatActivity() {
                     } else {
                         Log.e(TAG, "Auth state verification failed after sign-in success")
                         Toast.makeText(this@LoginActivity, "Sign-in succeeded but auth state not ready. Please try again.", Toast.LENGTH_LONG).show()
+                        isHandlingSignIn = false
                     }
                 } else {
                     Log.e(TAG, "Sign-in failed: ${result.errorMessage}")
                     // Show specific error message to user
                     val errorMsg = result.errorMessage ?: getString(R.string.sign_in_failed)
                     Toast.makeText(this@LoginActivity, errorMsg, Toast.LENGTH_LONG).show()
+                    isHandlingSignIn = false
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling sign-in result", e)
                 Toast.makeText(this@LoginActivity, R.string.sign_in_failed, Toast.LENGTH_LONG).show()
+                isHandlingSignIn = false
             }
         }
     }
