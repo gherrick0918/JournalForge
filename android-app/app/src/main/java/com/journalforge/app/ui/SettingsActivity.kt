@@ -93,7 +93,7 @@ class SettingsActivity : AppCompatActivity() {
                     Toast.makeText(this@SettingsActivity, R.string.sign_in_failed, Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
-                Toast.makeText(this@SettingsActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@SettingsActivity, R.string.sign_in_failed, Toast.LENGTH_SHORT).show()
             }
         }
     }

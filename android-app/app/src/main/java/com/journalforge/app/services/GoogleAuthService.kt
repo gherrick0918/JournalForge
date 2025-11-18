@@ -66,6 +66,9 @@ class GoogleAuthService(private val context: Context) {
         } catch (e: ApiException) {
             Log.e(TAG, "Google sign-in failed with status code: ${e.statusCode}", e)
             false
+        } catch (e: Exception) {
+            Log.e(TAG, "Unexpected error during Google sign-in", e)
+            false
         }
     }
 
