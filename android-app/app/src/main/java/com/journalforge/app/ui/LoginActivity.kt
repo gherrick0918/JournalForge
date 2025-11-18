@@ -142,6 +142,9 @@ class LoginActivity : AppCompatActivity() {
                         val prefs = getSharedPreferences("auth_state", MODE_PRIVATE)
                         prefs.edit().putBoolean("just_authenticated", true).apply()
                         
+                        // Reset the handling flag before navigation
+                        isHandlingSignIn = false
+                        
                         // Clear the activity stack and start MainActivity as a new task
                         // This prevents going back to LoginActivity and ensures clean navigation
                         val intent = Intent(this@LoginActivity, MainActivity::class.java)
