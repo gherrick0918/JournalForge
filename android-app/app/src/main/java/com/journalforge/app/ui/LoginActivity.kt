@@ -60,14 +60,31 @@ class LoginActivity : AppCompatActivity() {
 
                 val result = googleAuthService.handleSignInResult(data)
                 if (result.success) {
-                    Log.d(TAG, "Sign-in successful, navigating to MainActivity")
-                    Toast.makeText(this@LoginActivity, R.string.sign_in_success, Toast.LENGTH_SHORT).show()
-                    // Clear the activity stack and start MainActivity as a new task
-                    // This prevents going back to LoginActivity and ensures clean navigation
-                    val intent = Intent(this@LoginActivity, MainActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(intent)
-                    finish()
+                    Log.d(TAG, "Sign-in successful, verifying auth state before navigation")
+                    
+                    // Verify auth state is stable before navigating
+                    // This prevents race conditions where MainActivity checks auth state
+                    // before it's fully propagated
+                    var retries = 0
+                    while (retries < 10 && !googleAuthService.isSignedIn()) {
+                        Log.d(TAG, "Waiting for auth state to stabilize (attempt ${retries + 1}/10)")
+                        kotlinx.coroutines.delay(100)
+                        retries++
+                    }
+                    
+                    if (googleAuthService.isSignedIn()) {
+                        Log.d(TAG, "Auth state verified, navigating to MainActivity")
+                        Toast.makeText(this@LoginActivity, R.string.sign_in_success, Toast.LENGTH_SHORT).show()
+                        // Clear the activity stack and start MainActivity as a new task
+                        // This prevents going back to LoginActivity and ensures clean navigation
+                        val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        startActivity(intent)
+                        finish()
+                    } else {
+                        Log.e(TAG, "Auth state verification failed after sign-in success")
+                        Toast.makeText(this@LoginActivity, "Sign-in succeeded but auth state not ready. Please try again.", Toast.LENGTH_LONG).show()
+                    }
                 } else {
                     Log.e(TAG, "Sign-in failed: ${result.errorMessage}")
                     // Show specific error message to user
