@@ -31,16 +31,38 @@ class MainActivity : AppCompatActivity() {
 
         app = application as JournalForgeApplication
 
-        // Check auth state with a small delay to ensure Firebase auth state is stable
-        // This prevents race conditions during activity transitions
-        if (!app.googleAuthService.isSignedIn()) {
-            android.util.Log.d("MainActivity", "User not signed in on first check, redirecting to LoginActivity")
-            // Clear the activity stack to prevent back navigation to MainActivity
-            val intent = Intent(this, LoginActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
-            finish()
-            return
+        // Check if we just completed authentication
+        val prefs = getSharedPreferences("auth_state", MODE_PRIVATE)
+        val justAuthenticated = prefs.getBoolean("just_authenticated", false)
+        
+        if (justAuthenticated) {
+            // Clear the flag immediately
+            prefs.edit().putBoolean("just_authenticated", false).apply()
+            android.util.Log.d("MainActivity", "Just authenticated, trusting auth state from LoginActivity")
+            
+            // Even though we trust LoginActivity's verification, do a quick sanity check
+            // If somehow auth state is still not ready, the LoginActivity verification should have caught it
+            // But we'll do one more check here as a safety net
+            if (!app.googleAuthService.isSignedIn()) {
+                android.util.Log.e("MainActivity", "Auth state not ready after LoginActivity verification! This should not happen.")
+                // This is a critical error - redirect back to login
+                val intent = Intent(this, LoginActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                finish()
+                return
+            }
+        } else {
+            // Normal startup - check auth state
+            if (!app.googleAuthService.isSignedIn()) {
+                android.util.Log.d("MainActivity", "User not signed in on first check, redirecting to LoginActivity")
+                // Clear the activity stack to prevent back navigation to MainActivity
+                val intent = Intent(this, LoginActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                finish()
+                return
+            }
         }
 
         setContentView(R.layout.activity_main)
