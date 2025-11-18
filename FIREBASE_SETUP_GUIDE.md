@@ -2,6 +2,36 @@
 
 This guide walks you through **exactly** what needs to be configured to get Google Sign-In working in JournalForge.
 
+## Already Configured? Start Here! ✅
+
+**If you've already completed the Firebase setup steps and the verification script passes:**
+
+1. **Run the verification script:**
+   ```bash
+   cd android-app
+   ./verify-firebase-setup.sh
+   ```
+
+2. **If you see all checks passed and:**
+   - Your SHA-1 was already in Firebase Console (no changes needed)
+   - Google Sign-In provider was already enabled
+   - `google-services.json` showed no changes when you downloaded it
+
+   **→ You're all set! Just build and test the app:**
+   ```bash
+   ./gradlew clean assembleDebug installDebug
+   ```
+
+3. **Then test Google Sign-In in the app:**
+   - Open the app
+   - Go to Settings (⚙️)
+   - Tap "Sign In with Google"
+   - ✅ Should work!
+
+**If it still doesn't work after building and testing, see the [Troubleshooting](#troubleshooting) section below.**
+
+---
+
 ## What You're Seeing
 
 If you see the error:
@@ -98,10 +128,12 @@ Now we'll register your SHA-1 fingerprint with Firebase:
    - Click **"Add fingerprint"**
    - Paste your SHA-1 fingerprint (e.g., `EE:2E:34:33:6D:EB:B4:F4:2F:43:8F:3C:51:B5:C5:49:32:7F:AF:03`)
    - Click **Save**
+   
+   **Note:** If your SHA-1 is already listed, skip this step and move to Step 3.
 
-5. **Download Updated google-services.json**
-   - After adding the fingerprint, click **"Download google-services.json"**
-   - Replace the existing file at `android-app/app/google-services.json`
+5. **Download Updated google-services.json (Only if you added a NEW fingerprint)**
+   - **If you just added a NEW SHA-1:** Click **"Download google-services.json"** and replace the existing file at `android-app/app/google-services.json`
+   - **If your SHA-1 was already there:** You do NOT need to download a new file. The existing `google-services.json` is fine!
 
 **Important Notes:**
 - ⏰ Firebase takes **5-10 minutes** to propagate changes. Wait before testing!
@@ -203,6 +235,38 @@ cat app/src/main/res/values/strings.xml | grep default_web_client_id
 
 ## Troubleshooting
 
+### Setup Verification Passes But You're Uncertain What to Do Next
+
+**If you ran `./verify-firebase-setup.sh` and all checks passed:**
+
+This means your **local configuration is correct**. Now you need to ensure Firebase Console is also configured:
+
+1. **Check Firebase Console Settings:**
+   - Go to [Firebase Console](https://console.firebase.google.com/project/journalforgeapp)
+   - Navigate to Project Settings → Your apps → Android app
+   - Verify your SHA-1 fingerprint is listed
+   - Go to Authentication → Sign-in method
+   - Verify Google provider is **Enabled**
+
+2. **If Everything Was Already Configured:**
+   - SHA-1 was already in Firebase? ✅ Good!
+   - Google Sign-In already enabled? ✅ Good!
+   - `google-services.json` showed no changes? ✅ Good!
+   
+   **→ This means setup is complete. Just build and test:**
+   ```bash
+   cd android-app
+   ./gradlew clean assembleDebug installDebug
+   ```
+
+3. **If You Just Made Changes in Firebase Console:**
+   - Download the updated `google-services.json`
+   - Replace the old file at `android-app/app/google-services.json`
+   - Wait 5-10 minutes for Firebase to propagate changes
+   - Then rebuild and test
+
+**The key point:** If your SHA-1 was already in Firebase and Google Sign-In was already enabled, you don't need to download a new `google-services.json` or make any other changes. Just build the app and test it!
+
 ### Still Getting "Developer error: Please ensure SHA-1 fingerprint is configured"
 
 **Checklist:**
@@ -272,14 +336,15 @@ If you can sign in but data isn't syncing:
 Each developer must:
 1. Generate their own SHA-1 from their debug keystore
 2. Add it to Firebase Console (you can have multiple SHA-1s)
-3. Each developer can add their own without affecting others
+3. **Important:** When adding additional SHA-1s, you do NOT need to download a new `google-services.json`. The file doesn't contain the SHA-1 fingerprints - those are stored in Firebase Console only.
+4. Each developer can add their own without affecting others
 
 ### For CI/CD (GitHub Actions, etc.)
 
 1. Your CI system will have its own keystore
 2. Generate SHA-1 from the CI keystore
 3. Add it to Firebase Console
-4. Configure CI to use the same `google-services.json`
+4. Configure CI to use the same `google-services.json` that's already in the repo
 
 ---
 
@@ -358,7 +423,7 @@ cd android-app
 
 ### Files You'll Modify
 
-- `android-app/app/google-services.json` - Replace with updated version from Firebase Console
+- `android-app/app/google-services.json` - **Only** needs to be replaced if you made changes to the Firebase project configuration (not when adding SHA-1 fingerprints)
 
 ### URLs You'll Need
 
@@ -368,19 +433,62 @@ cd android-app
 
 ---
 
+## Frequently Asked Questions
+
+### Do I need to download a new google-services.json when I add an SHA-1?
+
+**Short answer: Usually NO.**
+
+The `google-services.json` file contains your Firebase project configuration (project ID, API keys, client IDs), but it does **NOT** contain the SHA-1 fingerprints. SHA-1 fingerprints are stored separately in Firebase's servers.
+
+**You only need to download a new `google-services.json` if:**
+- You're setting up the Firebase project for the first time
+- You changed the package name
+- You added/removed Firebase services (like Analytics, Storage, etc.)
+- Firebase Console tells you to download it
+
+**You do NOT need to download it when:**
+- Adding additional SHA-1 fingerprints (most common case)
+- Adding developers to the project
+- Enabling/disabling authentication providers
+
+### My SHA-1 was already in Firebase. Do I need to do anything?
+
+**No!** If your SHA-1 fingerprint was already added to Firebase Console and Google Sign-In is already enabled, you're all set. Just build and test the app:
+
+```bash
+cd android-app
+./gradlew clean assembleDebug installDebug
+```
+
+### The verify script passed. What should I do next?
+
+If the verification script shows all checks passed, just build and test the app. The script verifies your local configuration is correct. As long as you've also checked that:
+1. Your SHA-1 is in Firebase Console
+2. Google Sign-In is enabled in Firebase
+
+Then you're ready to test!
+
+---
+
 ## Summary Checklist
 
 Complete setup checklist:
 
 - [ ] **Step 1**: Get SHA-1 fingerprint using keytool command
-- [ ] **Step 2**: Add SHA-1 to Firebase Console → Project Settings → Your apps
-- [ ] **Step 3**: Download updated `google-services.json` from Firebase
-- [ ] **Step 4**: Replace old `google-services.json` in `android-app/app/`
+- [ ] **Step 2**: Check if SHA-1 is already in Firebase Console → Project Settings → Your apps
+  - If yes: Skip to Step 5
+  - If no: Add it now
+- [ ] **Step 3**: Download updated `google-services.json` from Firebase (only if you added a NEW SHA-1)
+- [ ] **Step 4**: Replace old `google-services.json` in `android-app/app/` (only if you downloaded a new one)
 - [ ] **Step 5**: Enable Google Sign-In in Firebase Console → Authentication
+  - If already enabled: ✅ Great! Move to next step
 - [ ] **Step 6**: Set project support email in Google Sign-In settings
+  - If already set: ✅ Great! Move to next step
 - [ ] **Step 7**: Rebuild app: `./gradlew clean assembleDebug`
 - [ ] **Step 8**: Install app: `./gradlew installDebug`
-- [ ] **Step 9**: Wait 5-10 minutes for Firebase to propagate changes
+- [ ] **Step 9**: Wait 5-10 minutes for Firebase to propagate changes (only if you made changes)
+  - If nothing changed: No need to wait!
 - [ ] **Step 10**: Test sign-in in the app!
 
 ---
