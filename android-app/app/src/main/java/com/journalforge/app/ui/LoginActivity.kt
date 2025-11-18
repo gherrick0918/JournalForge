@@ -32,6 +32,11 @@ class LoginActivity : AppCompatActivity() {
         // Check if user is already signed in
         if (googleAuthService.isSignedIn()) {
             Log.d(TAG, "User already signed in, navigating to MainActivity")
+            
+            // Set flag to indicate we're coming from an already-authenticated state
+            val prefs = getSharedPreferences("auth_state", MODE_PRIVATE)
+            prefs.edit().putBoolean("just_authenticated", true).apply()
+            
             // Clear the activity stack to prevent back navigation to LoginActivity
             val intent = Intent(this, MainActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -66,15 +71,25 @@ class LoginActivity : AppCompatActivity() {
                     // This prevents race conditions where MainActivity checks auth state
                     // before it's fully propagated
                     var retries = 0
-                    while (retries < 10 && !googleAuthService.isSignedIn()) {
-                        Log.d(TAG, "Waiting for auth state to stabilize (attempt ${retries + 1}/10)")
+                    while (retries < 15 && !googleAuthService.isSignedIn()) {
+                        Log.d(TAG, "Waiting for auth state to stabilize (attempt ${retries + 1}/15)")
                         kotlinx.coroutines.delay(100)
                         retries++
                     }
                     
                     if (googleAuthService.isSignedIn()) {
-                        Log.d(TAG, "Auth state verified, navigating to MainActivity")
+                        Log.d(TAG, "Auth state verified, giving extra time for state propagation")
+                        // Give an extra moment for auth state to fully propagate to all listeners
+                        kotlinx.coroutines.delay(200)
+                        
+                        Log.d(TAG, "Navigating to MainActivity")
                         Toast.makeText(this@LoginActivity, R.string.sign_in_success, Toast.LENGTH_SHORT).show()
+                        
+                        // Set flag to indicate we just completed authentication
+                        // This prevents MainActivity from checking auth state too early
+                        val prefs = getSharedPreferences("auth_state", MODE_PRIVATE)
+                        prefs.edit().putBoolean("just_authenticated", true).apply()
+                        
                         // Clear the activity stack and start MainActivity as a new task
                         // This prevents going back to LoginActivity and ensures clean navigation
                         val intent = Intent(this@LoginActivity, MainActivity::class.java)
