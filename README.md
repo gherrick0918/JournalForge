@@ -98,11 +98,23 @@ android-app/
 
 Google Sign-In is implemented in the app, but requires Firebase configuration to work properly.
 
-### 📚 Complete Setup Guide
+### 📚 Documentation
 
-**👉 See [FIREBASE_SETUP_GUIDE.md](FIREBASE_SETUP_GUIDE.md) for the complete step-by-step setup guide.**
+Choose the guide that fits your needs:
 
-The guide includes:
+**🎯 [GOOGLE_SIGNIN_CONFIGURATION.md](GOOGLE_SIGNIN_CONFIGURATION.md) - Visual Walkthrough**
+- Best for understanding "what goes where"
+- Shows file locations and Firebase Console settings
+- Includes flow diagrams and examples
+- Quick reference for common confusion points
+
+**📖 [FIREBASE_SETUP_GUIDE.md](FIREBASE_SETUP_GUIDE.md) - Complete Step-by-Step Guide**
+- Detailed instructions for each step
+- Verification commands to check your setup
+- Comprehensive troubleshooting section
+- Multiple developer and CI/CD scenarios
+
+The guides include:
 - What's already configured vs. what you need to do
 - How to get your SHA-1 fingerprint (the most common missing piece)
 - How to configure Firebase Console properly
