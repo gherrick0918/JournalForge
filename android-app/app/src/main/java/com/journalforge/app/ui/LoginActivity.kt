@@ -3,6 +3,7 @@ package com.journalforge.app.ui
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -24,9 +25,18 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
-
+        
         googleAuthService = (application as JournalForgeApplication).googleAuthService
+        
+        // Check if user is already signed in
+        if (googleAuthService.isSignedIn()) {
+            Log.d(TAG, "User already signed in, navigating to MainActivity")
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+            return
+        }
+        
+        setContentView(R.layout.activity_login)
 
         findViewById<SignInButton>(R.id.sign_in_button).setOnClickListener {
             val signInIntent = googleAuthService.getSignInClient().signInIntent
@@ -40,19 +50,23 @@ class LoginActivity : AppCompatActivity() {
                 // Check if data is null (user cancelled sign-in)
                 if (data == null) {
                     Log.d(TAG, "Sign-in cancelled by user")
+                    Toast.makeText(this@LoginActivity, "Sign-in cancelled", Toast.LENGTH_SHORT).show()
                     return@launch
                 }
 
                 val success = googleAuthService.handleSignInResult(data)
                 if (success) {
                     Log.d(TAG, "Sign-in successful, navigating to MainActivity")
+                    Toast.makeText(this@LoginActivity, R.string.sign_in_success, Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                     finish()
                 } else {
                     Log.e(TAG, "Sign-in failed")
+                    Toast.makeText(this@LoginActivity, R.string.sign_in_failed, Toast.LENGTH_LONG).show()
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling sign-in result", e)
+                Toast.makeText(this@LoginActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }
