@@ -38,23 +38,13 @@ class MainActivity : AppCompatActivity() {
         if (justAuthenticated) {
             // Clear the flag immediately
             prefs.edit().putBoolean("just_authenticated", false).apply()
-            android.util.Log.d("MainActivity", "Just authenticated, trusting auth state from LoginActivity")
+            android.util.Log.d("MainActivity", "Just authenticated, trusting LoginActivity's verification completely")
             
-            // Sanity check: even though we trust LoginActivity's verification,
-            // verify that the auth state is actually ready
-            if (!app.googleAuthService.isSignedIn()) {
-                android.util.Log.e("MainActivity", "Auth state not ready after LoginActivity verification! Redirecting back to login.")
-                // This is a critical error - redirect back to login
-                // Set flag to force showing login UI even if auth state appears valid
-                prefs.edit().putBoolean("force_login_ui", true).apply()
-                val intent = Intent(this, LoginActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
-                finish()
-                return
-            }
+            // Trust LoginActivity's verification completely - it already waited for auth state
+            // to stabilize with retries and extra propagation time. Checking again here creates
+            // a race condition that can cause both activities to finish and the app to exit.
             
-            // Auth state is confirmed, proceed with initialization
+            // Auth state is trusted, proceed with initialization
         } else {
             // Normal startup - check auth state
             if (!app.googleAuthService.isSignedIn()) {
