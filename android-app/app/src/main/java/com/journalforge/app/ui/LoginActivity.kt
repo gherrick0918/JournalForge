@@ -32,7 +32,10 @@ class LoginActivity : AppCompatActivity() {
         // Check if user is already signed in
         if (googleAuthService.isSignedIn()) {
             Log.d(TAG, "User already signed in, navigating to MainActivity")
-            startActivity(Intent(this, MainActivity::class.java))
+            // Clear the activity stack to prevent back navigation to LoginActivity
+            val intent = Intent(this, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
             finish()
             return
         }
@@ -59,7 +62,11 @@ class LoginActivity : AppCompatActivity() {
                 if (result.success) {
                     Log.d(TAG, "Sign-in successful, navigating to MainActivity")
                     Toast.makeText(this@LoginActivity, R.string.sign_in_success, Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                    // Clear the activity stack and start MainActivity as a new task
+                    // This prevents going back to LoginActivity and ensures clean navigation
+                    val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
                     finish()
                 } else {
                     Log.e(TAG, "Sign-in failed: ${result.errorMessage}")

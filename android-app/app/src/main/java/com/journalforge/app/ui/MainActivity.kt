@@ -32,7 +32,10 @@ class MainActivity : AppCompatActivity() {
         app = application as JournalForgeApplication
 
         if (!app.googleAuthService.isSignedIn()) {
-            startActivity(Intent(this, LoginActivity::class.java))
+            // Clear the activity stack to prevent back navigation to MainActivity
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
             finish()
             return
         }
@@ -137,7 +140,10 @@ class MainActivity : AppCompatActivity() {
             R.id.menu_sign_out -> {
                 lifecycleScope.launch {
                     app.googleAuthService.signOut()
-                    startActivity(Intent(this@MainActivity, LoginActivity::class.java))
+                    // Clear the activity stack to prevent back navigation to MainActivity
+                    val intent = Intent(this@MainActivity, LoginActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
                     finish()
                 }
                 true
