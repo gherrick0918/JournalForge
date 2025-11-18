@@ -19,7 +19,6 @@
         <activity
             android:name=".ui.LoginActivity"
             android:exported="true"
-            android:launchMode="singleTask"
             android:theme="@style/Theme.JournalForge">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,7 +29,6 @@
         <activity
             android:name=".ui.MainActivity"
             android:exported="false"
-            android:launchMode="singleTask"
             android:theme="@style/Theme.JournalForge" />
 
         <activity

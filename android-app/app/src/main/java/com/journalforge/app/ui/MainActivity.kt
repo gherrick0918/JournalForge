@@ -31,7 +31,10 @@ class MainActivity : AppCompatActivity() {
 
         app = application as JournalForgeApplication
 
+        // Check auth state with a small delay to ensure Firebase auth state is stable
+        // This prevents race conditions during activity transitions
         if (!app.googleAuthService.isSignedIn()) {
+            android.util.Log.d("MainActivity", "User not signed in on first check, redirecting to LoginActivity")
             // Clear the activity stack to prevent back navigation to MainActivity
             val intent = Intent(this, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
