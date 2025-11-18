@@ -1,5 +1,58 @@
 # JournalForge Troubleshooting Guide
 
+## Google Sign-In Issues
+
+### Error: "Developer error: Please ensure SHA-1 fingerprint is configured in Firebase Console"
+
+This is the **most common** Google Sign-In error. It means your app's signing certificate isn't registered in Firebase.
+
+**Solution:**
+👉 See [FIREBASE_SETUP_GUIDE.md](FIREBASE_SETUP_GUIDE.md) for complete step-by-step instructions.
+
+**Quick Fix:**
+1. Get your SHA-1 fingerprint:
+   ```bash
+   keytool -list -v -keystore ~/.android/debug.keystore \
+     -alias androiddebugkey -storepass android -keypass android
+   ```
+2. Add it to Firebase Console → Project Settings → Your apps → Add fingerprint
+3. Wait 5-10 minutes for changes to propagate
+4. Rebuild and test
+
+### Error: "Configuration error: Please check your Firebase setup"
+
+**Cause:** Issue with `google-services.json` file
+
+**Solution:**
+1. Download the latest `google-services.json` from Firebase Console
+2. Replace the file at `android-app/app/google-services.json`
+3. Rebuild the app: `./gradlew clean assembleDebug`
+
+### Error: "Network error: Please check your internet connection"
+
+**Cause:** No internet connection or network restrictions
+
+**Solutions:**
+- Check WiFi/mobile data connection
+- Try switching networks
+- Check if firewall is blocking Google services
+- Verify you can access google.com in a browser
+
+### Google Sign-In Not Working After Following All Steps
+
+**Checklist:**
+- [ ] SHA-1 fingerprint added to Firebase Console
+- [ ] Google Sign-In enabled in Firebase Authentication
+- [ ] Project support email set in Firebase
+- [ ] Waited 5-10 minutes after making changes
+- [ ] Rebuilt app after configuration changes
+- [ ] Using correct Firebase project (`journalforgeapp`)
+- [ ] Package name matches: `com.journalforge.app`
+
+For detailed setup instructions, see [FIREBASE_SETUP_GUIDE.md](FIREBASE_SETUP_GUIDE.md).
+
+---
+
 ## Speech-to-Text Issues
 
 ### "No Speech Detected" Error
