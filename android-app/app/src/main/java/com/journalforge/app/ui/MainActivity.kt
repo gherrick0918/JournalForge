@@ -40,22 +40,16 @@ class MainActivity : AppCompatActivity() {
             prefs.edit().putBoolean("just_authenticated", false).apply()
             android.util.Log.d("MainActivity", "Just authenticated, trusting auth state from LoginActivity")
             
-            // Even though we trust LoginActivity's verification, do a quick sanity check
-            // If somehow auth state is still not ready, the LoginActivity verification should have caught it
-            // But we'll do one more check here as a safety net
-            if (!app.googleAuthService.isSignedIn()) {
-                android.util.Log.e("MainActivity", "Auth state not ready after LoginActivity verification! This should not happen.")
-                // This is a critical error - redirect back to login
-                val intent = Intent(this, LoginActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
-                finish()
-                return
-            }
+            // Trust LoginActivity's verification completely - it has already:
+            // 1. Verified auth state with up to 15 retries
+            // 2. Waited 200ms for state propagation
+            // 3. Set the flag only after confirmation
+            // Therefore, we skip the auth check here to avoid race conditions
+            // The auth state listener in GoogleAuthService will handle any edge cases
         } else {
             // Normal startup - check auth state
             if (!app.googleAuthService.isSignedIn()) {
-                android.util.Log.d("MainActivity", "User not signed in on first check, redirecting to LoginActivity")
+                android.util.Log.d("MainActivity", "User not signed in, redirecting to LoginActivity")
                 // Clear the activity stack to prevent back navigation to MainActivity
                 val intent = Intent(this, LoginActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -103,6 +97,21 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        
+        // Check auth state when resuming
+        // If user is not signed in and we didn't just authenticate, redirect to login
+        val prefs = getSharedPreferences("auth_state", MODE_PRIVATE)
+        val justAuthenticated = prefs.getBoolean("just_authenticated", false)
+        
+        if (!app.googleAuthService.isSignedIn() && !justAuthenticated) {
+            android.util.Log.d("MainActivity", "User no longer signed in, redirecting to LoginActivity")
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
+            return
+        }
+        
         // Refresh entries when returning to this activity
         if (app.googleAuthService.isSignedIn()) {
             loadRecentEntries()
