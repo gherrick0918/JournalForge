@@ -11,6 +11,7 @@ import com.google.android.gms.common.SignInButton
 import com.journalforge.app.JournalForgeApplication
 import com.journalforge.app.R
 import com.journalforge.app.services.GoogleAuthService
+import com.journalforge.app.services.SignInResult
 import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
@@ -54,15 +55,17 @@ class LoginActivity : AppCompatActivity() {
                     return@launch
                 }
 
-                val success = googleAuthService.handleSignInResult(data)
-                if (success) {
+                val result = googleAuthService.handleSignInResult(data)
+                if (result.success) {
                     Log.d(TAG, "Sign-in successful, navigating to MainActivity")
                     Toast.makeText(this@LoginActivity, R.string.sign_in_success, Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                     finish()
                 } else {
-                    Log.e(TAG, "Sign-in failed")
-                    Toast.makeText(this@LoginActivity, R.string.sign_in_failed, Toast.LENGTH_LONG).show()
+                    Log.e(TAG, "Sign-in failed: ${result.errorMessage}")
+                    // Show specific error message to user
+                    val errorMsg = result.errorMessage ?: getString(R.string.sign_in_failed)
+                    Toast.makeText(this@LoginActivity, errorMsg, Toast.LENGTH_LONG).show()
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error handling sign-in result", e)
