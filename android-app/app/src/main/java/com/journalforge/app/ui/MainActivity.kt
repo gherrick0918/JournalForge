@@ -40,17 +40,28 @@ class MainActivity : AppCompatActivity() {
             prefs.edit().putBoolean("just_authenticated", false).apply()
             android.util.Log.d("MainActivity", "Just authenticated, trusting auth state from LoginActivity")
             
-            // Trust LoginActivity's verification completely - it has already:
-            // 1. Verified auth state with up to 15 retries
-            // 2. Waited 200ms for state propagation
-            // 3. Set the flag only after confirmation
-            // Therefore, we skip the auth check here to avoid race conditions
-            // The auth state listener in GoogleAuthService will handle any edge cases
+            // Sanity check: even though we trust LoginActivity's verification,
+            // verify that the auth state is actually ready
+            if (!app.googleAuthService.isSignedIn()) {
+                android.util.Log.e("MainActivity", "Auth state not ready after LoginActivity verification! Redirecting back to login.")
+                // This is a critical error - redirect back to login
+                // Set flag to force showing login UI even if auth state appears valid
+                prefs.edit().putBoolean("force_login_ui", true).apply()
+                val intent = Intent(this, LoginActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                finish()
+                return
+            }
+            
+            // Auth state is confirmed, proceed with initialization
         } else {
             // Normal startup - check auth state
             if (!app.googleAuthService.isSignedIn()) {
                 android.util.Log.d("MainActivity", "User not signed in, redirecting to LoginActivity")
                 // Clear the activity stack to prevent back navigation to MainActivity
+                // Also set a flag to prevent LoginActivity from auto-redirecting if auth state is stale
+                prefs.edit().putBoolean("force_login_ui", true).apply()
                 val intent = Intent(this, LoginActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)
@@ -105,6 +116,7 @@ class MainActivity : AppCompatActivity() {
         
         if (!app.googleAuthService.isSignedIn() && !justAuthenticated) {
             android.util.Log.d("MainActivity", "User no longer signed in, redirecting to LoginActivity")
+            prefs.edit().putBoolean("force_login_ui", true).apply()
             val intent = Intent(this, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
