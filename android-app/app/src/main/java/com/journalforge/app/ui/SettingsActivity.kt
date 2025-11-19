@@ -64,6 +64,7 @@ class SettingsActivity : AppCompatActivity() {
         // Observe auth state changes
         authViewModel.authState.observe(this) { authState ->
             when (authState) {
+                is AuthState.Loading -> updateUI(false) // Show as not signed in while loading
                 is AuthState.Authenticated -> updateUI(true)
                 is AuthState.Unauthenticated -> updateUI(false)
             }

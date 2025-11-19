@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 
 /**
  * Simplified LoginActivity using reactive auth state management.
- * No flags, no delays, no retries - just clean architecture.
+ * Relies purely on LiveData observer - no synchronous checks to avoid race conditions.
  */
 class LoginActivity : AppCompatActivity() {
 
@@ -37,6 +37,8 @@ class LoginActivity : AppCompatActivity() {
         
         // Observe auth state - navigate to MainActivity when authenticated
         authViewModel.authState.observe(this) { authState ->
+            Log.d(TAG, "Auth state changed: $authState")
+            
             // Prevent multiple navigation attempts
             if (hasNavigated) {
                 Log.d(TAG, "Already navigated, ignoring auth state change")
@@ -44,24 +46,29 @@ class LoginActivity : AppCompatActivity() {
             }
             
             when (authState) {
+                is AuthState.Loading -> {
+                    Log.d(TAG, "Auth state is Loading, showing loading UI")
+                    showLoadingUI()
+                }
                 is AuthState.Authenticated -> {
-                    Log.d(TAG, "Auth state changed to Authenticated, navigating to MainActivity")
+                    Log.d(TAG, "Auth state is Authenticated, navigating to MainActivity")
                     navigateToMainActivity()
                 }
                 is AuthState.Unauthenticated -> {
-                    Log.d(TAG, "Auth state is Unauthenticated")
-                    // Stay on login screen
+                    Log.d(TAG, "Auth state is Unauthenticated, showing login UI")
+                    showLoginUI()
                 }
             }
         }
-        
-        // Check if already authenticated on startup
-        if (authViewModel.isAuthenticated()) {
-            Log.d(TAG, "Already authenticated on startup, navigating to MainActivity")
-            navigateToMainActivity()
-            return
-        }
-        
+    }
+    
+    private fun showLoadingUI() {
+        setContentView(R.layout.activity_login)
+        // Hide sign-in button while loading
+        findViewById<SignInButton>(R.id.sign_in_button)?.visibility = android.view.View.GONE
+    }
+    
+    private fun showLoginUI() {
         // User is not authenticated, show login UI
         googleAuthService = (application as JournalForgeApplication).googleAuthService
         setContentView(R.layout.activity_login)
@@ -69,7 +76,9 @@ class LoginActivity : AppCompatActivity() {
     }
     
     private fun setupSignInButton() {
-        findViewById<SignInButton>(R.id.sign_in_button).setOnClickListener {
+        val signInButton = findViewById<SignInButton>(R.id.sign_in_button)
+        signInButton.visibility = android.view.View.VISIBLE
+        signInButton.setOnClickListener {
             Log.d(TAG, "Sign-in button clicked, launching Google Sign-In")
             val signInIntent = googleAuthService.getSignInClient().signInIntent
             signInLauncher.launch(signInIntent)

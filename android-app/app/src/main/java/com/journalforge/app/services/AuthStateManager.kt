@@ -22,13 +22,17 @@ class AuthStateManager private constructor() {
     private val _userProfile = MutableLiveData<UserProfile?>()
     val userProfile: LiveData<UserProfile?> = _userProfile
     
+    private var isInitialized = false
+    
     init {
-        // Initialize with current auth state
-        updateAuthState()
+        // Start with Loading state to avoid premature navigation decisions
+        _authState.value = AuthState.Loading
+        Log.d(TAG, "AuthStateManager initialized with Loading state")
         
         // Listen to Firebase auth state changes
         auth.addAuthStateListener { firebaseAuth ->
             Log.d(TAG, "Firebase auth state changed: ${firebaseAuth.currentUser != null}")
+            isInitialized = true
             updateAuthState()
         }
     }
@@ -40,19 +44,17 @@ class AuthStateManager private constructor() {
         val user = auth.currentUser
         
         if (user != null) {
-            _authState.postValue(AuthState.Authenticated)
-            _userProfile.postValue(
-                UserProfile(
-                    id = user.uid,
-                    email = user.email ?: "",
-                    name = user.displayName ?: "",
-                    photoUrl = user.photoUrl?.toString()
-                )
+            _authState.value = AuthState.Authenticated
+            _userProfile.value = UserProfile(
+                id = user.uid,
+                email = user.email ?: "",
+                name = user.displayName ?: "",
+                photoUrl = user.photoUrl?.toString()
             )
             Log.d(TAG, "Auth state updated: Authenticated (${user.email})")
         } else {
-            _authState.postValue(AuthState.Unauthenticated)
-            _userProfile.postValue(null)
+            _authState.value = AuthState.Unauthenticated
+            _userProfile.value = null
             Log.d(TAG, "Auth state updated: Unauthenticated")
         }
     }
@@ -98,6 +100,7 @@ class AuthStateManager private constructor() {
  * Represents the authentication state of the user
  */
 sealed class AuthState {
+    object Loading : AuthState()
     object Authenticated : AuthState()
     object Unauthenticated : AuthState()
 }
