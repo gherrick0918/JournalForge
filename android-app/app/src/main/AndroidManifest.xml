@@ -29,26 +29,30 @@
         <activity
             android:name=".ui.MainActivity"
             android:exported="false"
-            android:theme="@style/Theme.JournalForge" />
+            android:theme="@style/Theme.JournalForge.NoActionBar" />
 
         <activity
             android:name=".ui.JournalEntryActivity"
             android:exported="false"
+            android:theme="@style/Theme.JournalForge.NoActionBar"
             android:parentActivityName=".ui.MainActivity" />
 
         <activity
             android:name=".ui.HistoryActivity"
             android:exported="false"
+            android:theme="@style/Theme.JournalForge.NoActionBar"
             android:parentActivityName=".ui.MainActivity" />
 
         <activity
             android:name=".ui.TimeCapsuleActivity"
             android:exported="false"
+            android:theme="@style/Theme.JournalForge.NoActionBar"
             android:parentActivityName=".ui.MainActivity" />
 
         <activity
             android:name=".ui.SettingsActivity"
             android:exported="false"
+            android:theme="@style/Theme.JournalForge.NoActionBar"
             android:parentActivityName=".ui.MainActivity" />
 
     </application>
