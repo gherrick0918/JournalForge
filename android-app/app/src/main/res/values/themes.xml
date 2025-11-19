@@ -43,4 +43,22 @@
     <style name="RPGBody" parent="TextAppearance.MaterialComponents.Body1">
         <item name="android:textColor">@color/dark_brown</item>
     </style>
+
+    <!-- Theme variant without action bar for activities with custom toolbar -->
+    <style name="Theme.JournalForge.NoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/gold</item>
+        <item name="colorPrimaryVariant">@color/dark_brown</item>
+        <item name="colorOnPrimary">@color/dark_brown</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/stone_gray</item>
+        <item name="colorSecondaryVariant">@color/dark_gray</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">@color/dark_brown</item>
+        <!-- Background color. -->
+        <item name="android:windowBackground">@color/light_parchment</item>
+        <item name="colorSurface">@color/parchment</item>
+        <item name="colorOnSurface">@color/dark_brown</item>
+    </style>
 </resources>
