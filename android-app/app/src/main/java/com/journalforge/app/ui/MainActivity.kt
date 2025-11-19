@@ -6,6 +6,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Button
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,8 +14,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.journalforge.app.JournalForgeApplication
 import com.journalforge.app.R
 import com.journalforge.app.models.JournalEntry
+import com.journalforge.app.services.AuthState
+import com.journalforge.app.viewmodels.AuthViewModel
 import kotlinx.coroutines.launch
 
+/**
+ * Simplified MainActivity using reactive auth state management.
+ * No flags, no workarounds - just observing auth state.
+ */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var app: JournalForgeApplication
@@ -26,46 +33,32 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnViewHistory: Button
     private lateinit var btnTimeCapsules: Button
     
-    // Flag to prevent onResume from checking auth state immediately after onCreate
-    private var justCreated = false
+    private val authViewModel: AuthViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         app = application as JournalForgeApplication
 
-        // Check if we just completed authentication
-        val prefs = getSharedPreferences("auth_state", MODE_PRIVATE)
-        val justAuthenticated = prefs.getBoolean("just_authenticated", false)
-        
-        if (justAuthenticated) {
-            // Clear the flag immediately
-            prefs.edit().putBoolean("just_authenticated", false).apply()
-            android.util.Log.d("MainActivity", "Just authenticated, trusting LoginActivity's verification completely")
-            
-            // Trust LoginActivity's verification completely - it already waited for auth state
-            // to stabilize with retries and extra propagation time. Checking again here creates
-            // a race condition that can cause both activities to finish and the app to exit.
-            
-            // Set flag to prevent onResume from checking auth state immediately
-            justCreated = true
-            
-            // Auth state is trusted, proceed with initialization
-        } else {
-            // Normal startup - check auth state
-            if (!app.googleAuthService.isSignedIn()) {
-                android.util.Log.d("MainActivity", "User not signed in, redirecting to LoginActivity")
-                // Clear the activity stack to prevent back navigation to MainActivity
-                // Also set a flag to prevent LoginActivity from auto-redirecting if auth state is stale
-                prefs.edit().putBoolean("force_login_ui", true).apply()
-                val intent = Intent(this, LoginActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
-                finish()
-                return
+        // Observe auth state - redirect to login if unauthenticated
+        authViewModel.authState.observe(this) { authState ->
+            when (authState) {
+                is AuthState.Unauthenticated -> {
+                    android.util.Log.d(TAG, "Auth state changed to Unauthenticated, redirecting to LoginActivity")
+                    navigateToLoginActivity()
+                }
+                is AuthState.Authenticated -> {
+                    android.util.Log.d(TAG, "Auth state is Authenticated")
+                    // User is authenticated, continue normally
+                }
             }
-            // Set flag to prevent onResume from checking auth state immediately
-            justCreated = true
+        }
+        
+        // Check auth state on startup
+        if (!authViewModel.isAuthenticated()) {
+            android.util.Log.d(TAG, "User not authenticated on startup, redirecting to LoginActivity")
+            navigateToLoginActivity()
+            return
         }
 
         setContentView(R.layout.activity_main)
@@ -107,37 +100,9 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         
-        // If we just finished onCreate(), skip the auth check this time
-        // This prevents a race condition where onResume() checks auth state
-        // before Firebase has fully propagated the sign-in state
-        if (justCreated) {
-            android.util.Log.d("MainActivity", "Skipping auth check in onResume() - just finished onCreate()")
-            justCreated = false
-            
-            // Still refresh entries if signed in
-            if (app.googleAuthService.isSignedIn()) {
-                loadRecentEntries()
-            }
-            return
-        }
-        
-        // Check auth state when resuming (e.g., when returning from another activity or app)
-        // Note: We don't check the just_authenticated flag here because it was already cleared in onCreate()
-        if (!app.googleAuthService.isSignedIn()) {
-            android.util.Log.d("MainActivity", "User no longer signed in, redirecting to LoginActivity")
-            val prefs = getSharedPreferences("auth_state", MODE_PRIVATE)
-            prefs.edit().putBoolean("force_login_ui", true).apply()
-            val intent = Intent(this, LoginActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
-            finish()
-            return
-        }
-        
-        // Refresh entries when returning to this activity
-        if (app.googleAuthService.isSignedIn()) {
-            loadRecentEntries()
-        }
+        // Simply refresh entries when resuming
+        // Auth state is monitored by the observer
+        loadRecentEntries()
     }
 
     private fun loadDailyContent() {
@@ -196,16 +161,24 @@ class MainActivity : AppCompatActivity() {
             R.id.menu_sign_out -> {
                 lifecycleScope.launch {
                     app.googleAuthService.signOut()
-                    // Clear the activity stack to prevent back navigation to MainActivity
-                    val intent = Intent(this@MainActivity, LoginActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(intent)
-                    finish()
+                    // AuthStateManager will automatically update state
+                    // Observer will handle navigation to LoginActivity
                 }
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+    
+    private fun navigateToLoginActivity() {
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
+    }
+
+    companion object {
+        private const val TAG = "MainActivity"
     }
 }
 
