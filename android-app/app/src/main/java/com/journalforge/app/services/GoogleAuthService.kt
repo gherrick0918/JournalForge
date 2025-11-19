@@ -9,11 +9,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
-import com.journalforge.app.R
-import com.journalforge.app.models.UserProfile
 import kotlinx.coroutines.tasks.await
+import com.journalforge.app.R
 
 /**
  * Result of a Google Sign-In attempt
@@ -25,15 +22,13 @@ data class SignInResult(
 )
 
 /**
- * Service for handling Google Sign-In with Firebase Authentication
+ * Simplified Google Sign-In service.
+ * Handles only authentication operations - state management is in AuthStateManager.
  */
 class GoogleAuthService(private val context: Context) {
 
-    private val auth: FirebaseAuth = Firebase.auth
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val googleSignInClient: GoogleSignInClient
-
-    // Listener for authentication state changes
-    var onAuthStateChanged: ((Boolean) -> Unit)? = null
 
     init {
         // Configure Google Sign-In
@@ -43,11 +38,6 @@ class GoogleAuthService(private val context: Context) {
             .build()
 
         googleSignInClient = GoogleSignIn.getClient(context, gso)
-
-        // Add auth state listener
-        auth.addAuthStateListener { firebaseAuth ->
-            onAuthStateChanged?.invoke(firebaseAuth.currentUser != null)
-        }
     }
 
     /**
@@ -127,27 +117,6 @@ class GoogleAuthService(private val context: Context) {
         } catch (e: Exception) {
             Log.e(TAG, "Sign out failed", e)
         }
-    }
-
-    /**
-     * Check if user is currently signed in
-     */
-    fun isSignedIn(): Boolean {
-        return auth.currentUser != null
-    }
-
-    /**
-     * Get the current user profile
-     */
-    fun getCurrentUser(): UserProfile? {
-        val user = auth.currentUser ?: return null
-
-        return UserProfile(
-            id = user.uid,
-            email = user.email ?: "",
-            name = user.displayName ?: "",
-            photoUrl = user.photoUrl?.toString()
-        )
     }
 
     companion object {

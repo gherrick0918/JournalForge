@@ -1,22 +1,22 @@
 package com.journalforge.app.ui
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.journalforge.app.JournalForgeApplication
 import com.journalforge.app.R
-import com.journalforge.app.services.SignInResult
+import com.journalforge.app.services.AuthState
+import com.journalforge.app.viewmodels.AuthViewModel
 import kotlinx.coroutines.launch
 
 /**
- * Settings activity with Google Sign-In integration
+ * Simplified SettingsActivity using reactive auth state management
  */
 class SettingsActivity : AppCompatActivity() {
     
@@ -26,12 +26,12 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var btnSignOut: Button
     private lateinit var tvSyncStatus: TextView
     
+    private val authViewModel: AuthViewModel by viewModels()
+    
     // Register for activity result to handle Google Sign-In
     private val signInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        // Always attempt to handle the sign-in result, regardless of result code
-        // Google Sign-In may return data even when resultCode is not RESULT_OK
         handleSignInResult(result.data)
     }
     
@@ -61,15 +61,20 @@ class SettingsActivity : AppCompatActivity() {
             signOut()
         }
         
-        // Setup auth state change listener
-        app.googleAuthService.onAuthStateChanged = { isSignedIn ->
-            runOnUiThread {
-                updateUI(isSignedIn)
+        // Observe auth state changes
+        authViewModel.authState.observe(this) { authState ->
+            when (authState) {
+                is AuthState.Authenticated -> updateUI(true)
+                is AuthState.Unauthenticated -> updateUI(false)
             }
         }
         
-        // Update initial UI
-        updateUI(app.googleAuthService.isSignedIn())
+        // Observe user profile changes
+        authViewModel.userProfile.observe(this) { userProfile ->
+            if (userProfile != null) {
+                tvAccountInfo.text = getString(R.string.signed_in_as, userProfile.email)
+            }
+        }
     }
     
     private fun signInWithGoogle() {
@@ -77,10 +82,9 @@ class SettingsActivity : AppCompatActivity() {
         signInLauncher.launch(signInIntent)
     }
     
-    private fun handleSignInResult(data: Intent?) {
+    private fun handleSignInResult(data: android.content.Intent?) {
         lifecycleScope.launch {
             try {
-                // Check if data is null (user cancelled sign-in)
                 if (data == null) {
                     Toast.makeText(this@SettingsActivity, "Sign-in cancelled", Toast.LENGTH_SHORT).show()
                     return@launch
@@ -89,9 +93,8 @@ class SettingsActivity : AppCompatActivity() {
                 val result = app.googleAuthService.handleSignInResult(data)
                 if (result.success) {
                     Toast.makeText(this@SettingsActivity, R.string.sign_in_success, Toast.LENGTH_SHORT).show()
-                    updateUI(true)
+                    // AuthStateManager will automatically update UI via observer
                 } else {
-                    // Show specific error message to user
                     val errorMsg = result.errorMessage ?: getString(R.string.sign_in_failed)
                     Toast.makeText(this@SettingsActivity, errorMsg, Toast.LENGTH_LONG).show()
                 }
@@ -106,7 +109,7 @@ class SettingsActivity : AppCompatActivity() {
             try {
                 app.googleAuthService.signOut()
                 Toast.makeText(this@SettingsActivity, "Signed out successfully", Toast.LENGTH_SHORT).show()
-                updateUI(false)
+                // AuthStateManager will automatically update UI via observer
             } catch (e: Exception) {
                 Toast.makeText(this@SettingsActivity, "Error signing out", Toast.LENGTH_SHORT).show()
             }
@@ -115,7 +118,7 @@ class SettingsActivity : AppCompatActivity() {
     
     private fun updateUI(isSignedIn: Boolean) {
         if (isSignedIn) {
-            val user = app.googleAuthService.getCurrentUser()
+            val user = authViewModel.getCurrentUser()
             tvAccountInfo.text = getString(R.string.signed_in_as, user?.email ?: "Unknown")
             tvAccountInfo.visibility = View.VISIBLE
             btnSignIn.visibility = View.GONE
