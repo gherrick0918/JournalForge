@@ -123,9 +123,9 @@ class HistoryActivity : AppCompatActivity() {
     
     private fun sortAndDisplayEntries() {
         val sortedEntries = if (sortNewestFirst) {
-            displayedEntries.sortedByDescending { it.timestamp }
+            displayedEntries.sortedByDescending { it.createdDate }
         } else {
-            displayedEntries.sortedBy { it.timestamp }
+            displayedEntries.sortedBy { it.createdDate }
         }
         
         if (sortedEntries.isEmpty()) {
