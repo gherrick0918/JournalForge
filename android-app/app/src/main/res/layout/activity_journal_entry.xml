@@ -17,71 +17,91 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.core.widget.NestedScrollView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+        <!-- Title input at the top -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            app:boxBackgroundColor="@color/parchment">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_entry_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/entry_title_hint"
+                android:textColor="@color/dark_brown" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Chat messages -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_chat_messages"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:padding="8dp"
+            android:background="@color/light_parchment" />
+
+        <!-- Input area at the bottom -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:boxBackgroundColor="@color/parchment">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_entry_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/entry_title_hint"
-                    android:textColor="@color/dark_brown" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:boxBackgroundColor="@color/parchment">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_entry_content"
-                    android:layout_width="match_parent"
-                    android:layout_height="300dp"
-                    android:hint="@string/entry_content_hint"
-                    android:gravity="top|start"
-                    android:inputType="textMultiLine"
-                    android:textColor="@color/dark_brown" />
-            </com.google.android.material.textfield.TextInputLayout>
+            android:background="@color/white"
+            android:elevation="8dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="16dp">
+                android:padding="8dp"
+                android:gravity="center_vertical">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_ask_ai"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:id="@+id/btn_voice_input"
+                    style="@style/Widget.MaterialComponents.Button.Icon"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:insetLeft="0dp"
+                    android:insetTop="0dp"
+                    android:insetRight="0dp"
+                    android:insetBottom="0dp"
+                    app:icon="@android:drawable/ic_btn_speak_now"
+                    app:iconGravity="textStart"
+                    app:iconPadding="0dp" />
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_message_input"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:layout_marginStart="8dp"
                     android:layout_marginEnd="8dp"
-                    android:text="@string/btn_ask_ai"
-                    app:strokeColor="@color/gold" />
+                    android:hint="Write your thoughts..."
+                    android:maxLines="4"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:background="@color/parchment"
+                    android:padding="12dp" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_suggest_ending"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/btn_suggest_ending"
-                    app:strokeColor="@color/gold" />
+                    android:id="@+id/btn_send"
+                    style="@style/Widget.MaterialComponents.Button.Icon"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:insetLeft="0dp"
+                    android:insetTop="0dp"
+                    android:insetRight="0dp"
+                    android:insetBottom="0dp"
+                    app:icon="@android:drawable/ic_menu_send"
+                    app:iconGravity="textStart"
+                    app:iconPadding="0dp"
+                    app:iconTint="@color/gold" />
+
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
@@ -89,9 +109,11 @@
                 style="@style/RPGButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="8dp"
                 android:text="@string/btn_save" />
 
         </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
