@@ -24,6 +24,7 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var googleAuthService: GoogleAuthService
     private val authViewModel: AuthViewModel by viewModels()
+    private var hasNavigated = false
     
     private val signInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -36,6 +37,12 @@ class LoginActivity : AppCompatActivity() {
         
         // Observe auth state - navigate to MainActivity when authenticated
         authViewModel.authState.observe(this) { authState ->
+            // Prevent multiple navigation attempts
+            if (hasNavigated) {
+                Log.d(TAG, "Already navigated, ignoring auth state change")
+                return@observe
+            }
+            
             when (authState) {
                 is AuthState.Authenticated -> {
                     Log.d(TAG, "Auth state changed to Authenticated, navigating to MainActivity")
@@ -97,6 +104,13 @@ class LoginActivity : AppCompatActivity() {
     }
     
     private fun navigateToMainActivity() {
+        // Prevent multiple navigation attempts
+        if (hasNavigated) {
+            Log.d(TAG, "Already navigated, skipping")
+            return
+        }
+        hasNavigated = true
+        
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)

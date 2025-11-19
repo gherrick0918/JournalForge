@@ -34,6 +34,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnTimeCapsules: Button
     
     private val authViewModel: AuthViewModel by viewModels()
+    private var isInitializing = true
+    private var hasNavigatedToLogin = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +44,13 @@ class MainActivity : AppCompatActivity() {
 
         // Observe auth state - redirect to login if unauthenticated
         authViewModel.authState.observe(this) { authState ->
+            // Don't react to auth state changes during initial setup
+            // to avoid race conditions with the synchronous check
+            if (isInitializing) {
+                android.util.Log.d(TAG, "Skipping auth state change during initialization: $authState")
+                return@observe
+            }
+            
             when (authState) {
                 is AuthState.Unauthenticated -> {
                     android.util.Log.d(TAG, "Auth state changed to Unauthenticated, redirecting to LoginActivity")
@@ -54,13 +63,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
         
-        // Check auth state on startup
+        // Check auth state on startup - if not authenticated, go to login
+        // This is a one-time check to handle cold start
         if (!authViewModel.isAuthenticated()) {
             android.util.Log.d(TAG, "User not authenticated on startup, redirecting to LoginActivity")
             navigateToLoginActivity()
             return
         }
 
+        // User is authenticated, proceed with normal initialization
         setContentView(R.layout.activity_main)
 
         // Setup toolbar
@@ -95,6 +106,9 @@ class MainActivity : AppCompatActivity() {
         // Load data
         loadDailyContent()
         loadRecentEntries()
+        
+        // Now that initialization is complete, allow observer to react to auth state changes
+        isInitializing = false
     }
 
     override fun onResume() {
@@ -171,6 +185,13 @@ class MainActivity : AppCompatActivity() {
     }
     
     private fun navigateToLoginActivity() {
+        // Prevent multiple navigation attempts
+        if (hasNavigatedToLogin) {
+            android.util.Log.d(TAG, "Already navigated to login, skipping")
+            return
+        }
+        hasNavigatedToLogin = true
+        
         val intent = Intent(this, LoginActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
