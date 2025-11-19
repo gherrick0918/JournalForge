@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 
 /**
  * Simplified MainActivity using reactive auth state management.
- * No flags, no workarounds - just observing auth state.
+ * Relies purely on LiveData observer - no synchronous checks to avoid race conditions.
  */
 class MainActivity : AppCompatActivity() {
 
@@ -34,7 +34,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnTimeCapsules: Button
     
     private val authViewModel: AuthViewModel by viewModels()
-    private var isInitializing = true
     private var hasNavigatedToLogin = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,33 +43,34 @@ class MainActivity : AppCompatActivity() {
 
         // Observe auth state - redirect to login if unauthenticated
         authViewModel.authState.observe(this) { authState ->
-            // Don't react to auth state changes during initial setup
-            // to avoid race conditions with the synchronous check
-            if (isInitializing) {
-                android.util.Log.d(TAG, "Skipping auth state change during initialization: $authState")
-                return@observe
-            }
+            android.util.Log.d(TAG, "Auth state changed: $authState")
             
             when (authState) {
+                is AuthState.Loading -> {
+                    android.util.Log.d(TAG, "Auth state is Loading, showing loading UI")
+                    showLoadingUI()
+                }
                 is AuthState.Unauthenticated -> {
-                    android.util.Log.d(TAG, "Auth state changed to Unauthenticated, redirecting to LoginActivity")
+                    android.util.Log.d(TAG, "Auth state is Unauthenticated, redirecting to LoginActivity")
                     navigateToLoginActivity()
                 }
                 is AuthState.Authenticated -> {
-                    android.util.Log.d(TAG, "Auth state is Authenticated")
-                    // User is authenticated, continue normally
+                    android.util.Log.d(TAG, "Auth state is Authenticated, showing main UI")
+                    // Only initialize UI on first authenticated state
+                    if (!::tvDailyPrompt.isInitialized) {
+                        initializeMainUI()
+                    }
                 }
             }
         }
-        
-        // Check auth state on startup - if not authenticated, go to login
-        // This is a one-time check to handle cold start
-        if (!authViewModel.isAuthenticated()) {
-            android.util.Log.d(TAG, "User not authenticated on startup, redirecting to LoginActivity")
-            navigateToLoginActivity()
-            return
-        }
-
+    }
+    
+    private fun showLoadingUI() {
+        setContentView(R.layout.activity_main)
+        // UI will be initialized once authenticated state is received
+    }
+    
+    private fun initializeMainUI() {
         // User is authenticated, proceed with normal initialization
         setContentView(R.layout.activity_main)
 
@@ -106,17 +106,15 @@ class MainActivity : AppCompatActivity() {
         // Load data
         loadDailyContent()
         loadRecentEntries()
-        
-        // Now that initialization is complete, allow observer to react to auth state changes
-        isInitializing = false
     }
 
     override fun onResume() {
         super.onResume()
         
-        // Simply refresh entries when resuming
-        // Auth state is monitored by the observer
-        loadRecentEntries()
+        // Refresh entries when resuming, but only if UI is initialized
+        if (::tvDailyPrompt.isInitialized) {
+            loadRecentEntries()
+        }
     }
 
     private fun loadDailyContent() {
