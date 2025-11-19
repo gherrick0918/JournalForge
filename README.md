@@ -96,30 +96,41 @@ android-app/
 
 ## Setting Up Google Sign-In
 
-Google Sign-In is implemented in the app, but requires Firebase configuration to work properly.
+Google Sign-In has been completely refactored in V8 with a clean, modern architecture.
 
 ### 📚 Documentation
 
-Choose the guide that fits your needs:
+**🆕 [GOOGLE_SIGNIN_V8_QUICK_REFERENCE.md](GOOGLE_SIGNIN_V8_QUICK_REFERENCE.md) - Start Here!**
+- Quick reference for the new V8 architecture
+- How to use the refactored system
+- Best practices and what NOT to do
+
+**📖 [GOOGLE_SIGNIN_REFACTOR_V8.md](GOOGLE_SIGNIN_REFACTOR_V8.md) - Complete Details**
+- Full architecture documentation
+- Comparison with previous versions (V1-V7)
+- Design principles and testing guide
 
 **🎯 [GOOGLE_SIGNIN_CONFIGURATION.md](GOOGLE_SIGNIN_CONFIGURATION.md) - Visual Walkthrough**
 - Best for understanding "what goes where"
 - Shows file locations and Firebase Console settings
 - Includes flow diagrams and examples
-- Quick reference for common confusion points
 
 **📖 [FIREBASE_SETUP_GUIDE.md](FIREBASE_SETUP_GUIDE.md) - Complete Step-by-Step Guide**
 - Detailed instructions for each step
 - Verification commands to check your setup
 - Comprehensive troubleshooting section
-- Multiple developer and CI/CD scenarios
 
-The guides include:
-- What's already configured vs. what you need to do
-- How to get your SHA-1 fingerprint (the most common missing piece)
-- How to configure Firebase Console properly
-- Verification steps to ensure everything is correct
-- Troubleshooting for common issues
+### What's New in V8?
+
+The V8 refactor completely rebuilds Google sign-in with modern Android Architecture Components:
+
+- ✅ **AuthStateManager** - Single source of truth for auth state
+- ✅ **ViewModel + LiveData** - Reactive, lifecycle-aware state management
+- ✅ **No flags or workarounds** - Clean, simple code
+- ✅ **No race conditions** - Proper reactive architecture
+- ✅ **170 lines of code removed** - Eliminated all workaround code
+
+**Previous versions (V1-V7)** used SharedPreferences flags, retry loops, and timing delays. These are now deprecated.
 
 ### Quick Reference
 
