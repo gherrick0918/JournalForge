@@ -25,6 +25,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnNewEntry: Button
     private lateinit var btnViewHistory: Button
     private lateinit var btnTimeCapsules: Button
+    
+    // Flag to prevent onResume from checking auth state immediately after onCreate
+    private var justCreated = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +47,9 @@ class MainActivity : AppCompatActivity() {
             // to stabilize with retries and extra propagation time. Checking again here creates
             // a race condition that can cause both activities to finish and the app to exit.
             
+            // Set flag to prevent onResume from checking auth state immediately
+            justCreated = true
+            
             // Auth state is trusted, proceed with initialization
         } else {
             // Normal startup - check auth state
@@ -58,6 +64,8 @@ class MainActivity : AppCompatActivity() {
                 finish()
                 return
             }
+            // Set flag to prevent onResume from checking auth state immediately
+            justCreated = true
         }
 
         setContentView(R.layout.activity_main)
@@ -99,13 +107,25 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         
-        // Check auth state when resuming
-        // If user is not signed in and we didn't just authenticate, redirect to login
-        val prefs = getSharedPreferences("auth_state", MODE_PRIVATE)
-        val justAuthenticated = prefs.getBoolean("just_authenticated", false)
+        // If we just finished onCreate(), skip the auth check this time
+        // This prevents a race condition where onResume() checks auth state
+        // before Firebase has fully propagated the sign-in state
+        if (justCreated) {
+            android.util.Log.d("MainActivity", "Skipping auth check in onResume() - just finished onCreate()")
+            justCreated = false
+            
+            // Still refresh entries if signed in
+            if (app.googleAuthService.isSignedIn()) {
+                loadRecentEntries()
+            }
+            return
+        }
         
-        if (!app.googleAuthService.isSignedIn() && !justAuthenticated) {
+        // Check auth state when resuming (e.g., when returning from another activity or app)
+        // Note: We don't check the just_authenticated flag here because it was already cleared in onCreate()
+        if (!app.googleAuthService.isSignedIn()) {
             android.util.Log.d("MainActivity", "User no longer signed in, redirecting to LoginActivity")
+            val prefs = getSharedPreferences("auth_state", MODE_PRIVATE)
             prefs.edit().putBoolean("force_login_ui", true).apply()
             val intent = Intent(this, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

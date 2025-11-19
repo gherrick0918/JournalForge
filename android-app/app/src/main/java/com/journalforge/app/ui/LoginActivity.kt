@@ -61,8 +61,8 @@ class LoginActivity : AppCompatActivity() {
         if (googleAuthService.isSignedIn()) {
             Log.d(TAG, "User already signed in, navigating to MainActivity")
             
-            // Set flag to indicate we're coming from an already-authenticated state
-            prefs.edit().putBoolean("just_authenticated", true).apply()
+            // User was already signed in - don't set just_authenticated flag
+            // because they didn't just complete authentication, they were already authenticated
             
             // Clear the activity stack to prevent back navigation to LoginActivity
             val intent = Intent(this, MainActivity::class.java)
@@ -85,9 +85,8 @@ class LoginActivity : AppCompatActivity() {
                 Log.d(TAG, "User already signed in when clicking sign-in button, navigating directly")
                 Toast.makeText(this, "Already signed in", Toast.LENGTH_SHORT).show()
                 
-                // Set flag and navigate to MainActivity
-                val prefs = getSharedPreferences("auth_state", MODE_PRIVATE)
-                prefs.edit().putBoolean("just_authenticated", true).apply()
+                // User was already signed in - don't set just_authenticated flag
+                // because they didn't just complete authentication
                 
                 val intent = Intent(this, MainActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
