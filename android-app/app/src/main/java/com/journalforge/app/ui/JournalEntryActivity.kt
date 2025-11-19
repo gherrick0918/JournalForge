@@ -50,6 +50,8 @@ class JournalEntryActivity : AppCompatActivity() {
             val results = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
             results?.firstOrNull()?.let { text ->
                 etMessageInput.setText(text)
+                // Automatically send the message after speech recognition
+                sendMessage()
             }
         }
     }
@@ -163,7 +165,12 @@ class JournalEntryActivity : AppCompatActivity() {
     private fun getAIResponse(userMessage: String) {
         lifecycleScope.launch {
             try {
-                val response = app.aiService.generateProbingQuestion(userMessage)
+                // Build conversation history from recent messages (last 10 messages)
+                val conversationHistory = chatMessages
+                    .takeLast(10)
+                    .map { it.content }
+                
+                val response = app.aiService.generateProbingQuestion(userMessage, conversationHistory)
                 addAIMessage(response)
             } catch (e: Exception) {
                 addAIMessage("🔮 I sense your thoughts are powerful. Continue writing, adventurer!")

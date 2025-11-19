@@ -48,7 +48,7 @@ class AIService(private val settings: AppSettings?) {
     /**
      * Generate a probing question based on journal content
      */
-    suspend fun generateProbingQuestion(entryContent: String): String = withContext(Dispatchers.IO) {
+    suspend fun generateProbingQuestion(entryContent: String, conversationHistory: List<String> = emptyList()): String = withContext(Dispatchers.IO) {
         if (settings?.openAIApiKey.isNullOrBlank()) {
             return@withContext getMockQuestion()
         }
@@ -56,7 +56,8 @@ class AIService(private val settings: AppSettings?) {
         try {
             val response = callOpenAI(
                 "Based on this journal entry, ask a thoughtful probing question to help the writer explore their thoughts deeper: \"$entryContent\"",
-                systemPrompt = "You are a wise companion helping adventurers reflect on their journey. Ask insightful questions."
+                systemPrompt = "You are a wise companion helping adventurers reflect on their journey. Ask insightful questions to deepen their self-awareness. Be creative and vary your questions.",
+                conversationHistory = conversationHistory
             )
             response ?: getMockQuestion()
         } catch (e: Exception) {
@@ -108,7 +109,7 @@ class AIService(private val settings: AppSettings?) {
     /**
      * Call OpenAI API
      */
-    private suspend fun callOpenAI(prompt: String, systemPrompt: String): String? = withContext(Dispatchers.IO) {
+    private suspend fun callOpenAI(prompt: String, systemPrompt: String, conversationHistory: List<String> = emptyList()): String? = withContext(Dispatchers.IO) {
         try {
             val apiKey = settings?.openAIApiKey ?: return@withContext null
             val model = settings.openAIModel
@@ -118,6 +119,13 @@ class AIService(private val settings: AppSettings?) {
                     put("role", "system")
                     put("content", systemPrompt)
                 })
+                // Add conversation history for context
+                conversationHistory.forEachIndexed { index, message ->
+                    put(JSONObject().apply {
+                        put("role", if (index % 2 == 0) "user" else "assistant")
+                        put("content", message)
+                    })
+                }
                 put(JSONObject().apply {
                     put("role", "user")
                     put("content", prompt)
@@ -127,8 +135,10 @@ class AIService(private val settings: AppSettings?) {
             val requestBody = JSONObject().apply {
                 put("model", model)
                 put("messages", messages)
-                put("temperature", 0.7)
+                put("temperature", 0.9)  // Increased from 0.7 for more variety
                 put("max_tokens", 150)
+                put("presence_penalty", 0.6)  // Encourage new topics
+                put("frequency_penalty", 0.5)  // Reduce repetition
             }
             
             val request = Request.Builder()
