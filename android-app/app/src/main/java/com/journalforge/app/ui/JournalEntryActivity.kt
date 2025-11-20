@@ -36,6 +36,8 @@ class JournalEntryActivity : AppCompatActivity() {
     private lateinit var btnSend: Button
     private lateinit var btnVoiceInput: Button
     private lateinit var btnSave: Button
+    private lateinit var btnProbingQuestion: Button
+    private lateinit var btnSuggestEnding: Button
     
     private val chatMessages = mutableListOf<ChatMessage>()
     private lateinit var chatAdapter: ChatAdapter
@@ -85,6 +87,8 @@ class JournalEntryActivity : AppCompatActivity() {
         btnSend = findViewById(R.id.btn_send)
         btnVoiceInput = findViewById(R.id.btn_voice_input)
         btnSave = findViewById(R.id.btn_save)
+        btnProbingQuestion = findViewById(R.id.btn_probing_question)
+        btnSuggestEnding = findViewById(R.id.btn_suggest_ending)
         
         // Setup RecyclerView
         chatAdapter = ChatAdapter(chatMessages)
@@ -109,6 +113,14 @@ class JournalEntryActivity : AppCompatActivity() {
         
         btnVoiceInput.setOnClickListener {
             requestVoiceInput()
+        }
+        
+        btnProbingQuestion.setOnClickListener {
+            generateProbingQuestion()
+        }
+        
+        btnSuggestEnding.setOnClickListener {
+            suggestEntryEnding()
         }
         
         btnSave.setOnClickListener {
@@ -187,6 +199,76 @@ class JournalEntryActivity : AppCompatActivity() {
                 addAIMessage(response)
             } catch (e: Exception) {
                 addAIMessage("🔮 I sense your thoughts are powerful. Continue writing, adventurer!")
+            }
+        }
+    }
+    
+    private fun generateProbingQuestion() {
+        if (chatMessages.isEmpty()) {
+            Toast.makeText(this, "Write something first to get probing questions!", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        lifecycleScope.launch {
+            try {
+                // Disable button while loading
+                btnProbingQuestion.isEnabled = false
+                btnProbingQuestion.text = "⏳ Thinking..."
+                
+                // Get user's content
+                val userContent = chatMessages
+                    .filter { it.isFromUser }
+                    .joinToString(" ") { it.content }
+                
+                // Build conversation history
+                val conversationHistory = chatMessages
+                    .takeLast(10)
+                    .map { it.content }
+                
+                val question = app.aiService.generateProbingQuestion(userContent, conversationHistory)
+                addAIMessage(question)
+            } catch (e: Exception) {
+                Toast.makeText(this@JournalEntryActivity, "Could not generate question", Toast.LENGTH_SHORT).show()
+            } finally {
+                btnProbingQuestion.isEnabled = true
+                btnProbingQuestion.text = "💭 Ask Me More"
+            }
+        }
+    }
+    
+    private fun suggestEntryEnding() {
+        if (chatMessages.isEmpty()) {
+            Toast.makeText(this, "Write something first to get ending suggestions!", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        lifecycleScope.launch {
+            try {
+                // Disable button while loading
+                btnSuggestEnding.isEnabled = false
+                btnSuggestEnding.text = "⏳ Thinking..."
+                
+                // Get user's content
+                val userContent = chatMessages
+                    .filter { it.isFromUser }
+                    .joinToString(" ") { it.content }
+                
+                val ending = app.aiService.suggestEnding(userContent)
+                
+                // Show ending in a dialog with option to add it
+                androidx.appcompat.app.AlertDialog.Builder(this@JournalEntryActivity)
+                    .setTitle("✍️ Suggested Ending")
+                    .setMessage(ending)
+                    .setPositiveButton("Add to Entry") { _, _ ->
+                        etMessageInput.setText(ending)
+                    }
+                    .setNegativeButton("Close", null)
+                    .show()
+            } catch (e: Exception) {
+                Toast.makeText(this@JournalEntryActivity, "Could not generate ending", Toast.LENGTH_SHORT).show()
+            } finally {
+                btnSuggestEnding.isEnabled = true
+                btnSuggestEnding.text = "✍️ Suggest Ending"
             }
         }
     }
@@ -305,7 +387,12 @@ class JournalEntryActivity : AppCompatActivity() {
     private fun showDailyInsight() {
         lifecycleScope.launch {
             try {
-                val insight = app.aiService.generateDailyInsight()
+                // Extract user messages to create content summary
+                val userMessages = chatMessages
+                    .filter { it.isFromUser }
+                    .joinToString(" ") { it.content }
+                
+                val insight = app.aiService.generateDailyInsight(userMessages)
                 
                 // Show insight in a dialog
                 androidx.appcompat.app.AlertDialog.Builder(this@JournalEntryActivity)

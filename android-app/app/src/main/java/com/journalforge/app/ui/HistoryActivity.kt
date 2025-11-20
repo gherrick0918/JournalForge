@@ -7,6 +7,7 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -29,10 +30,13 @@ class HistoryActivity : AppCompatActivity() {
     private lateinit var etSearch: TextInputEditText
     private lateinit var btnSortNewest: Button
     private lateinit var btnSortOldest: Button
+    private lateinit var btnGenerateSummary: Button
+    private lateinit var btnSemanticSearch: Button
     
     private var allEntries = listOf<JournalEntry>()
     private var displayedEntries = listOf<JournalEntry>()
     private var sortNewestFirst = true
+    private var useSemanticSearch = false
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +55,8 @@ class HistoryActivity : AppCompatActivity() {
         etSearch = findViewById(R.id.et_search)
         btnSortNewest = findViewById(R.id.btn_sort_newest)
         btnSortOldest = findViewById(R.id.btn_sort_oldest)
+        btnGenerateSummary = findViewById(R.id.btn_generate_summary)
+        btnSemanticSearch = findViewById(R.id.btn_semantic_search)
         
         // Setup RecyclerView
         rvEntries.layoutManager = LinearLayoutManager(this)
@@ -77,7 +83,22 @@ class HistoryActivity : AppCompatActivity() {
             sortAndDisplayEntries()
         }
         
+        btnGenerateSummary.setOnClickListener {
+            generateJournalSummary()
+        }
+        
+        btnSemanticSearch.setOnClickListener {
+            useSemanticSearch = !useSemanticSearch
+            updateSemanticSearchButton()
+            // Re-trigger search if there's a query
+            val query = etSearch.text.toString()
+            if (query.isNotBlank()) {
+                filterEntries(query)
+            }
+        }
+        
         updateSortButtons()
+        updateSemanticSearchButton()
         loadEntries()
     }
     
@@ -96,6 +117,16 @@ class HistoryActivity : AppCompatActivity() {
         }
     }
     
+    private fun updateSemanticSearchButton() {
+        if (useSemanticSearch) {
+            btnSemanticSearch.setStrokeColorResource(R.color.gold)
+            btnSemanticSearch.setTextColor(getColor(R.color.gold))
+        } else {
+            btnSemanticSearch.setStrokeColorResource(R.color.stone_gray)
+            btnSemanticSearch.setTextColor(getColor(R.color.stone_gray))
+        }
+    }
+    
     private fun loadEntries() {
         lifecycleScope.launch {
             try {
@@ -111,15 +142,44 @@ class HistoryActivity : AppCompatActivity() {
     }
     
     private fun filterEntries(query: String) {
-        displayedEntries = if (query.isBlank()) {
-            allEntries
+        if (query.isBlank()) {
+            displayedEntries = allEntries
+            sortAndDisplayEntries()
+            return
+        }
+        
+        if (useSemanticSearch) {
+            // Use AI semantic search
+            lifecycleScope.launch {
+                try {
+                    val entriesWithIds = allEntries.map { it.id to it.content }
+                    val results = app.aiService.semanticSearch(query, entriesWithIds)
+                    val relevantIds = results.map { it.first }.toSet()
+                    
+                    displayedEntries = allEntries.filter { it.id in relevantIds }
+                        .sortedBy { entry ->
+                            // Sort by semantic relevance
+                            results.indexOfFirst { it.first == entry.id }
+                        }
+                    
+                    sortAndDisplayEntries()
+                } catch (e: Exception) {
+                    // Fallback to keyword search on error
+                    displayedEntries = allEntries.filter { entry ->
+                        entry.title.contains(query, ignoreCase = true) ||
+                        entry.content.contains(query, ignoreCase = true)
+                    }
+                    sortAndDisplayEntries()
+                }
+            }
         } else {
-            allEntries.filter { entry ->
+            // Use standard keyword search
+            displayedEntries = allEntries.filter { entry ->
                 entry.title.contains(query, ignoreCase = true) ||
                 entry.content.contains(query, ignoreCase = true)
             }
+            sortAndDisplayEntries()
         }
-        sortAndDisplayEntries()
     }
     
     private fun sortAndDisplayEntries() {
@@ -135,7 +195,63 @@ class HistoryActivity : AppCompatActivity() {
         } else {
             tvNoEntries.visibility = View.GONE
             rvEntries.visibility = View.VISIBLE
-            rvEntries.adapter = HistoryAdapter(sortedEntries, ::openEntry, ::deleteEntry)
+            rvEntries.adapter = HistoryAdapter(sortedEntries, ::openEntry, ::analyzeEntry, ::deleteEntry)
+        }
+    }
+    
+    private fun generateJournalSummary() {
+        if (allEntries.isEmpty()) {
+            Toast.makeText(this, "No entries to summarize", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        lifecycleScope.launch {
+            try {
+                btnGenerateSummary.isEnabled = false
+                btnGenerateSummary.text = "⏳ Generating..."
+                
+                val entryContents = allEntries.take(10).map { entry ->
+                    "${entry.title}: ${entry.content}"
+                }
+                
+                val summary = app.aiService.generateJournalSummary(entryContents, "recent")
+                
+                androidx.appcompat.app.AlertDialog.Builder(this@HistoryActivity)
+                    .setTitle("📊 Journal Summary")
+                    .setMessage(summary)
+                    .setPositiveButton("Close", null)
+                    .show()
+            } catch (e: Exception) {
+                Toast.makeText(this@HistoryActivity, "Could not generate summary", Toast.LENGTH_SHORT).show()
+            } finally {
+                btnGenerateSummary.isEnabled = true
+                btnGenerateSummary.text = "🤖 Generate AI Summary"
+            }
+        }
+    }
+    
+    private fun analyzeEntry(entry: JournalEntry) {
+        lifecycleScope.launch {
+            try {
+                val progressDialog = androidx.appcompat.app.AlertDialog.Builder(this@HistoryActivity)
+                    .setTitle("🤖 Analyzing Entry...")
+                    .setMessage("Please wait while AI analyzes this entry...")
+                    .setCancelable(false)
+                    .create()
+                progressDialog.show()
+                
+                val analysis = app.aiService.analyzeEntry(entry.content)
+                
+                progressDialog.dismiss()
+                
+                androidx.appcompat.app.AlertDialog.Builder(this@HistoryActivity)
+                    .setTitle("💡 Entry Analysis")
+                    .setMessage("\"${entry.title}\"\n\n$analysis")
+                    .setPositiveButton("Close", null)
+                    .show()
+            } catch (e: Exception) {
+                Toast.makeText(this@HistoryActivity, "Could not analyze entry", Toast.LENGTH_SHORT).show()
+            }
         }
     }
     
@@ -171,6 +287,7 @@ class HistoryActivity : AppCompatActivity() {
 class HistoryAdapter(
     private val entries: List<JournalEntry>,
     private val onItemClick: (JournalEntry) -> Unit,
+    private val onAnalyzeClick: (JournalEntry) -> Unit,
     private val onDeleteClick: (JournalEntry) -> Unit
 ) : RecyclerView.Adapter<HistoryAdapter.ViewHolder>() {
     
@@ -178,6 +295,7 @@ class HistoryAdapter(
         val tvTitle: TextView = view.findViewById(R.id.tv_entry_title)
         val tvDate: TextView = view.findViewById(R.id.tv_entry_date)
         val tvPreview: TextView = view.findViewById(R.id.tv_entry_preview)
+        val btnAnalyze: View = view.findViewById(R.id.btn_analyze)
         val btnDelete: View = view.findViewById(R.id.btn_delete)
     }
     
@@ -193,6 +311,7 @@ class HistoryAdapter(
         holder.tvDate.text = entry.getFormattedDate()
         holder.tvPreview.text = entry.getPreview()
         holder.itemView.setOnClickListener { onItemClick(entry) }
+        holder.btnAnalyze.setOnClickListener { onAnalyzeClick(entry) }
         holder.btnDelete.setOnClickListener { onDeleteClick(entry) }
     }
     

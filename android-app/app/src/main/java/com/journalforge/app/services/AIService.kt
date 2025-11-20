@@ -84,23 +84,28 @@ class AIService(private val settings: AppSettings?) {
                 if (contextSummary.isNotEmpty()) {
                     append("$contextSummary\n\n")
                 }
-                append("User's message: \"$userMessage\"\n\n")
-                append("Respond naturally to what the user just said. Reference specific details from their message. ")
-                append("Ask a follow-up question that directly relates to what they mentioned. ")
-                append("Be conversational, empathetic, and show that you're actively listening.")
+                append("User just said: \"$userMessage\"\n\n")
+                append("Respond warmly and specifically to what they shared. ")
+                append("Reference the specific feelings, situations, or topics they mentioned. ")
+                append("Then ask ONE thoughtful follow-up question that shows you're truly listening and want to understand deeper. ")
+                append("Be empathetic, validating, and conversational.")
             }
             
             val response = callOpenAI(
                 prompt,
-                systemPrompt = """You are a wise, empathetic companion on an adventurer's journaling quest. 
-                    |Your role is to have a genuine conversation, not just ask generic questions.
-                    |- Always respond directly to what the user says
-                    |- Reference specific details they mention
-                    |- Show empathy and understanding
-                    |- Ask follow-up questions that flow naturally from the conversation
-                    |- Vary your responses - sometimes reflect, sometimes probe deeper, sometimes validate their feelings
-                    |- Keep responses conversational and natural (2-3 sentences max)
-                    |- Use the RPG/fantasy theme lightly - don't overdo it""".trimMargin(),
+                systemPrompt = """You are a warm, empathetic companion helping someone explore their thoughts and feelings through journaling. 
+                    |Your role is to have a genuine, supportive conversation.
+                    |
+                    |CRITICAL RULES:
+                    |- ALWAYS acknowledge and respond to what the user JUST said
+                    |- Reference specific words, feelings, or situations they mentioned
+                    |- Show deep empathy and validation, especially for difficult emotions
+                    |- When they share struggles (anxiety, depression, stress, etc.), acknowledge those feelings before asking questions
+                    |- Ask ONE relevant follow-up question that directly relates to what they shared
+                    |- Vary your responses: sometimes validate feelings, sometimes explore causes, sometimes ask about coping
+                    |- Be conversational and natural (2-3 sentences max)
+                    |- Use light RPG/fantasy elements occasionally, but prioritize genuine support
+                    |- Never give generic responses like "what would you like to explore next" - be specific!""".trimMargin(),
                 conversationHistory = conversationHistory
             )
             response ?: getMockConversationalResponse(userMessage)
@@ -131,22 +136,139 @@ class AIService(private val settings: AppSettings?) {
     }
     
     /**
-     * Generate daily insight
+     * Generate daily insight based on the journal entry content
      */
-    suspend fun generateDailyInsight(): String = withContext(Dispatchers.IO) {
+    suspend fun generateDailyInsight(entryContent: String = ""): String = withContext(Dispatchers.IO) {
         if (settings?.openAIApiKey.isNullOrBlank()) {
             return@withContext getMockInsight()
         }
         
         try {
+            val prompt = if (entryContent.isNotBlank()) {
+                "Based on this journal entry: \"${entryContent.take(500)}\"\n\nGenerate a brief, personalized insight that reflects on what they wrote. Keep it supportive and relevant to their experience (1-2 sentences)."
+            } else {
+                "Generate a brief, inspirational insight about journaling or self-reflection in RPG/fantasy style (1-2 sentences)."
+            }
+            
             val response = callOpenAI(
-                "Generate a brief, inspirational insight about journaling or self-reflection in RPG/fantasy style (1-2 sentences).",
-                systemPrompt = "You are a wise sage offering wisdom to adventurers."
+                prompt,
+                systemPrompt = "You are a wise, empathetic companion offering thoughtful reflections to journalers. When you see their writing, provide insights that directly relate to their experience."
             )
             response ?: getMockInsight()
         } catch (e: Exception) {
             Log.e(TAG, "Error generating insight", e)
             getMockInsight()
+        }
+    }
+    
+    /**
+     * Generate a summary of multiple journal entries with pattern analysis
+     */
+    suspend fun generateJournalSummary(entries: List<String>, timeframe: String = "recent"): String = withContext(Dispatchers.IO) {
+        if (settings?.openAIApiKey.isNullOrBlank()) {
+            return@withContext getMockSummary()
+        }
+        
+        try {
+            val entriesText = entries.take(10).joinToString("\n\n---\n\n") { entry ->
+                entry.take(300) // Limit each entry to 300 chars
+            }
+            
+            val prompt = """Analyze these $timeframe journal entries and provide:
+                |1. Key emotional patterns or themes (2-3 sentences)
+                |2. Notable growth or changes (1-2 sentences)
+                |3. One thoughtful reflection or encouragement (1 sentence)
+                |
+                |Entries:
+                |$entriesText
+                |
+                |Keep the summary supportive, insightful, and around 5-6 sentences total.""".trimMargin()
+            
+            val response = callOpenAI(
+                prompt,
+                systemPrompt = "You are a wise, empathetic journaling companion who helps people understand patterns and growth in their reflections. Provide thoughtful, supportive analysis."
+            )
+            response ?: getMockSummary()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error generating summary", e)
+            getMockSummary()
+        }
+    }
+    
+    /**
+     * Analyze a specific journal entry for insights
+     */
+    suspend fun analyzeEntry(entryContent: String): String = withContext(Dispatchers.IO) {
+        if (settings?.openAIApiKey.isNullOrBlank()) {
+            return@withContext getMockAnalysis()
+        }
+        
+        try {
+            val prompt = """Analyze this journal entry and provide a brief, thoughtful reflection:
+                |
+                |"${entryContent.take(800)}"
+                |
+                |Focus on:
+                |- Key emotions or themes present
+                |- Significant moments or realizations
+                |- Patterns worth noting
+                |
+                |Keep your analysis supportive and insightful (3-4 sentences).""".trimMargin()
+            
+            val response = callOpenAI(
+                prompt,
+                systemPrompt = "You are a wise, empathetic companion analyzing journal entries. Provide thoughtful, supportive insights that help the person understand their experience better."
+            )
+            response ?: getMockAnalysis()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error analyzing entry", e)
+            getMockAnalysis()
+        }
+    }
+    
+    /**
+     * Semantic search across journal entries
+     */
+    suspend fun semanticSearch(query: String, entries: List<Pair<String, String>>): List<Pair<String, Double>> = withContext(Dispatchers.IO) {
+        if (settings?.openAIApiKey.isNullOrBlank()) {
+            // Fallback to basic keyword search
+            return@withContext entries.mapIndexed { index, (id, content) ->
+                val relevance = if (content.contains(query, ignoreCase = true)) 1.0 else 0.0
+                id to relevance
+            }.filter { it.second > 0 }
+        }
+        
+        try {
+            // Use OpenAI to find semantically similar entries
+            val entriesSummary = entries.take(20).joinToString("\n") { (id, content) ->
+                "ID:$id | ${content.take(150)}"
+            }
+            
+            val prompt = """Given this search query: "$query"
+                |
+                |Find the most relevant journal entries from this list. Return ONLY the IDs of relevant entries, separated by commas, in order of relevance.
+                |
+                |Entries:
+                |$entriesSummary
+                |
+                |Return format: ID1,ID2,ID3 (no explanations, just IDs)""".trimMargin()
+            
+            val response = callOpenAI(
+                prompt,
+                systemPrompt = "You are a semantic search engine for journal entries. Understand the meaning and emotion behind queries, not just keywords."
+            )
+            
+            if (response != null) {
+                val ids = response.split(",").map { it.trim() }
+                ids.mapIndexed { index, id -> 
+                    id to (1.0 - (index * 0.1)) // Decreasing relevance score
+                }
+            } else {
+                emptyList()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in semantic search", e)
+            emptyList()
         }
     }
     
@@ -263,51 +385,125 @@ class AIService(private val settings: AppSettings?) {
         val lowerMessage = userMessage.lowercase()
         
         return when {
-            lowerMessage.contains("feel") || lowerMessage.contains("felt") -> {
+            // Mental health and emotional struggles - HIGH PRIORITY
+            lowerMessage.contains("anxiety") || lowerMessage.contains("anxious") -> {
                 listOf(
-                    "I hear you expressing those feelings. What do you think triggered them?",
-                    "Those emotions sound significant. Can you tell me more about what led to that?",
-                    "Thank you for sharing that with me. How are you processing these feelings now?"
+                    "I hear that you've been dealing with anxiety. That can be really overwhelming. What does the anxiety feel like for you?",
+                    "Anxiety can be so challenging to navigate. Thank you for sharing that. When do you notice it affecting you most?",
+                    "I'm sorry you're experiencing anxiety. That takes courage to acknowledge. What helps you cope when it feels intense?"
                 ).random()
             }
-            lowerMessage.contains("work") || lowerMessage.contains("job") -> {
+            lowerMessage.contains("depression") || lowerMessage.contains("depressed") -> {
                 listOf(
-                    "Work can certainly be challenging. What aspect of this situation matters most to you?",
-                    "That sounds like quite a day at work. How did you handle it?",
-                    "I'm curious - what would your ideal outcome have been in that situation?"
+                    "I'm hearing that depression has been weighing on you. That's really difficult. What does a hard day with depression look like for you?",
+                    "Thank you for trusting me with this. Depression can feel so heavy. What, if anything, has brought you moments of relief?",
+                    "I'm sorry you're going through this with depression. You're not alone in this. How long have you been feeling this way?"
                 ).random()
             }
-            lowerMessage.contains("friend") || lowerMessage.contains("family") || lowerMessage.contains("relationship") -> {
+            lowerMessage.contains("rough") || lowerMessage.contains("hard") || lowerMessage.contains("difficult") || lowerMessage.contains("tough") -> {
                 listOf(
-                    "Relationships shape so much of our journey. What was going through your mind during that interaction?",
-                    "It sounds like this person is important to you. How did that make you feel?",
-                    "Thank you for opening up about that. What do you think you learned from this experience?"
+                    "It sounds like things have been really rough for you. I'm here to listen. What's been the hardest part?",
+                    "I can hear that it's been difficult. Thank you for opening up about this. What's weighing on you most right now?",
+                    "That sounds really tough. I appreciate you sharing this with me. How have you been managing through it?"
                 ).random()
             }
-            lowerMessage.contains("today") || lowerMessage.contains("this morning") || lowerMessage.contains("tonight") -> {
+            lowerMessage.contains("stress") || lowerMessage.contains("stressed") || lowerMessage.contains("overwhelm") -> {
                 listOf(
-                    "Let's explore that moment more deeply. What stood out to you about it?",
-                    "That's an interesting start to your reflection. What else happened that affected you?",
-                    "I'm listening - tell me more about what made that significant."
+                    "Stress can be so consuming. I hear you. What's contributing most to feeling overwhelmed right now?",
+                    "That level of stress sounds really challenging. What part of it feels most difficult to handle?",
+                    "I understand that stressed feeling. Thank you for expressing it. What would help lighten that burden for you?"
                 ).random()
             }
-            lowerMessage.contains("don't know") || lowerMessage.contains("not sure") || lowerMessage.contains("confused") -> {
+            lowerMessage.contains("sad") || lowerMessage.contains("cry") || lowerMessage.contains("crying") || lowerMessage.contains("tears") -> {
                 listOf(
-                    "Uncertainty is part of growth. What's the first thing that comes to mind when you think about it?",
-                    "It's okay not to have all the answers. What does your gut tell you?",
-                    "Sometimes we know more than we think. What possibilities are you considering?"
+                    "I hear the sadness in your words. It's okay to feel this way. What's bringing up these feelings?",
+                    "Thank you for sharing these difficult emotions with me. What do you think is at the heart of this sadness?",
+                    "Those tears represent real pain. I'm here with you. What's been weighing most heavily on your heart?"
                 ).random()
             }
+            lowerMessage.contains("lonely") || lowerMessage.contains("alone") || lowerMessage.contains("isolated") -> {
+                listOf(
+                    "Loneliness can feel so heavy. I'm glad you're here sharing this. What makes you feel most isolated?",
+                    "That feeling of being alone is so hard. Thank you for trusting me with this. When do you feel it most?",
+                    "I hear that sense of isolation. You're not alone in feeling this way. What kind of connection are you craving?"
+                ).random()
+            }
+            // Positive emotions and growth
+            lowerMessage.contains("happy") || lowerMessage.contains("joy") || lowerMessage.contains("excited") || lowerMessage.contains("great") -> {
+                listOf(
+                    "I can sense that positive energy! What's bringing you this happiness?",
+                    "That's wonderful to hear! Tell me more about what's making you feel this way.",
+                    "I love hearing about these brighter moments. What made this experience special for you?"
+                ).random()
+            }
+            // General feelings
+            lowerMessage.contains("feel") || lowerMessage.contains("felt") || lowerMessage.contains("feeling") -> {
+                listOf(
+                    "I hear you expressing those feelings. What do you think is at the root of them?",
+                    "Those emotions sound significant. Tell me more about what led to feeling this way.",
+                    "Thank you for sharing what you're feeling. How are these emotions affecting you right now?"
+                ).random()
+            }
+            // Work and career
+            lowerMessage.contains("work") || lowerMessage.contains("job") || lowerMessage.contains("career") || lowerMessage.contains("boss") -> {
+                listOf(
+                    "Work situations can be so challenging. What's the most frustrating part for you?",
+                    "I hear what you're saying about work. How is this affecting you beyond just the job itself?",
+                    "That sounds like a complex work situation. What would you most like to change about it?"
+                ).random()
+            }
+            // Relationships
+            lowerMessage.contains("friend") || lowerMessage.contains("family") || lowerMessage.contains("relationship") || lowerMessage.contains("partner") -> {
+                listOf(
+                    "Relationships can be complicated. What happened in this interaction that's affecting you?",
+                    "I can hear that this person matters to you. What are you feeling about this situation?",
+                    "Thank you for sharing about this relationship. What do you need from this person that you're not getting?"
+                ).random()
+            }
+            // Uncertainty
+            lowerMessage.contains("don't know") || lowerMessage.contains("not sure") || lowerMessage.contains("confused") || lowerMessage.contains("uncertain") -> {
+                listOf(
+                    "Uncertainty can be uncomfortable. What's making this feel unclear for you?",
+                    "It's okay not to have all the answers. What's the main question you're wrestling with?",
+                    "I hear that confusion. What would clarity look like to you in this situation?"
+                ).random()
+            }
+            // Time references
+            lowerMessage.contains("today") || lowerMessage.contains("this morning") || lowerMessage.contains("tonight") || lowerMessage.contains("week") -> {
+                listOf(
+                    "Tell me more about what happened. What stood out most to you about this experience?",
+                    "I'm listening closely. What made this particularly significant for you?",
+                    "I hear you reflecting on this time. What emotions are coming up as you think about it?"
+                ).random()
+            }
+            // Default - but still more specific than before
             else -> {
                 listOf(
-                    "That's a meaningful reflection. What else comes to mind as you think about it?",
-                    "I appreciate you sharing that. How does exploring this make you feel?",
-                    "Tell me more - what aspect of this feels most important to you right now?",
-                    "Interesting perspective. What led you to that realization?",
-                    "I'm curious to hear more. What would you like to explore next?"
+                    "I hear what you're saying. What's the most important part of this for you?",
+                    "Thank you for sharing that. What thoughts or feelings are strongest as you reflect on this?",
+                    "That sounds meaningful. What aspect of this experience do you want to explore more?",
+                    "I'm here listening. What's beneath what you just shared?"
                 ).random()
             }
         }
+    }
+    
+    private fun getMockSummary(): String {
+        val summaries = listOf(
+            "📊 Your recent entries show a journey of self-discovery and growth. You've been thoughtfully exploring your emotions and experiences, which demonstrates real courage and commitment to understanding yourself better.",
+            "🌟 Looking at your journal entries, there's a pattern of resilience and reflection. You're actively working through challenges and taking time to process your feelings, which is a powerful practice.",
+            "💫 Your entries reveal someone who is deeply engaged with their inner world. The themes of growth, struggle, and hope interweave through your reflections, showing a commitment to personal development."
+        )
+        return summaries.random()
+    }
+    
+    private fun getMockAnalysis(): String {
+        val analyses = listOf(
+            "This entry shows thoughtful self-reflection and honesty about your experiences. The emotions you've shared are valid and meaningful, and writing about them is an important step in processing them.",
+            "There's a clear thread of introspection in this entry. You're not just describing events but exploring how they affected you, which demonstrates emotional awareness and growth.",
+            "Your words reveal both vulnerability and strength. This kind of honest journaling helps create clarity and understanding about your experiences."
+        )
+        return analyses.random()
     }
     
     companion object {

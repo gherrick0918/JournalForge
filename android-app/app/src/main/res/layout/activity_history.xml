@@ -25,20 +25,39 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <!-- Search bar -->
-        <com.google.android.material.textfield.TextInputLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            app:startIconDrawable="@android:drawable/ic_menu_search"
-            app:boxBackgroundColor="@color/parchment">
+            android:orientation="horizontal"
+            android:layout_margin="16dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_search"
-                android:layout_width="match_parent"
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:hint="Search entries..."
-                android:inputType="text" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_weight="1"
+                app:startIconDrawable="@android:drawable/ic_menu_search"
+                app:boxBackgroundColor="@color/parchment">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_search"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Search entries..."
+                    android:inputType="text" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_semantic_search"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_marginStart="8dp"
+                android:text="🤖"
+                android:textSize="20sp"
+                app:strokeColor="@color/stone_gray"
+                android:contentDescription="Toggle semantic search" />
+
+        </LinearLayout>
 
         <!-- Sort options -->
         <LinearLayout
@@ -67,6 +86,18 @@
                 android:textSize="12sp" />
 
         </LinearLayout>
+
+        <!-- AI Summary Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_generate_summary"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="8dp"
+            android:text="🤖 Generate AI Summary"
+            app:strokeColor="@color/gold"
+            android:textColor="@color/dark_brown" />
 
         <!-- Entries list -->
         <androidx.recyclerview.widget.RecyclerView
