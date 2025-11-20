@@ -305,7 +305,12 @@ class JournalEntryActivity : AppCompatActivity() {
     private fun showDailyInsight() {
         lifecycleScope.launch {
             try {
-                val insight = app.aiService.generateDailyInsight()
+                // Extract user messages to create content summary
+                val userMessages = chatMessages
+                    .filter { it.isFromUser }
+                    .joinToString(" ") { it.content }
+                
+                val insight = app.aiService.generateDailyInsight(userMessages)
                 
                 // Show insight in a dialog
                 androidx.appcompat.app.AlertDialog.Builder(this@JournalEntryActivity)

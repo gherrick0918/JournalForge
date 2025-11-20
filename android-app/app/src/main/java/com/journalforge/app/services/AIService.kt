@@ -136,17 +136,23 @@ class AIService(private val settings: AppSettings?) {
     }
     
     /**
-     * Generate daily insight
+     * Generate daily insight based on the journal entry content
      */
-    suspend fun generateDailyInsight(): String = withContext(Dispatchers.IO) {
+    suspend fun generateDailyInsight(entryContent: String = ""): String = withContext(Dispatchers.IO) {
         if (settings?.openAIApiKey.isNullOrBlank()) {
             return@withContext getMockInsight()
         }
         
         try {
+            val prompt = if (entryContent.isNotBlank()) {
+                "Based on this journal entry: \"${entryContent.take(500)}\"\n\nGenerate a brief, personalized insight that reflects on what they wrote. Keep it supportive and relevant to their experience (1-2 sentences)."
+            } else {
+                "Generate a brief, inspirational insight about journaling or self-reflection in RPG/fantasy style (1-2 sentences)."
+            }
+            
             val response = callOpenAI(
-                "Generate a brief, inspirational insight about journaling or self-reflection in RPG/fantasy style (1-2 sentences).",
-                systemPrompt = "You are a wise sage offering wisdom to adventurers."
+                prompt,
+                systemPrompt = "You are a wise, empathetic companion offering thoughtful reflections to journalers. When you see their writing, provide insights that directly relate to their experience."
             )
             response ?: getMockInsight()
         } catch (e: Exception) {
