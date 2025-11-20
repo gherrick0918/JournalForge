@@ -123,10 +123,23 @@ class JournalEntryActivity : AppCompatActivity() {
                 currentEntry = entry
                 etTitle.setText(entry.title)
                 
-                // Convert entry content to chat messages
-                val userMessage = ChatMessage(entry.content, isFromUser = true)
-                chatMessages.add(userMessage)
-                chatAdapter.notifyItemInserted(chatMessages.size - 1)
+                // Restore conversation from aiConversation if available
+                if (entry.aiConversation.isNotEmpty()) {
+                    entry.aiConversation.forEach { aiMsg ->
+                        val chatMsg = ChatMessage(
+                            content = aiMsg.content,
+                            isFromUser = aiMsg.role == "user",
+                            timestamp = aiMsg.timestamp.time
+                        )
+                        chatMessages.add(chatMsg)
+                    }
+                    chatAdapter.notifyDataSetChanged()
+                } else {
+                    // Fallback: if no conversation stored, show content as single user message
+                    val userMessage = ChatMessage(entry.content, isFromUser = true)
+                    chatMessages.add(userMessage)
+                    chatAdapter.notifyItemInserted(chatMessages.size - 1)
+                }
                 
                 supportActionBar?.title = "📝 Edit Entry"
             }
@@ -236,23 +249,40 @@ class JournalEntryActivity : AppCompatActivity() {
             return
         }
         
-        // Combine all user messages into the entry content
-        val content = chatMessages
-            .filter { it.isFromUser }
-            .joinToString("\n\n") { it.content }
+        // Format the full conversation for display
+        val content = chatMessages.joinToString("\n\n") { msg ->
+            if (msg.isFromUser) {
+                "You: ${msg.content}"
+            } else {
+                "Guide: ${msg.content}"
+            }
+        }
         
-        if (content.isBlank()) {
+        // Check if user wrote anything
+        val hasUserContent = chatMessages.any { it.isFromUser && it.content.isNotBlank() }
+        if (!hasUserContent) {
             Toast.makeText(this, "Please write something first!", Toast.LENGTH_SHORT).show()
             return
+        }
+        
+        // Convert chat messages to AIMessage format for storage
+        val aiConversation = chatMessages.map { chatMsg ->
+            com.journalforge.app.models.AIMessage(
+                role = if (chatMsg.isFromUser) "user" else "assistant",
+                content = chatMsg.content,
+                timestamp = java.util.Date(chatMsg.timestamp)
+            )
         }
         
         lifecycleScope.launch {
             val entry = currentEntry?.copy(
                 title = title,
-                content = content
+                content = content,
+                aiConversation = aiConversation
             ) ?: JournalEntry(
                 title = title,
-                content = content
+                content = content,
+                aiConversation = aiConversation
             )
             
             val success = app.journalEntryService.saveEntry(entry)
