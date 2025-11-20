@@ -31,10 +31,12 @@ class HistoryActivity : AppCompatActivity() {
     private lateinit var btnSortNewest: Button
     private lateinit var btnSortOldest: Button
     private lateinit var btnGenerateSummary: Button
+    private lateinit var btnSemanticSearch: Button
     
     private var allEntries = listOf<JournalEntry>()
     private var displayedEntries = listOf<JournalEntry>()
     private var sortNewestFirst = true
+    private var useSemanticSearch = false
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,6 +56,7 @@ class HistoryActivity : AppCompatActivity() {
         btnSortNewest = findViewById(R.id.btn_sort_newest)
         btnSortOldest = findViewById(R.id.btn_sort_oldest)
         btnGenerateSummary = findViewById(R.id.btn_generate_summary)
+        btnSemanticSearch = findViewById(R.id.btn_semantic_search)
         
         // Setup RecyclerView
         rvEntries.layoutManager = LinearLayoutManager(this)
@@ -84,7 +87,18 @@ class HistoryActivity : AppCompatActivity() {
             generateJournalSummary()
         }
         
+        btnSemanticSearch.setOnClickListener {
+            useSemanticSearch = !useSemanticSearch
+            updateSemanticSearchButton()
+            // Re-trigger search if there's a query
+            val query = etSearch.text.toString()
+            if (query.isNotBlank()) {
+                filterEntries(query)
+            }
+        }
+        
         updateSortButtons()
+        updateSemanticSearchButton()
         loadEntries()
     }
     
@@ -103,6 +117,16 @@ class HistoryActivity : AppCompatActivity() {
         }
     }
     
+    private fun updateSemanticSearchButton() {
+        if (useSemanticSearch) {
+            btnSemanticSearch.setStrokeColorResource(R.color.gold)
+            btnSemanticSearch.setTextColor(getColor(R.color.gold))
+        } else {
+            btnSemanticSearch.setStrokeColorResource(R.color.stone_gray)
+            btnSemanticSearch.setTextColor(getColor(R.color.stone_gray))
+        }
+    }
+    
     private fun loadEntries() {
         lifecycleScope.launch {
             try {
@@ -118,15 +142,44 @@ class HistoryActivity : AppCompatActivity() {
     }
     
     private fun filterEntries(query: String) {
-        displayedEntries = if (query.isBlank()) {
-            allEntries
+        if (query.isBlank()) {
+            displayedEntries = allEntries
+            sortAndDisplayEntries()
+            return
+        }
+        
+        if (useSemanticSearch) {
+            // Use AI semantic search
+            lifecycleScope.launch {
+                try {
+                    val entriesWithIds = allEntries.map { it.id to it.content }
+                    val results = app.aiService.semanticSearch(query, entriesWithIds)
+                    val relevantIds = results.map { it.first }.toSet()
+                    
+                    displayedEntries = allEntries.filter { it.id in relevantIds }
+                        .sortedBy { entry ->
+                            // Sort by semantic relevance
+                            results.indexOfFirst { it.first == entry.id }
+                        }
+                    
+                    sortAndDisplayEntries()
+                } catch (e: Exception) {
+                    // Fallback to keyword search on error
+                    displayedEntries = allEntries.filter { entry ->
+                        entry.title.contains(query, ignoreCase = true) ||
+                        entry.content.contains(query, ignoreCase = true)
+                    }
+                    sortAndDisplayEntries()
+                }
+            }
         } else {
-            allEntries.filter { entry ->
+            // Use standard keyword search
+            displayedEntries = allEntries.filter { entry ->
                 entry.title.contains(query, ignoreCase = true) ||
                 entry.content.contains(query, ignoreCase = true)
             }
+            sortAndDisplayEntries()
         }
-        sortAndDisplayEntries()
     }
     
     private fun sortAndDisplayEntries() {
