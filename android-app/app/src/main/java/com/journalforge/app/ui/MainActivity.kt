@@ -112,8 +112,9 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         
-        // Refresh entries when resuming, but only if UI is initialized
+        // Refresh entries and daily content when resuming, but only if UI is initialized
         if (::tvDailyPrompt.isInitialized) {
+            loadDailyContent()  // Reload daily content to show updated insights based on new entries
             loadRecentEntries()
         }
     }
@@ -121,10 +122,19 @@ class MainActivity : AppCompatActivity() {
     private fun loadDailyContent() {
         lifecycleScope.launch {
             try {
+                // Generate daily prompt
                 val prompt = app.aiService.generateDailyPrompt()
                 tvDailyPrompt.text = prompt
 
-                val insight = app.aiService.generateDailyInsight()
+                // Generate daily insight based on recent entries for personalization
+                val recentEntries = app.journalEntryService.getRecentEntries(3)
+                val insight = if (recentEntries.isNotEmpty()) {
+                    // Use the most recent entry's content for personalized insight
+                    app.aiService.generateDailyInsight(recentEntries.first().content)
+                } else {
+                    // No entries yet, use generic insight
+                    app.aiService.generateDailyInsight()
+                }
                 tvDailyInsight.text = insight
             } catch (e: Exception) {
                 Log.e("MainActivity", "Critical error loading daily content", e)

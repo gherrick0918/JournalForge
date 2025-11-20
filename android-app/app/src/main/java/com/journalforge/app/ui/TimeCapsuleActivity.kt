@@ -126,6 +126,7 @@ class TimeCapsuleActivity : AppCompatActivity() {
             
             DatePickerDialog(
                 this,
+                R.style.Theme_JournalForge_DatePicker,
                 { _, year, month, dayOfMonth ->
                     calendar.set(year, month, dayOfMonth)
                     selectedDate = calendar.time
