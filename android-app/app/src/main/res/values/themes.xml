@@ -61,4 +61,21 @@
         <item name="colorSurface">@color/parchment</item>
         <item name="colorOnSurface">@color/dark_brown</item>
     </style>
+
+    <!-- DatePicker dialog theme for better readability -->
+    <style name="Theme.JournalForge.DatePicker" parent="Theme.MaterialComponents.DayNight.Dialog">
+        <!-- Primary brand color for header -->
+        <item name="colorPrimary">@color/dark_brown</item>
+        <item name="colorPrimaryVariant">@color/dark_brown</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- Accent color for selected date -->
+        <item name="colorAccent">@color/gold</item>
+        <item name="colorSecondary">@color/gold</item>
+        <item name="colorOnSecondary">@color/dark_brown</item>
+        <!-- Text colors for better contrast -->
+        <item name="android:textColorPrimary">@color/dark_brown</item>
+        <item name="android:textColorSecondary">@color/stone_gray</item>
+        <!-- Background -->
+        <item name="android:colorBackground">@color/white</item>
+    </style>
 </resources>
