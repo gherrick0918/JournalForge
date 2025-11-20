@@ -14,6 +14,13 @@ android {
         keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
     }
 
+    // Load local properties for API keys
+    def localPropertiesFile = rootProject.file("local.properties")
+    def localProperties = new Properties()
+    if (localPropertiesFile.exists()) {
+        localProperties.load(new FileInputStream(localPropertiesFile))
+    }
+
     signingConfigs {
         release {
             if (keystorePropertiesFile.exists() && keystoreProperties.containsKey('storeFile')) {
@@ -33,6 +40,10 @@ android {
         versionName "1.0.28"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // Add BuildConfig fields for API configuration
+        buildConfigField "String", "OPENAI_API_KEY", localProperties.getProperty('openai.api.key', '""')
+        buildConfigField "String", "OPENAI_MODEL", localProperties.getProperty('openai.model', '"gpt-4o-mini"')
     }
 
     buildTypes {
@@ -56,6 +67,7 @@ android {
 
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
 }
 

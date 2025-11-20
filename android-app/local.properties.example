@@ -1,0 +1,10 @@
+## This file contains application configuration that should not be committed to version control.
+## Copy this file to 'local.properties' and fill in your actual values.
+
+# OpenAI API Configuration
+# Get your API key from: https://platform.openai.com/api-keys
+openai.api.key=your-api-key-here
+
+# OpenAI Model (optional, defaults to gpt-4o-mini)
+# Available models: gpt-4o-mini, gpt-4o, gpt-4, gpt-3.5-turbo
+openai.model=gpt-4o-mini

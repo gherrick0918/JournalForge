@@ -172,11 +172,44 @@ For detailed troubleshooting, see [FIREBASE_SETUP_GUIDE.md](FIREBASE_SETUP_GUIDE
 
 ## OpenAI Integration
 
-The app includes AI-powered features using OpenAI's API. To configure:
+The app includes AI-powered features using OpenAI's API for intelligent journaling assistance.
 
-1. Get an API key from [OpenAI](https://platform.openai.com/)
-2. Add your API key to the `AIService.kt` configuration
-3. The app will use GPT-4o-mini for cost-effectiveness
+### Setting Up OpenAI
+
+1. **Get an API key** from [OpenAI Platform](https://platform.openai.com/api-keys)
+
+2. **Configure the API key**:
+   - Navigate to `android-app/` directory
+   - Copy `local.properties.example` to `local.properties`:
+     ```bash
+     cp local.properties.example local.properties
+     ```
+   - Edit `local.properties` and add your API key:
+     ```properties
+     openai.api.key=sk-your-actual-api-key-here
+     openai.model=gpt-4o-mini
+     ```
+
+3. **Build the app** - The API key will be injected into BuildConfig
+
+4. **Verify configuration** - Open Settings in the app to see the AI configuration status
+
+### Important Notes
+
+- **Never commit `local.properties`** - It's already in `.gitignore`
+- Without an API key, the app falls back to mock responses
+- Default model is `gpt-4o-mini` for cost-effectiveness
+- You can change the model to `gpt-4o`, `gpt-4`, or `gpt-3.5-turbo` in `local.properties`
+
+### AI Features
+
+When properly configured with an OpenAI API key, the app provides:
+- Daily writing prompts with RPG-themed language
+- Context-aware probing questions based on your entry content
+- Personalized entry ending suggestions
+- Smart insights about journaling patterns
+- Conversational AI companion that learns from your entries
+
 
 ## Architecture
 

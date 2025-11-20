@@ -72,3 +72,8 @@ secrets.json
 **/*key*.json
 *.jks
 *.keystore
+
+# Android specific
+local.properties
+keystore.properties
+google-services.json
