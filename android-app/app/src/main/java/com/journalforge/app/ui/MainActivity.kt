@@ -2,6 +2,7 @@ package com.journalforge.app.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Button
@@ -126,8 +127,10 @@ class MainActivity : AppCompatActivity() {
                 val insight = app.aiService.generateDailyInsight()
                 tvDailyInsight.text = insight
             } catch (e: Exception) {
-                tvDailyPrompt.text = "⚔️ What challenge did you face today?"
-                tvDailyInsight.text = "🔮 Begin your journaling quest!"
+                Log.e("MainActivity", "Critical error loading daily content", e)
+                // Let the AIService handle the fallback - this should rarely happen
+                tvDailyPrompt.text = app.aiService.generateDailyPrompt()
+                tvDailyInsight.text = app.aiService.generateDailyInsight()
             }
         }
     }
