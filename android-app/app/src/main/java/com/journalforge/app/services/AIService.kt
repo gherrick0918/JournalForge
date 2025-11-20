@@ -162,6 +162,117 @@ class AIService(private val settings: AppSettings?) {
     }
     
     /**
+     * Generate a summary of multiple journal entries with pattern analysis
+     */
+    suspend fun generateJournalSummary(entries: List<String>, timeframe: String = "recent"): String = withContext(Dispatchers.IO) {
+        if (settings?.openAIApiKey.isNullOrBlank()) {
+            return@withContext getMockSummary()
+        }
+        
+        try {
+            val entriesText = entries.take(10).joinToString("\n\n---\n\n") { entry ->
+                entry.take(300) // Limit each entry to 300 chars
+            }
+            
+            val prompt = """Analyze these $timeframe journal entries and provide:
+                |1. Key emotional patterns or themes (2-3 sentences)
+                |2. Notable growth or changes (1-2 sentences)
+                |3. One thoughtful reflection or encouragement (1 sentence)
+                |
+                |Entries:
+                |$entriesText
+                |
+                |Keep the summary supportive, insightful, and around 5-6 sentences total.""".trimMargin()
+            
+            val response = callOpenAI(
+                prompt,
+                systemPrompt = "You are a wise, empathetic journaling companion who helps people understand patterns and growth in their reflections. Provide thoughtful, supportive analysis."
+            )
+            response ?: getMockSummary()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error generating summary", e)
+            getMockSummary()
+        }
+    }
+    
+    /**
+     * Analyze a specific journal entry for insights
+     */
+    suspend fun analyzeEntry(entryContent: String): String = withContext(Dispatchers.IO) {
+        if (settings?.openAIApiKey.isNullOrBlank()) {
+            return@withContext getMockAnalysis()
+        }
+        
+        try {
+            val prompt = """Analyze this journal entry and provide a brief, thoughtful reflection:
+                |
+                |"${entryContent.take(800)}"
+                |
+                |Focus on:
+                |- Key emotions or themes present
+                |- Significant moments or realizations
+                |- Patterns worth noting
+                |
+                |Keep your analysis supportive and insightful (3-4 sentences).""".trimMargin()
+            
+            val response = callOpenAI(
+                prompt,
+                systemPrompt = "You are a wise, empathetic companion analyzing journal entries. Provide thoughtful, supportive insights that help the person understand their experience better."
+            )
+            response ?: getMockAnalysis()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error analyzing entry", e)
+            getMockAnalysis()
+        }
+    }
+    
+    /**
+     * Semantic search across journal entries
+     */
+    suspend fun semanticSearch(query: String, entries: List<Pair<String, String>>): List<Pair<String, Double>> = withContext(Dispatchers.IO) {
+        if (settings?.openAIApiKey.isNullOrBlank()) {
+            // Fallback to basic keyword search
+            return@withContext entries.mapIndexed { index, (id, content) ->
+                val relevance = if (content.contains(query, ignoreCase = true)) 1.0 else 0.0
+                id to relevance
+            }.filter { it.second > 0 }
+        }
+        
+        try {
+            // Use OpenAI to find semantically similar entries
+            val entriesSummary = entries.take(20).joinToString("\n") { (id, content) ->
+                "ID:$id | ${content.take(150)}"
+            }
+            
+            val prompt = """Given this search query: "$query"
+                |
+                |Find the most relevant journal entries from this list. Return ONLY the IDs of relevant entries, separated by commas, in order of relevance.
+                |
+                |Entries:
+                |$entriesSummary
+                |
+                |Return format: ID1,ID2,ID3 (no explanations, just IDs)""".trimMargin()
+            
+            val response = callOpenAI(
+                prompt,
+                systemPrompt = "You are a semantic search engine for journal entries. Understand the meaning and emotion behind queries, not just keywords."
+            )
+            
+            if (response != null) {
+                val ids = response.split(",").map { it.trim() }
+                ids.mapIndexed { index, id -> 
+                    id to (1.0 - (index * 0.1)) // Decreasing relevance score
+                }
+            } else {
+                emptyList()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in semantic search", e)
+            emptyList()
+        }
+    }
+    
+    /**
      * Call OpenAI API
      */
     private suspend fun callOpenAI(prompt: String, systemPrompt: String, conversationHistory: List<String> = emptyList()): String? = withContext(Dispatchers.IO) {
@@ -375,6 +486,24 @@ class AIService(private val settings: AppSettings?) {
                 ).random()
             }
         }
+    }
+    
+    private fun getMockSummary(): String {
+        val summaries = listOf(
+            "📊 Your recent entries show a journey of self-discovery and growth. You've been thoughtfully exploring your emotions and experiences, which demonstrates real courage and commitment to understanding yourself better.",
+            "🌟 Looking at your journal entries, there's a pattern of resilience and reflection. You're actively working through challenges and taking time to process your feelings, which is a powerful practice.",
+            "💫 Your entries reveal someone who is deeply engaged with their inner world. The themes of growth, struggle, and hope interweave through your reflections, showing a commitment to personal development."
+        )
+        return summaries.random()
+    }
+    
+    private fun getMockAnalysis(): String {
+        val analyses = listOf(
+            "This entry shows thoughtful self-reflection and honesty about your experiences. The emotions you've shared are valid and meaningful, and writing about them is an important step in processing them.",
+            "There's a clear thread of introspection in this entry. You're not just describing events but exploring how they affected you, which demonstrates emotional awareness and growth.",
+            "Your words reveal both vulnerability and strength. This kind of honest journaling helps create clarity and understanding about your experiences."
+        )
+        return analyses.random()
     }
     
     companion object {

@@ -68,6 +68,18 @@
 
         </LinearLayout>
 
+        <!-- AI Summary Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_generate_summary"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="8dp"
+            android:text="🤖 Generate AI Summary"
+            app:strokeColor="@color/gold"
+            android:textColor="@color/dark_brown" />
+
         <!-- Entries list -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_entries"
