@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.speech.RecognizerIntent
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -102,8 +103,20 @@ class JournalEntryActivity : AppCompatActivity() {
         if (entryId != null) {
             loadEntry(entryId)
         } else {
-            // Add initial AI greeting for new entries - more conversational
-            addAIMessage("⚔️ Welcome back, adventurer! I'm here to help you explore your thoughts. What's on your mind today?")
+            // Add initial AI greeting for new entries
+            lifecycleScope.launch {
+                try {
+                    val greeting = app.aiService.generateConversationalResponse(
+                        "Hello, I'm starting a new journal entry.",
+                        emptyList()
+                    )
+                    addAIMessage(greeting)
+                } catch (e: Exception) {
+                    Log.e("JournalEntryActivity", "Error generating greeting", e)
+                    // Simple fallback greeting
+                    addAIMessage("⚔️ Welcome back, adventurer! I'm here to help you explore your thoughts. What's on your mind today?")
+                }
+            }
         }
         
         // Setup listeners
@@ -198,7 +211,10 @@ class JournalEntryActivity : AppCompatActivity() {
                 val response = app.aiService.generateConversationalResponse(userMessage, conversationHistory)
                 addAIMessage(response)
             } catch (e: Exception) {
-                addAIMessage("🔮 I sense your thoughts are powerful. Continue writing, adventurer!")
+                Log.e("JournalEntryActivity", "Critical error in generateConversationalResponse", e)
+                // Let the AIService handle the fallback - this should rarely happen
+                val fallback = app.aiService.generateConversationalResponse("", emptyList())
+                addAIMessage(fallback)
             }
         }
     }

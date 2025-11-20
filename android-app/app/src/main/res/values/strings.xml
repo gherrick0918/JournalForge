@@ -50,12 +50,17 @@
     <!-- Settings Page -->
     <string name="settings_account_title">Account</string>
     <string name="settings_cloud_sync_title">Cloud Sync</string>
+    <string name="settings_ai_title">AI Configuration</string>
     <string name="btn_sign_in_google">Sign In with Google</string>
     <string name="btn_sign_out">Sign Out</string>
     <string name="signed_in_as">Signed in as: %s</string>
     <string name="last_sync">Last sync: %s</string>
     <string name="never_synced">Never synced</string>
     <string name="btn_sync_now">Sync Now</string>
+    <string name="openai_status">OpenAI: %s</string>
+    <string name="openai_configured">✓ Configured</string>
+    <string name="openai_not_configured">✗ Not Configured - Using mock responses</string>
+    <string name="openai_model">Model: %s</string>
     <string name="settings_app_info">App Information</string>
     <string name="app_version">Version %s</string>
     

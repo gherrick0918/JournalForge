@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.journalforge.app.BuildConfig
 import com.journalforge.app.JournalForgeApplication
 import com.journalforge.app.R
 import com.journalforge.app.services.AuthState
@@ -25,6 +26,8 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var btnSignIn: Button
     private lateinit var btnSignOut: Button
     private lateinit var tvSyncStatus: TextView
+    private lateinit var tvOpenAIStatus: TextView
+    private lateinit var tvOpenAIModel: TextView
     
     private val authViewModel: AuthViewModel by viewModels()
     
@@ -51,6 +54,8 @@ class SettingsActivity : AppCompatActivity() {
         btnSignIn = findViewById(R.id.btn_sign_in_google)
         btnSignOut = findViewById(R.id.btn_sign_out)
         tvSyncStatus = findViewById(R.id.tv_sync_status)
+        tvOpenAIStatus = findViewById(R.id.tv_openai_status)
+        tvOpenAIModel = findViewById(R.id.tv_openai_model)
         
         // Setup listeners
         btnSignIn.setOnClickListener {
@@ -60,6 +65,9 @@ class SettingsActivity : AppCompatActivity() {
         btnSignOut.setOnClickListener {
             signOut()
         }
+        
+        // Display OpenAI configuration status
+        updateOpenAIStatus()
         
         // Observe auth state changes
         authViewModel.authState.observe(this) { authState ->
@@ -137,5 +145,16 @@ class SettingsActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         onBackPressedDispatcher.onBackPressed()
         return true
+    }
+    
+    private fun updateOpenAIStatus() {
+        val hasApiKey = BuildConfig.OPENAI_API_KEY.isNotBlank()
+        val statusText = if (hasApiKey) {
+            getString(R.string.openai_status, getString(R.string.openai_configured))
+        } else {
+            getString(R.string.openai_status, getString(R.string.openai_not_configured))
+        }
+        tvOpenAIStatus.text = statusText
+        tvOpenAIModel.text = getString(R.string.openai_model, BuildConfig.OPENAI_MODEL)
     }
 }
