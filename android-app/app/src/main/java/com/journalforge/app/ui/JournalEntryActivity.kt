@@ -98,8 +98,8 @@ class JournalEntryActivity : AppCompatActivity() {
         if (entryId != null) {
             loadEntry(entryId)
         } else {
-            // Add initial AI greeting for new entries
-            addAIMessage("⚔️ Welcome, brave adventurer! What would you like to write about today?")
+            // Add initial AI greeting for new entries - more conversational
+            addAIMessage("⚔️ Welcome back, adventurer! I'm here to help you explore your thoughts. What's on your mind today?")
         }
         
         // Setup listeners
@@ -123,10 +123,23 @@ class JournalEntryActivity : AppCompatActivity() {
                 currentEntry = entry
                 etTitle.setText(entry.title)
                 
-                // Convert entry content to chat messages
-                val userMessage = ChatMessage(entry.content, isFromUser = true)
-                chatMessages.add(userMessage)
-                chatAdapter.notifyItemInserted(chatMessages.size - 1)
+                // Restore conversation from aiConversation if available
+                if (entry.aiConversation.isNotEmpty()) {
+                    entry.aiConversation.forEach { aiMsg ->
+                        val chatMsg = ChatMessage(
+                            content = aiMsg.content,
+                            isFromUser = aiMsg.role == "user",
+                            timestamp = aiMsg.timestamp.time
+                        )
+                        chatMessages.add(chatMsg)
+                    }
+                    chatAdapter.notifyDataSetChanged()
+                } else {
+                    // Fallback: if no conversation stored, show content as single user message
+                    val userMessage = ChatMessage(entry.content, isFromUser = true)
+                    chatMessages.add(userMessage)
+                    chatAdapter.notifyItemInserted(chatMessages.size - 1)
+                }
                 
                 supportActionBar?.title = "📝 Edit Entry"
             }
@@ -170,7 +183,7 @@ class JournalEntryActivity : AppCompatActivity() {
                     .takeLast(10)
                     .map { it.content }
                 
-                val response = app.aiService.generateProbingQuestion(userMessage, conversationHistory)
+                val response = app.aiService.generateConversationalResponse(userMessage, conversationHistory)
                 addAIMessage(response)
             } catch (e: Exception) {
                 addAIMessage("🔮 I sense your thoughts are powerful. Continue writing, adventurer!")
@@ -226,11 +239,9 @@ class JournalEntryActivity : AppCompatActivity() {
     }
     
     private fun saveEntry() {
-        val title = etTitle.text.toString()
-        
-        if (title.isBlank()) {
-            Toast.makeText(this, "Please add a title", Toast.LENGTH_SHORT).show()
-            return
+        // Generate default title if empty
+        val title = etTitle.text.toString().trim().ifBlank {
+            generateDefaultTitle()
         }
         
         if (chatMessages.isEmpty()) {
@@ -238,31 +249,77 @@ class JournalEntryActivity : AppCompatActivity() {
             return
         }
         
-        // Combine all user messages into the entry content
-        val content = chatMessages
-            .filter { it.isFromUser }
-            .joinToString("\n\n") { it.content }
+        // Format the full conversation for display
+        val content = chatMessages.joinToString("\n\n") { msg ->
+            if (msg.isFromUser) {
+                "You: ${msg.content}"
+            } else {
+                "Guide: ${msg.content}"
+            }
+        }
         
-        if (content.isBlank()) {
+        // Check if user wrote anything
+        val hasUserContent = chatMessages.any { it.isFromUser && it.content.isNotBlank() }
+        if (!hasUserContent) {
             Toast.makeText(this, "Please write something first!", Toast.LENGTH_SHORT).show()
             return
+        }
+        
+        // Convert chat messages to AIMessage format for storage
+        val aiConversation = chatMessages.map { chatMsg ->
+            com.journalforge.app.models.AIMessage(
+                role = if (chatMsg.isFromUser) "user" else "assistant",
+                content = chatMsg.content,
+                timestamp = java.util.Date(chatMsg.timestamp)
+            )
         }
         
         lifecycleScope.launch {
             val entry = currentEntry?.copy(
                 title = title,
-                content = content
+                content = content,
+                aiConversation = aiConversation
             ) ?: JournalEntry(
                 title = title,
-                content = content
+                content = content,
+                aiConversation = aiConversation
             )
             
             val success = app.journalEntryService.saveEntry(entry)
             if (success) {
                 Toast.makeText(this@JournalEntryActivity, R.string.entry_saved, Toast.LENGTH_SHORT).show()
-                finish()
+                // Show daily insight after saving
+                showDailyInsight()
             } else {
                 Toast.makeText(this@JournalEntryActivity, "Failed to save entry", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    
+    private fun generateDefaultTitle(): String {
+        val calendar = java.util.Calendar.getInstance()
+        val dateFormat = java.text.SimpleDateFormat("MMMM d, yyyy", java.util.Locale.getDefault())
+        return "Entry - ${dateFormat.format(calendar.time)}"
+    }
+    
+    private fun showDailyInsight() {
+        lifecycleScope.launch {
+            try {
+                val insight = app.aiService.generateDailyInsight()
+                
+                // Show insight in a dialog
+                androidx.appcompat.app.AlertDialog.Builder(this@JournalEntryActivity)
+                    .setTitle("✨ Daily Insight")
+                    .setMessage(insight)
+                    .setPositiveButton("Continue Quest") { dialog, _ ->
+                        dialog.dismiss()
+                        finish()
+                    }
+                    .setCancelable(false)
+                    .show()
+            } catch (e: Exception) {
+                // If insight fails, just finish normally
+                finish()
             }
         }
     }

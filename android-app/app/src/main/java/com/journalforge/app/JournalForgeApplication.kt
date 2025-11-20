@@ -5,6 +5,7 @@ import com.google.firebase.FirebaseApp
 import com.journalforge.app.services.AIService
 import com.journalforge.app.services.GoogleAuthService
 import com.journalforge.app.services.JournalEntryService
+import com.journalforge.app.services.TimeCapsuleService
 
 /**
  * Application class for JournalForge
@@ -21,6 +22,9 @@ class JournalForgeApplication : Application() {
     lateinit var aiService: AIService
         private set
     
+    lateinit var timeCapsuleService: TimeCapsuleService
+        private set
+    
     override fun onCreate() {
         super.onCreate()
         
@@ -31,5 +35,6 @@ class JournalForgeApplication : Application() {
         journalEntryService = JournalEntryService(this)
         googleAuthService = GoogleAuthService(this)
         aiService = AIService(null) // TODO: Load settings from file
+        timeCapsuleService = TimeCapsuleService(this)
     }
 }
