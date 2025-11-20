@@ -98,8 +98,8 @@ class JournalEntryActivity : AppCompatActivity() {
         if (entryId != null) {
             loadEntry(entryId)
         } else {
-            // Add initial AI greeting for new entries
-            addAIMessage("⚔️ Welcome, brave adventurer! What would you like to write about today?")
+            // Add initial AI greeting for new entries - more conversational
+            addAIMessage("⚔️ Welcome back, adventurer! I'm here to help you explore your thoughts. What's on your mind today?")
         }
         
         // Setup listeners
@@ -170,7 +170,7 @@ class JournalEntryActivity : AppCompatActivity() {
                     .takeLast(10)
                     .map { it.content }
                 
-                val response = app.aiService.generateProbingQuestion(userMessage, conversationHistory)
+                val response = app.aiService.generateConversationalResponse(userMessage, conversationHistory)
                 addAIMessage(response)
             } catch (e: Exception) {
                 addAIMessage("🔮 I sense your thoughts are powerful. Continue writing, adventurer!")
@@ -226,11 +226,9 @@ class JournalEntryActivity : AppCompatActivity() {
     }
     
     private fun saveEntry() {
-        val title = etTitle.text.toString()
-        
-        if (title.isBlank()) {
-            Toast.makeText(this, "Please add a title", Toast.LENGTH_SHORT).show()
-            return
+        // Generate default title if empty
+        val title = etTitle.text.toString().trim().ifBlank {
+            generateDefaultTitle()
         }
         
         if (chatMessages.isEmpty()) {
@@ -260,9 +258,38 @@ class JournalEntryActivity : AppCompatActivity() {
             val success = app.journalEntryService.saveEntry(entry)
             if (success) {
                 Toast.makeText(this@JournalEntryActivity, R.string.entry_saved, Toast.LENGTH_SHORT).show()
-                finish()
+                // Show daily insight after saving
+                showDailyInsight()
             } else {
                 Toast.makeText(this@JournalEntryActivity, "Failed to save entry", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    
+    private fun generateDefaultTitle(): String {
+        val calendar = java.util.Calendar.getInstance()
+        val dateFormat = java.text.SimpleDateFormat("MMMM d, yyyy", java.util.Locale.getDefault())
+        return "Entry - ${dateFormat.format(calendar.time)}"
+    }
+    
+    private fun showDailyInsight() {
+        lifecycleScope.launch {
+            try {
+                val insight = app.aiService.generateDailyInsight()
+                
+                // Show insight in a dialog
+                androidx.appcompat.app.AlertDialog.Builder(this@JournalEntryActivity)
+                    .setTitle("✨ Daily Insight")
+                    .setMessage(insight)
+                    .setPositiveButton("Continue Quest") { dialog, _ ->
+                        dialog.dismiss()
+                        finish()
+                    }
+                    .setCancelable(false)
+                    .show()
+            } catch (e: Exception) {
+                // If insight fails, just finish normally
+                finish()
             }
         }
     }

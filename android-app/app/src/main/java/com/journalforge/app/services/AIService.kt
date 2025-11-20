@@ -67,6 +67,50 @@ class AIService(private val settings: AppSettings?) {
     }
     
     /**
+     * Generate a conversational response that directly addresses what the user said
+     */
+    suspend fun generateConversationalResponse(userMessage: String, conversationHistory: List<String> = emptyList()): String = withContext(Dispatchers.IO) {
+        if (settings?.openAIApiKey.isNullOrBlank()) {
+            return@withContext getMockConversationalResponse(userMessage)
+        }
+        
+        try {
+            // Build context from recent messages
+            val contextSummary = if (conversationHistory.size > 2) {
+                "Previous conversation context: ${conversationHistory.takeLast(4).joinToString(" | ")}"
+            } else ""
+            
+            val prompt = buildString {
+                if (contextSummary.isNotEmpty()) {
+                    append("$contextSummary\n\n")
+                }
+                append("User's message: \"$userMessage\"\n\n")
+                append("Respond naturally to what the user just said. Reference specific details from their message. ")
+                append("Ask a follow-up question that directly relates to what they mentioned. ")
+                append("Be conversational, empathetic, and show that you're actively listening.")
+            }
+            
+            val response = callOpenAI(
+                prompt,
+                systemPrompt = """You are a wise, empathetic companion on an adventurer's journaling quest. 
+                    |Your role is to have a genuine conversation, not just ask generic questions.
+                    |- Always respond directly to what the user says
+                    |- Reference specific details they mention
+                    |- Show empathy and understanding
+                    |- Ask follow-up questions that flow naturally from the conversation
+                    |- Vary your responses - sometimes reflect, sometimes probe deeper, sometimes validate their feelings
+                    |- Keep responses conversational and natural (2-3 sentences max)
+                    |- Use the RPG/fantasy theme lightly - don't overdo it""".trimMargin(),
+                conversationHistory = conversationHistory
+            )
+            response ?: getMockConversationalResponse(userMessage)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error generating conversational response", e)
+            getMockConversationalResponse(userMessage)
+        }
+    }
+    
+    /**
      * Suggest an ending for the journal entry
      */
     suspend fun suggestEnding(entryContent: String): String = withContext(Dispatchers.IO) {
@@ -212,6 +256,58 @@ class AIService(private val settings: AppSettings?) {
             "🗡️ Your thoughts, once recorded, become powerful artifacts."
         )
         return insights.random()
+    }
+    
+    private fun getMockConversationalResponse(userMessage: String): String {
+        // Extract keywords to make response feel more personalized
+        val lowerMessage = userMessage.lowercase()
+        
+        return when {
+            lowerMessage.contains("feel") || lowerMessage.contains("felt") -> {
+                listOf(
+                    "I hear you expressing those feelings. What do you think triggered them?",
+                    "Those emotions sound significant. Can you tell me more about what led to that?",
+                    "Thank you for sharing that with me. How are you processing these feelings now?"
+                ).random()
+            }
+            lowerMessage.contains("work") || lowerMessage.contains("job") -> {
+                listOf(
+                    "Work can certainly be challenging. What aspect of this situation matters most to you?",
+                    "That sounds like quite a day at work. How did you handle it?",
+                    "I'm curious - what would your ideal outcome have been in that situation?"
+                ).random()
+            }
+            lowerMessage.contains("friend") || lowerMessage.contains("family") || lowerMessage.contains("relationship") -> {
+                listOf(
+                    "Relationships shape so much of our journey. What was going through your mind during that interaction?",
+                    "It sounds like this person is important to you. How did that make you feel?",
+                    "Thank you for opening up about that. What do you think you learned from this experience?"
+                ).random()
+            }
+            lowerMessage.contains("today") || lowerMessage.contains("this morning") || lowerMessage.contains("tonight") -> {
+                listOf(
+                    "Let's explore that moment more deeply. What stood out to you about it?",
+                    "That's an interesting start to your reflection. What else happened that affected you?",
+                    "I'm listening - tell me more about what made that significant."
+                ).random()
+            }
+            lowerMessage.contains("don't know") || lowerMessage.contains("not sure") || lowerMessage.contains("confused") -> {
+                listOf(
+                    "Uncertainty is part of growth. What's the first thing that comes to mind when you think about it?",
+                    "It's okay not to have all the answers. What does your gut tell you?",
+                    "Sometimes we know more than we think. What possibilities are you considering?"
+                ).random()
+            }
+            else -> {
+                listOf(
+                    "That's a meaningful reflection. What else comes to mind as you think about it?",
+                    "I appreciate you sharing that. How does exploring this make you feel?",
+                    "Tell me more - what aspect of this feels most important to you right now?",
+                    "Interesting perspective. What led you to that realization?",
+                    "I'm curious to hear more. What would you like to explore next?"
+                ).random()
+            }
+        }
     }
     
     companion object {
