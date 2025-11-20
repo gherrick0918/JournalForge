@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.journalforge.app.BuildConfig
 import com.journalforge.app.JournalForgeApplication
 import com.journalforge.app.R
 import com.journalforge.app.services.AuthState
