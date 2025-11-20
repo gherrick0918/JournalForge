@@ -79,28 +79,33 @@
                     android:id="@+id/et_message_input"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:minHeight="80dp"
                     android:layout_weight="1"
                     android:layout_marginStart="8dp"
                     android:layout_marginEnd="8dp"
                     android:hint="Write your thoughts..."
-                    android:maxLines="4"
+                    android:maxLines="6"
                     android:inputType="textMultiLine|textCapSentences"
                     android:background="@color/parchment"
+                    android:textColor="@color/dark_brown"
+                    android:textColorHint="@color/stone_gray"
                     android:padding="12dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_send"
-                    style="@style/Widget.MaterialComponents.Button.Icon"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
                     android:insetLeft="0dp"
                     android:insetTop="0dp"
                     android:insetRight="0dp"
                     android:insetBottom="0dp"
+                    android:backgroundTint="@color/gold"
                     app:icon="@android:drawable/ic_menu_send"
                     app:iconGravity="textStart"
                     app:iconPadding="0dp"
-                    app:iconTint="@color/gold" />
+                    app:iconTint="@color/dark_brown"
+                    app:cornerRadius="28dp" />
 
             </LinearLayout>
 
