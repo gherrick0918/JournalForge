@@ -100,6 +100,7 @@ class HistoryActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 allEntries = app.journalEntryService.getAllEntries()
+                displayedEntries = allEntries  // Initialize displayedEntries with all entries
                 sortAndDisplayEntries()
             } catch (e: Exception) {
                 tvNoEntries.visibility = View.VISIBLE
